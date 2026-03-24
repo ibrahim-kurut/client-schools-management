@@ -81,13 +81,18 @@ export default function FeaturesSection() {
             return (
               <div
                 key={feature.id}
-                className={`bg-slate-50 rounded-3xl p-8 border border-slate-100 ${colors.border} hover:shadow-2xl ${colors.shadow} transition-all duration-300 group`}
+                className={`bg-slate-50 flex flex-col rounded-3xl p-8 border border-slate-100 ${colors.border} hover:shadow-2xl ${colors.shadow} transition-all duration-300 group`}
               >
-                <div className={`w-16 h-16 ${colors.bg} ${colors.text} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 ${colors.hoverBg} group-hover:text-white transition-all`}>
-                  {IconComponent && <IconComponent className="w-8 h-8" />}
+                <div className='flex flex-col items-end justify-end w-full'>
+                  <div className={`w-16 h-16 ${colors.bg} ${colors.text} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 ${colors.hoverBg} group-hover:text-white transition-all`}>
+                    {IconComponent && <IconComponent className="w-8 h-8" />}
+                  </div>
+
+                  <h3 className="text-2xl font-bold text-slate-900 mb-4">{feature.title}</h3>
+                  <p className="text-slate-600 leading-relaxed text-right">{feature.description}</p>
+
                 </div>
-                <h3 className="text-2xl font-bold text-slate-900 mb-4">{feature.title}</h3>
-                <p className="text-slate-600 leading-relaxed">{feature.description}</p>
+
               </div>
             );
           })}

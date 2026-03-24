@@ -8,7 +8,7 @@ export default function Navbar() {
   const [mounted, setMounted] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   // Simplified: user is not logged in by default in this standalone version
-  const token = null; 
+  const token = null;
 
   useEffect(() => {
     setMounted(true);
@@ -29,16 +29,16 @@ export default function Navbar() {
             <div className="bg-blue-600 p-2 rounded-xl text-white">
               <GraduationCap className="h-6 w-6" />
             </div>
-            <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-indigo-700">
+            <Link href={"/"} className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-indigo-700">
               EduFlow
-            </span>
+            </Link>
           </div>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-8">
             <Link href="#features" className="text-slate-600 hover:text-blue-600 font-medium transition-colors">المميزات</Link>
             <Link href="#about" className="text-slate-600 hover:text-blue-600 font-medium transition-colors">عن النظام</Link>
-            <Link href="#pricing" className="text-slate-600 hover:text-blue-600 font-medium transition-colors">الأسعار</Link>
+            <Link href="/prices" className="text-slate-600 hover:text-blue-600 font-medium transition-colors">الأسعار</Link>
           </nav>
 
           {/* CTA Buttons */}
@@ -46,8 +46,8 @@ export default function Navbar() {
             {!mounted ? (
               <div className="w-32 h-10 animate-pulse bg-slate-200 rounded-full hidden md:block" />
             ) : token ? (
-              <button 
-                onClick={() => setShowLogoutConfirm(true)} 
+              <button
+                onClick={() => setShowLogoutConfirm(true)}
                 className="flex items-center gap-2 bg-red-50 hover:bg-red-100 text-red-600 px-4 py-2.5 rounded-full font-semibold transition-all"
               >
                 <LogOut className="w-4 h-4" />
@@ -76,15 +76,15 @@ export default function Navbar() {
             </div>
             <h3 className="text-xl font-bold text-center text-slate-900 mb-2">تسجيل الخروج</h3>
             <p className="text-center text-slate-500 mb-8">هل أنت متأكد أنك تريد تسجيل الخروج من الحساب؟</p>
-            
+
             <div className="flex gap-3">
-              <button 
+              <button
                 onClick={() => setShowLogoutConfirm(false)}
                 className="flex-1 py-3 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-2xl font-semibold transition-colors"
               >
                 إلغاء
               </button>
-              <button 
+              <button
                 onClick={handleLogout}
                 className="flex-1 py-3 px-4 bg-red-600 hover:bg-red-700 text-white rounded-2xl font-semibold transition-all shadow-lg shadow-red-600/20 hover:shadow-red-600/40 hover:-translate-y-0.5"
               >

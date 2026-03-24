@@ -15,23 +15,24 @@ export default function HeroSection() {
             <span className="flex h-2 w-2 rounded-full bg-blue-600 animate-pulse"></span>
             النظام السحابي الأول لإدارة المدارس
           </div>
-          
+
           <h1 className="text-5xl md:text-6xl lg:text-7xl font-black text-slate-900 leading-tight mb-8">
             أدر مؤسستك التعليمية بذكاء مع <span className="text-transparent bg-clip-text bg-gradient-to-l from-blue-600 to-indigo-600">EduFlow</span>
           </h1>
-          
+
           <p className="text-xl md:text-2xl text-slate-600 leading-relaxed mb-10 max-w-3xl mx-auto font-light">
             نظام متكامل مصمم خصيصاً لأتمتة العمليات الأكاديمية والمالية بدقة وموثوقية، ليمنحك التحكم الكامل بنقرة واحدة.
           </p>
-          
+
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Link href="#demo" className="w-full sm:w-auto px-8 py-4 bg-white border-2 border-slate-200 hover:border-blue-600 text-slate-700 hover:text-blue-600 rounded-full font-bold text-lg transition-all flex items-center justify-center gap-2 shadow-sm focus:ring-4 focus:ring-slate-100 hover:bg-slate-50">
+              اطلب عرضاً توضيحياً
+            </Link>
             <Link href="/signup" className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-full font-bold text-lg shadow-xl shadow-blue-900/20 hover:shadow-2xl hover:shadow-blue-900/30 transition-all flex items-center justify-center gap-2 hover:-translate-y-1">
               ابدأ تجربتك المجانية
               <ChevronLeft className="w-5 h-5" />
             </Link>
-            <Link href="#demo" className="w-full sm:w-auto px-8 py-4 bg-white border-2 border-slate-200 hover:border-blue-600 text-slate-700 hover:text-blue-600 rounded-full font-bold text-lg transition-all flex items-center justify-center gap-2 shadow-sm focus:ring-4 focus:ring-slate-100 hover:bg-slate-50">
-              اطلب عرضاً توضيحياً
-            </Link>
+
           </div>
 
           {/* Trust badges */}

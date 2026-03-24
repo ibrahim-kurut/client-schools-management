@@ -6,29 +6,10 @@ export default function HighlightSection() {
     <section className="py-24 bg-slate-900 relative overflow-hidden">
       <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-blue-500 to-transparent opacity-50"></div>
       <div className="absolute -bottom-40 right-10 w-96 h-96 bg-blue-600/30 rounded-full blur-3xl"></div>
-      
+
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="flex flex-col lg:flex-row items-center gap-16">
-          <div className="lg:w-1/2">
-            <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">جاهز للانتقال بمدرستك إلى المستقبل؟</h2>
-            <p className="text-xl text-slate-300 mb-8 leading-relaxed">
-              انضم إلى عشرات المدارس التي تثق في EduFlow لإدارة عملياتها اليومية بسلاسة واحترافية. لا مزيد من الأعمال الورقية، ولا مزيد من الأخطاء المالية.
-            </p>
-            <ul className="space-y-4 mb-10">
-              <li className="flex items-center gap-3 text-slate-200 text-lg">
-                <CheckCircle2 className="text-blue-400 w-6 h-6" /> دعم فني على مدار الساعة
-              </li>
-              <li className="flex items-center gap-3 text-slate-200 text-lg">
-                <CheckCircle2 className="text-blue-400 w-6 h-6" /> تحديثات دورية مجانية للمنصة
-              </li>
-              <li className="flex items-center gap-3 text-slate-200 text-lg">
-                <CheckCircle2 className="text-blue-400 w-6 h-6" /> نسخ احتياطي آلي للبيانات
-              </li>
-            </ul>
-            <Link href="/signup" className="inline-flex items-center gap-2 px-8 py-4 bg-white text-slate-900 hover:bg-slate-100 rounded-full font-bold text-lg shadow-xl shadow-white/10 transition-transform hover:-translate-y-1">
-              اشترك الآن <ChevronLeft className="w-5 h-5" />
-            </Link>
-          </div>
+
           <div className="lg:w-1/2 relative w-full aspect-video rounded-3xl bg-slate-800 border border-slate-700 shadow-2xl overflow-hidden flex items-center justify-center group hidden lg:flex">
             {/* Simulated Dashboard UI Mockup */}
             <div className="absolute inset-0 bg-gradient-to-br from-slate-800 to-slate-900 p-6 flex flex-col">
@@ -79,6 +60,27 @@ export default function HighlightSection() {
                 </div>
               </div>
             </div>
+          </div>
+
+          <div className=" text-right lg:w-1/2">
+            <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">جاهز للانتقال بمدرستك إلى المستقبل؟</h2>
+            <p className="text-xl text-slate-300 mb-8 leading-relaxed">
+              انضم إلى عشرات المدارس التي تثق في EduFlow لإدارة عملياتها اليومية بسلاسة واحترافية. لا مزيد من الأعمال الورقية، ولا مزيد من الأخطاء المالية.
+            </p>
+            <ul className="flex flex-col items-end justify-end space-y-4 mb-10">
+              <li className="flex items-center gap-3 text-slate-200 text-lg">
+                دعم فني على مدار الساعة <CheckCircle2 className="text-blue-400 w-6 h-6" />
+              </li>
+              <li className="flex items-center gap-3 text-slate-200 text-lg">
+                تحديثات دورية مجانية للمنصة <CheckCircle2 className="text-blue-400 w-6 h-6" />
+              </li>
+              <li className="flex items-center gap-3 text-slate-200 text-lg">
+                نسخ احتياطي آلي للبيانات <CheckCircle2 className="text-blue-400 w-6 h-6" />
+              </li>
+            </ul>
+            <Link href="/signup" className="inline-flex items-center gap-2 px-8 py-4 bg-white text-slate-900 hover:bg-slate-100 rounded-full font-bold text-lg shadow-xl shadow-white/10 transition-transform hover:-translate-y-1">
+              اشترك الآن <ChevronLeft className="w-5 h-5" />
+            </Link>
           </div>
         </div>
       </div>

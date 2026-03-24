@@ -1,60 +1,159 @@
 import Link from 'next/link';
-import { GraduationCap } from 'lucide-react';
+import { GraduationCap, Mail, MapPin, Phone } from 'lucide-react';
 
 export default function Footer() {
   return (
-    <footer className="bg-slate-50 border-t border-slate-200 pt-16 pb-8">
+    <footer
+      dir="rtl"
+      className="relative border-t border-slate-200/80 bg-gradient-to-b from-slate-50 to-white pt-16 pb-10"
+    >
+      <div
+        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-l from-transparent via-blue-200 to-transparent"
+        aria-hidden
+      />
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
-          <div className="col-span-1 md:col-span-1">
-            <div className="flex items-center gap-2 mb-6">
-              <div className="bg-blue-600 p-1.5 rounded-lg text-white">
-                <GraduationCap className="h-5 w-5" />
+        <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-10 lg:items-start mb-14">
+          <div className="lg:col-span-4 text-right">
+            <Link href="/" className="inline-flex items-center gap-2.5 mb-5 group">
+              <div className="bg-blue-600 p-2 rounded-xl text-white shadow-md shadow-blue-600/25 transition-transform group-hover:scale-105">
+                <GraduationCap className="h-5 w-5 sm:h-6 sm:w-6" aria-hidden />
               </div>
-              <span className="text-xl font-bold text-slate-900">EduFlow</span>
-            </div>
-            <p className="text-slate-500 mb-6 leading-relaxed">
+              <span className="text-xl sm:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-indigo-700">
+                EduFlow
+              </span>
+            </Link>
+            <p className="text-slate-600 text-sm sm:text-base leading-relaxed max-w-md">
               نظام إدارة مدرسية متكامل، يجمع بين كفاءة الأداء وسهولة الاستخدام.
             </p>
           </div>
-          
-          <div className="col-span-1 md:col-span-3 grid grid-cols-3 gap-8">
+
+          <div className="lg:col-span-8 grid grid-cols-1 sm:grid-cols-3 gap-10 sm:gap-8 text-right">
             <div>
-              <h4 className="font-bold text-slate-900 mb-6">المنتج</h4>
-              <ul className="space-y-4 text-slate-500">
-                <li><Link href="#features" className="hover:text-blue-600 transition-colors">المميزات</Link></li>
-                <li><Link href="#pricing" className="hover:text-blue-600 transition-colors">الأسعار</Link></li>
-                <li><Link href="#" className="hover:text-blue-600 transition-colors">التحديثات</Link></li>
-                <li><Link href="#" className="hover:text-blue-600 transition-colors">الأمان</Link></li>
+              <h4 className="text-sm font-semibold uppercase tracking-wide text-slate-400 mb-4">
+                المنتج
+              </h4>
+              <ul className="space-y-3 text-slate-600 text-sm sm:text-base">
+                <li>
+                  <Link
+                    href="/#features"
+                    className="inline-block hover:text-blue-600 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 rounded"
+                  >
+                    المميزات
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/prices"
+                    className="inline-block hover:text-blue-600 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 rounded"
+                  >
+                    الأسعار
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="#"
+                    className="inline-block hover:text-blue-600 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 rounded"
+                  >
+                    التحديثات
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="#"
+                    className="inline-block hover:text-blue-600 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 rounded"
+                  >
+                    الأمان
+                  </Link>
+                </li>
               </ul>
             </div>
 
             <div>
-              <h4 className="font-bold text-slate-900 mb-6">الشركة</h4>
-              <ul className="space-y-4 text-slate-500">
-                <li><Link href="#about" className="hover:text-blue-600 transition-colors">من نحن</Link></li>
-                <li><Link href="#" className="hover:text-blue-600 transition-colors">المدونة</Link></li>
-                <li><Link href="#" className="hover:text-blue-600 transition-colors">الوظائف</Link></li>
-                <li><Link href="#" className="hover:text-blue-600 transition-colors">اتصل بنا</Link></li>
+              <h4 className="text-sm font-semibold uppercase tracking-wide text-slate-400 mb-4">
+                الشركة
+              </h4>
+              <ul className="space-y-3 text-slate-600 text-sm sm:text-base">
+                <li>
+                  <Link
+                    href="/#about"
+                    className="inline-block hover:text-blue-600 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 rounded"
+                  >
+                    من نحن
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="#"
+                    className="inline-block hover:text-blue-600 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 rounded"
+                  >
+                    المدونة
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="#"
+                    className="inline-block hover:text-blue-600 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 rounded"
+                  >
+                    الوظائف
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="#"
+                    className="inline-block hover:text-blue-600 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 rounded"
+                  >
+                    اتصل بنا
+                  </Link>
+                </li>
               </ul>
             </div>
 
             <div>
-              <h4 className="font-bold text-slate-900 mb-6">تواصل</h4>
-              <ul className="space-y-4 text-slate-500">
-                <li>[EMAIL_ADDRESS]</li>
-                <li dir="ltr">+964 770 123 4567</li>
-                <li>العراق، الموصل</li>
+              <h4 className="text-sm font-semibold uppercase tracking-wide text-slate-400 mb-4">
+                تواصل
+              </h4>
+              <ul className="space-y-3 text-slate-600 text-sm sm:text-base">
+                <li className="flex items-start gap-2.5">
+                  <Mail className="h-4 w-4 text-slate-400 shrink-0 mt-0.5" aria-hidden />
+                  <a
+                    href="mailto:info@eduflow.iq"
+                    className="hover:text-blue-600 transition-colors break-all text-right"
+                  >
+                    info@eduflow.iq
+                  </a>
+                </li>
+                <li className="flex items-center gap-2.5">
+                  <Phone className="h-4 w-4 text-slate-400 shrink-0" aria-hidden />
+                  <a href="tel:+9647701234567" className="tabular-nums hover:text-blue-600 transition-colors" dir="ltr">
+                    +964 770 123 4567
+                  </a>
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <MapPin className="h-4 w-4 text-slate-400 shrink-0 mt-0.5" aria-hidden />
+                  <span className="text-right">العراق، الموصل</span>
+                </li>
               </ul>
             </div>
           </div>
         </div>
 
-        <div className="border-t border-slate-200 pt-8 flex flex-col md:flex-row items-center justify-between text-slate-500 text-sm">
-          <p>&copy; {new Date().getFullYear()} EduFlow. جميع الحقوق محفوظة.</p>
-          <div className="flex gap-6 mt-4 md:mt-0">
-            <Link href="#" className="hover:text-blue-600 transition-colors">سياسة الخصوصية</Link>
-            <Link href="#" className="hover:text-blue-600 transition-colors">شروط الخدمة</Link>
+        <div className="flex flex-col-reverse gap-4 sm:flex-row sm:items-center sm:justify-between pt-8 border-t border-slate-200/90 text-slate-500 text-sm">
+          <p className="text-center sm:text-right">
+            &copy; {new Date().getFullYear()} EduFlow. جميع الحقوق محفوظة.
+          </p>
+          <div className="flex flex-wrap items-center justify-center sm:justify-end gap-x-6 gap-y-2">
+            <Link
+              href="#"
+              className="hover:text-blue-600 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 rounded"
+            >
+              سياسة الخصوصية
+            </Link>
+            <Link
+              href="#"
+              className="hover:text-blue-600 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 rounded"
+            >
+              شروط الخدمة
+            </Link>
           </div>
         </div>
       </div>
