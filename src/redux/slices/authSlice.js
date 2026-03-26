@@ -1,6 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
-import { DOMAIN } from "../../lib/domain";
+import axiosInstance from "../../lib/axios";
 
 
 
@@ -9,7 +8,7 @@ import { DOMAIN } from "../../lib/domain";
 export const register = createAsyncThunk('user/register',
     async (userData, { rejectWithValue }) => {
         try {
-            const res = await axios.post(`${DOMAIN}/auth/register`, userData);
+            const res = await axiosInstance.post(`/auth/register`, userData);
             return res.data;
         } catch (e) {
             const errorMessage = e.response?.data?.message || e.response?.data?.error || "Registration failed";
@@ -22,7 +21,7 @@ export const register = createAsyncThunk('user/register',
 
 export const login = createAsyncThunk('user/login', async (loginData, { rejectWithValue }) => {
     try {
-        const res = await axios.post(`${DOMAIN}/auth/login`, loginData);
+        const res = await axiosInstance.post(`/auth/login`, loginData);
         return res.data
     } catch (e) {
         const errorMessage = e.response?.data?.message || e.response?.data?.error || "Login failed";
@@ -79,7 +78,7 @@ const authSlice = createSlice({
                 state.isLoggedIn = true;
                 state.error = null;
                 if (typeof window !== "undefined") {
-                    localStorage.setItem("user", JSON.stringify(action.payload));
+                    localStorage.setItem("user", JSON.stringify(action.payload.userData));
                 }
             })
             .addCase(login.rejected, (state, action) => {
