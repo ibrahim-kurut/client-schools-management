@@ -6,6 +6,9 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { GraduationCap, Mail, Lock, ArrowLeft, Loader2, CheckCircle2 } from 'lucide-react';
 import AuthInput from '@/components/AuthInput';
 import { validateLogin } from '@/lib/validation/authSchemas';
+import { useDispatch } from 'react-redux';
+import { login } from '@/redux/slices/authSlice';
+import { toast } from 'react-toastify';
 
 function LoginContent() {
   const router = useRouter();
@@ -15,6 +18,7 @@ function LoginContent() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const dispatch = useDispatch()
 
   useEffect(() => {
     if (searchParams.get('registered') === 'true') {
@@ -36,13 +40,20 @@ function LoginContent() {
 
     setIsLoading(true);
 
-    // Simulate API call
+// send data to server
+    dispatch(login(validation.data))
+      .unwrap()
+      .then((res) => {
+        toast.success(res.message || "Login Success");
     setTimeout(() => {
       setIsLoading(false);
-      // In a real app, we would validate credentials here
-      // For this static version, any login is "successful"
-      router.push('/');
+      router.push('/create-school');
     }, 1500);
+      })
+      .catch((err) => {
+        toast.error(err.message || "Login failed");
+        setIsLoading(false);
+      });
   };
 
   return (

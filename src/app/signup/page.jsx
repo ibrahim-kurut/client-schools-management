@@ -9,9 +9,13 @@ import {
 } from 'lucide-react';
 import AuthInput from '@/components/AuthInput';
 import { validateSignupStep1, validateSignupStep2 } from '@/lib/validation/authSchemas';
+import { useDispatch } from 'react-redux';
+import { register } from '@/redux/slices/authSlice';
+import { toast } from 'react-toastify';
 
 export default function SignupPage() {
   const router = useRouter();
+  const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     firstName: '',
@@ -23,6 +27,7 @@ export default function SignupPage() {
     gender: '',
     birthDate: '',
   });
+
 
   const [error, setError] = useState('');
   const [step, setStep] = useState(1);
@@ -55,11 +60,32 @@ export default function SignupPage() {
     setIsLoading(true);
 
     // Simulate API call
-    setTimeout(() => {
+     // send data to server
+        const { confirmPassword, ...dataToSubmit } = formData;
+        dispatch(register(dataToSubmit))
+            .unwrap()
+            .then((res) => {
+                toast.success(res.message || "Register Success");
+                setFormData({
+                    firstName: "",
+                    lastName: "",
+                    email: "",
+                    password: "",
+                    confirmPassword: "",
+                    phone: "",
+                    gender: "",
+                    birthDate: "",
+                });
+                setTimeout(() => {
       setIsLoading(false);
       // Redirect to login with a success parameter (we'll handle the UI there if needed)
       router.push('/login?registered=true');
     }, 2000);
+            })
+            .catch((err) => {
+                setIsLoading(false);
+                toast.error(err.message || "Registration failed");
+            });
   };
 
   return (
