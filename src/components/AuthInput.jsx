@@ -26,7 +26,7 @@ export default function AuthInput({
         )}
         <input
           type={isPassword ? (showPassword ? 'text' : 'password') : type}
-          className={`auth-input ${Icon ? 'ps-12' : 'px-4'} ${isPassword ? 'pe-12' : ''} ${
+          className={`auth-input ${Icon ? 'ps-14' : 'ps-5'} ${isPassword ? 'pe-14' : 'pe-5'} ${
             error ? 'border-red-300 focus:border-red-500 focus:ring-red-100' : ''
           } ${className}`}
           {...props}

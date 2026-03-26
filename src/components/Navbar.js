@@ -3,20 +3,24 @@
 import Link from 'next/link';
 import { GraduationCap, LogOut } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { logout } from '@/redux/slices/authSlice';
+import { useRouter } from 'next/navigation';
 
 export default function Navbar() {
+  const dispatch = useDispatch();
+  const { isLoggedIn } = useSelector((state) => state.auth);
   const [mounted, setMounted] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
-  // Simplified: user is not logged in by default in this standalone version
-  const token = null;
+  const router = useRouter();
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
   const handleLogout = () => {
-    // Simplified: No Redux dispatch
-    console.log('Logout clicked');
+    dispatch(logout());
+    router.push('/');
     setShowLogoutConfirm(false);
   };
 
@@ -45,7 +49,7 @@ export default function Navbar() {
           <div className="flex items-center gap-4">
             {!mounted ? (
               <div className="w-32 h-10 animate-pulse bg-slate-200 rounded-full hidden md:block" />
-            ) : token ? (
+            ) : isLoggedIn ? (
               <button
                 onClick={() => setShowLogoutConfirm(true)}
                 className="flex items-center gap-2 bg-red-50 hover:bg-red-100 text-red-600 px-4 py-2.5 rounded-full font-semibold transition-all"
