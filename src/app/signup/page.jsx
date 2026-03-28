@@ -60,36 +60,40 @@ export default function SignupPage() {
     setIsLoading(true);
 
     // Simulate API call
-     // send data to server
-        const { confirmPassword, ...dataToSubmit } = formData;
-        dispatch(register(dataToSubmit))
-            .unwrap()
-            .then((res) => {
-                toast.success(res.message || "Register Success");
-                setFormData({
-                    firstName: "",
-                    lastName: "",
-                    email: "",
-                    password: "",
-                    confirmPassword: "",
-                    phone: "",
-                    gender: "",
-                    birthDate: "",
-                });
-                setTimeout(() => {
-      setIsLoading(false);
-      // Redirect to login with a success parameter (we'll handle the UI there if needed)
-      router.push('/login?registered=true');
-    }, 2000);
-            })
-            .catch((err) => {
-                setIsLoading(false);
-                toast.error(err.message || "Registration failed");
-            });
+    // send data to server
+    const { confirmPassword, ...dataToSubmit } = formData;
+    dispatch(register(dataToSubmit))
+      .unwrap()
+      .then((res) => {
+        toast.success(
+          res.message && res.message !== "User created successfully"
+            ? res.message
+            : "تم إنشاء الحساب بنجاح"
+        );
+        setFormData({
+          firstName: "",
+          lastName: "",
+          email: "",
+          password: "",
+          confirmPassword: "",
+          phone: "",
+          gender: "",
+          birthDate: "",
+        });
+        setTimeout(() => {
+          setIsLoading(false);
+          // Redirect to login with a success parameter (we'll handle the UI there if needed)
+          router.push('/login?registered=true');
+        }, 2000);
+      })
+      .catch((err) => {
+        setIsLoading(false);
+        toast.error(err.message || 'فشل إنشاء الحساب');
+      });
   };
 
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex" dir="ltr">
       {/* Left Side — Decorative Panel */}
       <div dir="rtl" className="hidden lg:flex lg:w-1/2 relative bg-gradient-to-br from-indigo-600 via-blue-700 to-indigo-900 items-center justify-center overflow-hidden">
         <div className="absolute -top-32 -left-32 w-[500px] h-[500px] bg-white/10 rounded-full blur-3xl" />

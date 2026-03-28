@@ -18,10 +18,17 @@ export default function Navbar() {
     setMounted(true);
   }, []);
 
-  const handleLogout = () => {
-    dispatch(logout());
-    router.push('/');
+  const handleLogout = async () => {
     setShowLogoutConfirm(false);
+    try {
+      await dispatch(logout()).unwrap();
+      router.push('/');
+    } catch {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('user');
+        window.location.assign('/');
+      }
+    }
   };
 
   return (
@@ -43,6 +50,9 @@ export default function Navbar() {
             <Link href="#features" className="text-slate-600 hover:text-blue-600 font-medium transition-colors">المميزات</Link>
             <Link href="#about" className="text-slate-600 hover:text-blue-600 font-medium transition-colors">عن النظام</Link>
             <Link href="/prices" className="text-slate-600 hover:text-blue-600 font-medium transition-colors">الأسعار</Link>
+            {mounted && isLoggedIn && (
+              <Link href="/create-school" className="text-blue-600 hover:text-blue-800 font-bold transition-colors">إنشاء مدرسة</Link>
+            )}
           </nav>
 
           {/* CTA Buttons */}
@@ -83,16 +93,16 @@ export default function Navbar() {
 
             <div className="flex gap-3">
               <button
-                onClick={() => setShowLogoutConfirm(false)}
-                className="flex-1 py-3 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-2xl font-semibold transition-colors"
-              >
-                إلغاء
-              </button>
-              <button
                 onClick={handleLogout}
                 className="flex-1 py-3 px-4 bg-red-600 hover:bg-red-700 text-white rounded-2xl font-semibold transition-all shadow-lg shadow-red-600/20 hover:shadow-red-600/40 hover:-translate-y-0.5"
               >
                 نعم، خروج
+              </button>
+              <button
+                onClick={() => setShowLogoutConfirm(false)}
+                className="flex-1 py-3 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-2xl font-semibold transition-colors"
+              >
+                إلغاء
               </button>
             </div>
           </div>

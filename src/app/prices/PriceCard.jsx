@@ -22,7 +22,7 @@ export default function PriceCard({ plan }) {
       ].join(' ')}
     >
       {highlight && (
-        <div className="absolute -top-3 left-6 rounded-full bg-linear-to-r from-blue-600 to-indigo-600 px-3 py-1 text-xs font-bold text-white shadow">
+        <div className="absolute -top-3 start-6 rounded-full bg-linear-to-r from-blue-600 to-indigo-600 px-3 py-1 text-xs font-bold text-white shadow">
           الأكثر شيوعاً
         </div>
       )}

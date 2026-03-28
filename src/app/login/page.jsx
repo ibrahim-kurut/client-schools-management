@@ -44,20 +44,24 @@ function LoginContent() {
     dispatch(login(validation.data))
       .unwrap()
       .then((res) => {
-        toast.success(res.message || "Login Success");
+        toast.success(
+          res.message && res.message !== 'Login successful'
+            ? res.message
+            : 'تم تسجيل الدخول بنجاح'
+        );
     setTimeout(() => {
       setIsLoading(false);
       router.push('/create-school');
     }, 1500);
       })
       .catch((err) => {
-        toast.error(err.message || "Login failed");
+        toast.error(err.message || 'فشل تسجيل الدخول');
         setIsLoading(false);
       });
   };
 
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex" dir="ltr">
       {/* Left Side — Decorative Panel */}
       <div dir="rtl" className="hidden lg:flex lg:w-1/2 relative bg-gradient-to-br from-blue-600 via-indigo-700 to-blue-900 items-center justify-center overflow-hidden">
         {/* Background blurs */}
