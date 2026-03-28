@@ -49,10 +49,15 @@ function LoginContent() {
             ? res.message
             : 'تم تسجيل الدخول بنجاح'
         );
-    setTimeout(() => {
-      setIsLoading(false);
-      router.push('/create-school');
-    }, 1500);
+        setTimeout(() => {
+          setIsLoading(false);
+          // Check if we have userData and schoolSlug from the backend
+          if (res.userData && res.userData.schoolSlug) {
+            router.push(`/school/${res.userData.schoolSlug}`);
+          } else {
+            router.push('/create-school');
+          }
+        }, 1500);
       })
       .catch((err) => {
         toast.error(err.message || 'فشل تسجيل الدخول');
