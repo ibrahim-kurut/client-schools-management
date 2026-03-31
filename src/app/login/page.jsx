@@ -25,9 +25,18 @@ function LoginContent() {
   useEffect(() => {
     if (mounted && isLoggedIn) {
       const userData = user?.userData || user;
+
+      // 1. Check for Super Admin
+      if (userData?.role === "SUPER_ADMIN") {
+        router.replace('/super-admin');
+        return;
+      }
+
+      // 2. Check for School Admin with slug
       if (userData?.schoolSlug) {
         router.replace(`/school/${userData.schoolSlug}`);
       } else {
+        // 3. New School Admin without school yet
         router.replace('/create-school');
       }
     }
@@ -42,7 +51,6 @@ function LoginContent() {
   useEffect(() => {
     if (searchParams.get('registered') === 'true') {
       setSuccess('تم إنشاء الحساب بنجاح! يمكنك الآن تسجيل الدخول.');
-      // Clear the message after some time or on interaction
     }
   }, [searchParams]);
 
@@ -59,7 +67,6 @@ function LoginContent() {
 
     setIsLoading(true);
 
-// send data to server
     dispatch(login(validation.data))
       .unwrap()
       .then((res) => {
@@ -68,12 +75,21 @@ function LoginContent() {
             ? res.message
             : 'تم تسجيل الدخول بنجاح'
         );
+        
         setTimeout(() => {
           setIsLoading(false);
-          // Check if we have userData and schoolSlug from the backend
-          if (res.userData && res.userData.schoolSlug) {
-            router.push(`/school/${res.userData.schoolSlug}`);
-          } else {
+          const userData = res.userData;
+
+          // 1. Handle Super Admin redirection
+          if (userData?.role === "SUPER_ADMIN") {
+            router.push('/super-admin');
+          } 
+          // 2. Handle School Admin with slug
+          else if (userData?.schoolSlug) {
+            router.push(`/school/${userData.schoolSlug}`);
+          } 
+          // 3. Handle School Admin without school yet
+          else {
             router.push('/create-school');
           }
         }, 1500);

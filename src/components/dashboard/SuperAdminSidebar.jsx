@@ -14,6 +14,10 @@ import {
   ChevronLeft
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useDispatch } from "react-redux";
+import { logout } from "@/redux/slices/authSlice";
+import { useRouter } from "next/navigation";
+import Swal from "sweetalert2";
 
 const menuItems = [
   { icon: LayoutDashboard, label: "لوحة التحكم", href: "/super-admin" },
@@ -27,6 +31,39 @@ const menuItems = [
 export default function SuperAdminSidebar({ isOpen, onClose }) {
   const pathname = usePathname();
 
+  const dispatch = useDispatch();
+  const router = useRouter();
+
+  const handleLogout = () => {
+    Swal.fire({
+      title: "هل أنت متأكد؟",
+      text: "سيتم تسجيل خروجك من النظام",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#4f46e5",
+      cancelButtonColor: "#ef4444",
+      confirmButtonText: "نعم، سجل الخروج",
+      cancelButtonText: "إلغاء",
+      reverseButtons: true,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        dispatch(logout())
+          .unwrap()
+          .then(() => {
+            router.push("/");
+          })
+          .catch((error) => {
+            console.error("Logout failed:", error);
+            Swal.fire({
+              title: "خطأ!",
+              text: "فشل تسجيل الخروج، يرجى المحاولة مرة أخرى",
+              icon: "error",
+              confirmButtonColor: "#4f46e5",
+            });
+          });
+      }
+    });
+  };
   return (
     <aside 
       className={cn(
@@ -80,7 +117,9 @@ export default function SuperAdminSidebar({ isOpen, onClose }) {
       </nav>
 
       <div className="p-4 border-t border-slate-800">
-        <button className="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 hover:bg-red-500/10 hover:text-red-500 w-full text-slate-400">
+        <button 
+        onClick={handleLogout}
+        className="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 hover:bg-red-500/10 hover:text-red-500 w-full text-slate-400 cursor-pointer">
           <LogOut className="w-5 h-5" />
           <span className="font-medium text-sm">تسجيل الخروج</span>
         </button>
