@@ -58,13 +58,26 @@ const CreateSchoolPage = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // الحماية: لا تسمح بالإرسال إلا في الخطوة الثالثة والأخيرة
+    // Protection: only allow submission on the 3rd (final) step
     if (step < 3) {
       nextStep();
       return;
     }
 
-    dispatch(createSchool(formData))
+    // Build FormData for multipart/form-data
+    const data = new FormData();
+    data.append('name', formData.name);
+    if (formData.address) data.append('address', formData.address);
+    if (formData.phone) data.append('phone', formData.phone);
+    if (formData.slug) data.append('slug', formData.slug);
+    if (formData.planId) data.append('planId', formData.planId);
+    
+    // Append the actual file as 'logo'
+    if (formData.logoFile) {
+      data.append('logo', formData.logoFile);
+    }
+
+    dispatch(createSchool(data))
       .unwrap()
       .then(() => {
         toast.success(

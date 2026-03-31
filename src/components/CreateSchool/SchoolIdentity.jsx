@@ -26,14 +26,19 @@ export default function SchoolIdentity({ formData, setFormData, errors }) {
   const handleLogoChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      if (file.size > 2 * 1024 * 1024) {
-        alert('حجم الصورة كبير جداً (الأقصى 2MB)');
+      if (file.size > 5 * 1024 * 1024) {
+        alert('حجم الصورة كبير جداً (الأقصى 5MB)');
         return;
       }
 
+      // Store the preview for the UI
       const reader = new FileReader();
       reader.onloadend = () => {
-        setFormData({ ...formData, logo: reader.result });
+        setFormData({ 
+          ...formData, 
+          logo: reader.result,   // Preview (Base64)
+          logoFile: file         // Actual File object for upload
+        });
       };
       reader.readAsDataURL(file);
     }
@@ -41,7 +46,7 @@ export default function SchoolIdentity({ formData, setFormData, errors }) {
 
   const removeLogo = (e) => {
     e.stopPropagation();
-    setFormData({ ...formData, logo: '' });
+    setFormData({ ...formData, logo: '', logoFile: null });
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 

@@ -6,19 +6,38 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { GraduationCap, Mail, Lock, ArrowLeft, Loader2, CheckCircle2 } from 'lucide-react';
 import AuthInput from '@/components/AuthInput';
 import { validateLogin } from '@/lib/validation/authSchemas';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { login } from '@/redux/slices/authSlice';
 import { toast } from 'react-toastify';
 
 function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const dispatch = useDispatch();
+  const { isLoggedIn, user } = useSelector((state) => state.auth);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (mounted && isLoggedIn) {
+      const userData = user?.userData || user;
+      if (userData?.schoolSlug) {
+        router.replace(`/school/${userData.schoolSlug}`);
+      } else {
+        router.replace('/create-school');
+      }
+    }
+  }, [mounted, isLoggedIn, user, router]);
+
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const dispatch = useDispatch()
 
   useEffect(() => {
     if (searchParams.get('registered') === 'true') {

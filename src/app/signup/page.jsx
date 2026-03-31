@@ -1,21 +1,41 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
   GraduationCap, User, Phone, Mail, Lock,
-  ArrowLeft, Loader2, CheckCircle2, Users
+  ArrowLeft, Loader2, CheckCircle2, Users, Camera, X
 } from 'lucide-react';
 import AuthInput from '@/components/AuthInput';
 import { validateSignupStep1, validateSignupStep2 } from '@/lib/validation/authSchemas';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { register } from '@/redux/slices/authSlice';
 import { toast } from 'react-toastify';
+
 
 export default function SignupPage() {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { isLoggedIn, user } = useSelector((state) => state.auth);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (mounted && isLoggedIn) {
+      const userData = user?.userData || user;
+      if (userData?.schoolSlug) {
+        router.replace(`/school/${userData.schoolSlug}`);
+      } else {
+        router.replace('/create-school');
+      }
+    }
+  }, [mounted, isLoggedIn, user, router]);
+
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     firstName: '',
@@ -26,6 +46,8 @@ export default function SignupPage() {
     phone: '',
     gender: '',
     birthDate: '',
+    imageFile: null,
+    imagePreview: null,
   });
 
 
@@ -48,6 +70,33 @@ export default function SignupPage() {
     setStep(1);
   };
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('حجم الصورة كبير جداً (الأقصى 5MB)');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData(prev => ({
+          ...prev,
+          imageFile: file,
+          imagePreview: reader.result
+        }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = () => {
+    setFormData(prev => ({
+      ...prev,
+      imageFile: null,
+      imagePreview: null
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -59,10 +108,21 @@ export default function SignupPage() {
 
     setIsLoading(true);
 
-    // Simulate API call
-    // send data to server
-    const { confirmPassword, ...dataToSubmit } = formData;
-    dispatch(register(dataToSubmit))
+    // Build FormData for multipart/form-data
+    const data = new FormData();
+    data.append('firstName', formData.firstName);
+    data.append('lastName', formData.lastName);
+    data.append('email', formData.email);
+    data.append('password', formData.password);
+    data.append('phone', formData.phone);
+    data.append('gender', formData.gender);
+    data.append('birthDate', formData.birthDate);
+    
+    if (formData.imageFile) {
+      data.append('image', formData.imageFile);
+    }
+
+    dispatch(register(data))
       .unwrap()
       .then((res) => {
         toast.success(
@@ -79,10 +139,11 @@ export default function SignupPage() {
           phone: "",
           gender: "",
           birthDate: "",
+          imageFile: null,
+          imagePreview: null,
         });
         setTimeout(() => {
           setIsLoading(false);
-          // Redirect to login with a success parameter (we'll handle the UI there if needed)
           router.push('/login?registered=true');
         }, 2000);
       })
@@ -197,6 +258,37 @@ export default function SignupPage() {
                     placeholder="محمد"
                     className="text-right"
                   />
+                </div>
+
+                {/* Avatar Upload (Optional) */}
+                <div className="flex flex-col items-center justify-center p-4 bg-white border-2 border-dashed border-slate-200 rounded-2xl gap-3 group hover:border-blue-400 transition-all">
+                  <span className="text-sm font-semibold text-slate-700 w-full text-right">الصورة الشخصية (اختياري)</span>
+                  <div className="relative">
+                    <div className={`w-24 h-24 rounded-full flex items-center justify-center overflow-hidden bg-slate-100 border-2 ${formData.imagePreview ? 'border-blue-500' : 'border-slate-200'}`}>
+                      {formData.imagePreview ? (
+                        <img src={formData.imagePreview} alt="Avatar" className="w-full h-full object-cover" />
+                      ) : (
+                        <User className="w-12 h-12 text-slate-300" />
+                      )}
+                    </div>
+                    {formData.imagePreview ? (
+                      <button
+                        type="button"
+                        onClick={removeImage}
+                        className="absolute -top-1 -right-1 bg-red-500 text-white p-1 rounded-full shadow-lg hover:bg-red-600 transition-colors"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    ) : (
+                      <label htmlFor="avatar-upload" className="absolute bottom-0 right-0 bg-blue-600 text-white p-2 rounded-full shadow-lg cursor-pointer hover:bg-blue-700 transition-colors">
+                        <Camera className="w-4 h-4" />
+                        <input id="avatar-upload" type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
+                      </label>
+                    )}
+                  </div>
+                  {!formData.imagePreview && (
+                    <span className="text-xs text-slate-400">يمكنك رفع صورة بصيغة PNG أو JPG</span>
+                  )}
                 </div>
 
                 {/* Phone */}
