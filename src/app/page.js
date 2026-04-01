@@ -27,9 +27,17 @@ export default function Home() {
       // Check if user object has the nested userData or is direct
       const userData = user?.userData || user;
       
+      // 1. Check for Super Admin
+      if (userData?.role === "SUPER_ADMIN") {
+        router.replace('/super-admin');
+        return;
+      }
+
+      // 2. Check for School Admin with slug
       if (userData?.schoolSlug) {
         router.replace(`/school/${userData.schoolSlug}`);
       } else {
+        // 3. New School Admin without school yet
         router.replace('/create-school');
       }
     }

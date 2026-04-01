@@ -70,10 +70,9 @@ const authSlice = createSlice({
             })
             .addCase(register.fulfilled, (state, action) => {
                 state.status = 'succeeded';
-                state.user = action.payload.user;
-                state.isLoggedIn = true;
+                state.user = null;
+                state.isLoggedIn = false;
                 state.successMessage = action.payload.message;
-                localStorage.setItem("user", JSON.stringify(action.payload.user));
             })
             .addCase(register.rejected, (state, action) => {
                 state.status = 'failed';
