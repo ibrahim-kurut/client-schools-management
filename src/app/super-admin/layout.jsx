@@ -43,7 +43,9 @@ export default function SuperAdminLayout({ children }) {
           </div>
           <div className="flex items-center gap-6">
             <span className="hover:text-slate-600 dark:hover:text-slate-300 transition-colors cursor-default underline decoration-indigo-500/30 underline-offset-4">نسخة v1.0.4 - بريميوم</span>
-            <span className="hover:text-slate-600 dark:hover:text-slate-300 transition-colors cursor-default">جميع الحقوق محفوظة {new Date().getFullYear()}</span>
+            <span className="hover:text-slate-600 dark:hover:text-slate-300 transition-colors cursor-default" suppressHydrationWarning>
+              جميع الحقوق محفوظة {new Date().getFullYear()}
+            </span>
           </div>
         </footer>
       </div>

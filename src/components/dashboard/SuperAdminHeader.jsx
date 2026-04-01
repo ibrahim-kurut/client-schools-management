@@ -1,9 +1,20 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Bell, Search, User, ChevronDown, HelpCircle, Globe, Settings } from "lucide-react";
+import { useSelector } from "react-redux";
 
 export default function SuperAdminHeader({ onMenuClick }) {
+
+
+  const auth = useSelector((state) => state.auth);
+  const [mounted, setMounted] = useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+  
+  const superAdminName = auth?.user?.firstName + " " + auth?.user?.lastName;
   return (
     <header className="h-20 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 px-4 md:px-8 flex items-center justify-between z-10 backdrop-blur-md bg-opacity-80 dark:bg-opacity-80">
       
@@ -21,7 +32,7 @@ export default function SuperAdminHeader({ onMenuClick }) {
           <input
             type="text"
             placeholder="البحث عن مدرسة، مالي، أو اشتراك..."
-            className="w-full bg-slate-100 dark:bg-slate-800/50 border border-transparent focus:border-indigo-500 rounded-xl py-2.5 pr-11 pl-4 text-sm outline-none transition-all duration-200 focus:ring-4 focus:ring-indigo-500/10 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+            className="w-full bg-slate-100 dark:bg-slate-800/50 border border-transparent focus:border-indigo-500 rounded-xl py-2.5 pr-11 pl-4 text-white text-sm outline-none transition-all duration-200 focus:ring-4 focus:ring-indigo-500/10 placeholder:text-slate-400 dark:placeholder:text-slate-500"
           />
         </div>
       </div>
@@ -49,15 +60,17 @@ export default function SuperAdminHeader({ onMenuClick }) {
 
         {/* User Profile */}
         <button className="flex items-center gap-3 p-1.5 pr-1.5 pl-4 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all group border border-transparent hover:border-slate-200 dark:hover:border-slate-700 active:scale-95">
-          <div className="text-left flex flex-col justify-center">
+          <span className="text-left flex flex-col justify-center">
             <span className="font-bold text-sm text-slate-900 dark:text-white leading-none">مدير النظام</span>
-            <span className="text-[10px] font-semibold text-indigo-500 uppercase tracking-widest mt-1">Super Admin</span>
-          </div>
-          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 p-[2px] shadow-indigo-500/10">
-            <div className="w-full h-full rounded-[6px] bg-white dark:bg-slate-900 flex items-center justify-center font-bold text-indigo-600 dark:text-white overflow-hidden">
+            <span className="text-[10px] font-semibold text-indigo-500 uppercase tracking-widest mt-1">
+              {mounted ? superAdminName : "..."}
+            </span>
+          </span>
+          <span className="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 p-[2px] shadow-indigo-500/10">
+            <span className="w-full h-full rounded-[6px] bg-white dark:bg-slate-900 flex items-center justify-center font-bold text-indigo-600 dark:text-white overflow-hidden">
                <User className="w-6 h-6" />
-            </div>
-          </div>
+            </span>
+          </span>
           <ChevronDown className="w-4 h-4 text-slate-400 group-hover:text-slate-600 transition-transform group-hover:rotate-180" />
         </button>
       </div>

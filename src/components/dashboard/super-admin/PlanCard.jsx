@@ -5,7 +5,23 @@ import { Check, X, Layers, Edit3, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default function PlanCard({ plan }) {
-  const { name, description, price, interval, features, color, popular, activeSchools } = plan;
+  const { 
+    name, 
+    description, 
+    price, 
+    durationInDays, 
+    maxStudents, 
+    maxTeachers, 
+    storageLimit, 
+    allowReports,
+    features = [], 
+    color = "from-indigo-600 to-violet-600", 
+    popular = false, 
+    activeSchools = 0 
+  } = plan;
+
+  const intervalLabel = durationInDays === 365 ? "سنوياً" : "شهرياً";
+
 
   return (
     <div 
@@ -27,7 +43,7 @@ export default function PlanCard({ plan }) {
            </div>
            <div className="flex flex-col items-end">
               <span className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter">${price}</span>
-              <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">{interval}</span>
+              <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">{intervalLabel}</span>
            </div>
         </div>
 
@@ -37,7 +53,18 @@ export default function PlanCard({ plan }) {
         </div>
 
         <div className="space-y-4 mb-10">
-          {features.map((feature, i) => (
+          {/* Main Limits */}
+          <LimitItem label="الحد الأقصى للطلاب" value={maxStudents} icon={Check} />
+          <LimitItem label="الحد الأقصى للمعلمين" icon={Check} value={maxTeachers} />
+          <LimitItem label="مساحة التخزين" icon={Check} value={`${storageLimit} GB`} />
+          <LimitItem 
+            label="التقارير المتقدمة" 
+            icon={allowReports ? Check : X} 
+            included={allowReports} 
+          />
+
+          {/* Dynamic Features (Fallback if any) */}
+          {features?.map((feature, i) => (
             <div key={i} className="flex items-center gap-3">
               <div className={cn(
                 "w-5 h-5 rounded-full flex items-center justify-center p-1 group-hover:scale-110 transition-transform",
@@ -52,6 +79,7 @@ export default function PlanCard({ plan }) {
             </div>
           ))}
         </div>
+
 
         <div className="pt-8 border-t border-slate-50 dark:border-slate-800/50 flex items-center justify-between">
            <div className="flex flex-col">
@@ -69,7 +97,28 @@ export default function PlanCard({ plan }) {
         </div>
       </div>
       
-      <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r transition-all duration-500 group-hover:h-2 opacity-30 group-hover:opacity-100" style={{ backgroundImage: `linear-gradient(to right, transparent, ${color.split(' ')[1].replace('to-', '')}, transparent)` }} />
+      <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r transition-all duration-500 group-hover:h-2 opacity-30 group-hover:opacity-100" style={{ backgroundImage: `linear-gradient(to right, transparent, ${color?.split(' ')[1]?.replace('to-', '') || 'indigo-500'}, transparent)` }} />
     </div>
   );
 }
+
+function LimitItem({ label, value, icon: Icon, included = true }) {
+  return (
+    <div className="flex items-center gap-3">
+      <div className={cn(
+        "w-5 h-5 rounded-full flex items-center justify-center p-1 group-hover:scale-110 transition-transform",
+        included ? "bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600" : "bg-slate-50 dark:bg-slate-800 text-slate-300"
+      )}>
+        <Icon className={cn("w-3 h-3", included && "stroke-[3px]")} />
+      </div>
+      <div className="flex flex-col">
+        <span className={cn(
+          "text-xs font-bold transition-colors",
+          included ? "text-slate-700 dark:text-slate-300" : "text-slate-400 line-through"
+        )}>{label}</span>
+        {value && <span className="text-[10px] text-slate-400 font-bold">{value}</span>}
+      </div>
+    </div>
+  );
+}
+

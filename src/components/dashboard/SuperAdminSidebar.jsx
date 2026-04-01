@@ -14,7 +14,7 @@ import {
   ChevronLeft
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { logout } from "@/redux/slices/authSlice";
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
@@ -29,6 +29,23 @@ const menuItems = [
 ];
 
 export default function SuperAdminSidebar({ isOpen, onClose }) {
+
+
+  const auth = useSelector((state) => state.auth);
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const superAdminName = auth?.user?.firstName + " " + auth?.user?.lastName;
+
+
+
+
+
+
+
   const pathname = usePathname();
 
   const dispatch = useDispatch();
@@ -76,7 +93,9 @@ export default function SuperAdminSidebar({ isOpen, onClose }) {
           <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center font-bold text-white shadow-lg shadow-indigo-500/20">
             E
           </div>
-          <span className="text-xl font-bold text-white tracking-tight">Super Admin</span>
+          <span className="text-xl font-bold text-white tracking-tight">
+            {mounted ? superAdminName : "EduFlow"}
+          </span>
         </div>
         {/* Close Button Mobile */}
         <button 

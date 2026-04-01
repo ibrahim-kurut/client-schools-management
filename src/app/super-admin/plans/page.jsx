@@ -1,74 +1,30 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { 
   Plus, 
   CreditCard,
   TrendingUp,
-  Settings
+  Settings,
+  Loader2,
+  AlertCircle
 } from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchPlans } from "@/redux/slices/planSlice";
 import DashboardPageHeader from "@/components/dashboard/super-admin/DashboardPageHeader";
 import StatCard from "@/components/dashboard/super-admin/StatCard";
 import PlanCard from "@/components/dashboard/super-admin/PlanCard";
-
-const mockPlans = [
-  {
-    id: "1",
-    name: "الباقة الأساسية",
-    description: "مثالية للمدارس الصغيرة أو التي بدأت لتوها في التحول الرقمي.",
-    price: 49,
-    interval: "شهرياً",
-    features: [
-      { name: "حتى 50 طالب", included: true },
-      { name: "حتى 10 معلمين", included: true },
-      { name: "إدارة الحضور والغياب", included: true },
-      { name: "مساحة تخزين 1GB", included: true },
-      { name: "التقارير المتقدمة", included: false },
-      { name: "تطبيق الموبايل", included: false },
-    ],
-    color: "from-blue-500 to-indigo-600",
-    popular: false,
-    activeSchools: 45
-  },
-  {
-    id: "2",
-    name: "الباقة المتوسطة",
-    description: "الخيار الأكثر شيوعاً للمدارس المتوسطة التي تحتاج لمميزات إضافية.",
-    price: 99,
-    interval: "شهرياً",
-    features: [
-      { name: "حتى 200 طالب", included: true },
-      { name: "حتى 30 معلم", included: true },
-      { name: "إدارة الحضور والغياب", included: true },
-      { name: "مساحة تخزين 5GB", included: true },
-      { name: "التقارير المتقدمة", included: true },
-      { name: "تطبيق الموبايل", included: false },
-    ],
-    color: "from-indigo-600 to-violet-600",
-    popular: true,
-    activeSchools: 72
-  },
-  {
-    id: "3",
-    name: "الباقة المتقدمة (برو)",
-    description: "للصروح التعليمية الكبيرة التي تبحث عن تحكم كامل ومساحة غير محدودة.",
-    price: 199,
-    interval: "شهرياً",
-    features: [
-      { name: "عدد طلاب غير محدود", included: true },
-      { name: "عدد معلمين غير محدود", included: true },
-      { name: "إدارة الحضور والغياب", included: true },
-      { name: "مساحة تخزين 50GB", included: true },
-      { name: "التقارير المتقدمة", included: true },
-      { name: "تطبيق الموبايل", included: true },
-    ],
-    color: "from-purple-600 to-fuchsia-600",
-    popular: false,
-    activeSchools: 25
-  }
-];
+import CreatePlanModal from "@/components/dashboard/super-admin/CreatePlanModal";
 
 export default function PlansManagement() {
+  const dispatch = useDispatch();
+  const { plans, status, error } = useSelector((state) => state.plan);
+  const [addPlanModel, setAddPlanModel] = useState(false);
+
+  useEffect(() => {
+    dispatch(fetchPlans());
+  }, [dispatch]);
+
   return (
     <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
       
@@ -80,7 +36,7 @@ export default function PlansManagement() {
           label: "إضافة باقة جديدة",
           icon: Plus,
           variant: "indigo",
-          onClick: () => console.log("Add Plan")
+          onClick: () => setAddPlanModel(true)
         }}
       />
 
@@ -103,8 +59,8 @@ export default function PlansManagement() {
             color="from-emerald-500 to-teal-600"
          />
          <StatCard 
-            label="التحويلات البنكية المعلقة"
-            value="18"
+            label="الخطط النشطة حالياً"
+            value={plans?.length || 0}
             change="نشط"
             trend="up"
             icon={Settings}
@@ -113,10 +69,51 @@ export default function PlansManagement() {
       </div>
 
       {/* Plans List */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {mockPlans.map((plan) => (
-          <PlanCard key={plan.id} plan={plan} />
-        ))}
+      <div className="space-y-6">
+        <h2 className="text-xl font-black text-slate-900 dark:text-white mr-2">قائمة الخطط المتوفرة</h2>
+        
+        {status === 'loading' ? (
+          <div className="flex flex-col items-center justify-center py-20 bg-slate-50 dark:bg-slate-900/50 rounded-[2.5rem] border border-dashed border-slate-300 dark:border-slate-800">
+             <Loader2 className="w-12 h-12 text-indigo-600 animate-spin mb-4" />
+             <p className="text-slate-500 font-bold">جاري تحميل الخطط...</p>
+          </div>
+        ) : error ? (
+          <div className="flex items-center gap-4 p-8 bg-rose-50 dark:bg-rose-900/10 border border-rose-200 dark:border-rose-800 rounded-[2.5rem]">
+             <div className="w-12 h-12 rounded-2xl bg-rose-500/10 flex items-center justify-center">
+                <AlertCircle className="w-6 h-6 text-rose-600" />
+             </div>
+             <div>
+                <h4 className="text-lg font-black text-rose-900 dark:text-rose-200">فشل في جلب البيانات</h4>
+                <p className="text-sm font-medium text-rose-700 dark:text-rose-400">{error}</p>
+             </div>
+             <button 
+              onClick={() => dispatch(fetchPlans())}
+              className="ms-auto px-6 py-2.5 bg-rose-600 text-white rounded-xl font-bold text-sm hover:scale-105 active:scale-95 transition-all"
+             >
+               إعادة المحاولة
+             </button>
+          </div>
+        ) : plans.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20 bg-slate-50 dark:bg-slate-900/50 rounded-[2.5rem] border border-dashed border-slate-300 dark:border-slate-800">
+             <div className="w-20 h-20 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-6">
+                <Settings className="w-10 h-10 text-slate-400" />
+             </div>
+             <h3 className="text-xl font-black text-slate-900 dark:text-white mb-2">لا يوجد خطط حالياً</h3>
+             <p className="text-slate-500 font-medium mb-8">ابدأ بإنشاء أول باقة اشتراك للمدارس عبر الضغط على الزر أعلاه</p>
+             <button 
+              onClick={() => setAddPlanModel(true)}
+              className="px-8 py-3.5 bg-indigo-600 text-white rounded-2xl font-bold text-sm shadow-xl shadow-indigo-500/20 hover:scale-105 active:scale-95 transition-all"
+             >
+               إنشاء أول باقة
+             </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {plans.map((plan) => (
+              <PlanCard key={plan.id} plan={plan} />
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Analytics Snapshot */}
@@ -137,6 +134,11 @@ export default function PlansManagement() {
             </div>
          </div>
       </div>
+
+      <CreatePlanModal 
+        isOpen={addPlanModel} 
+        onClose={() => setAddPlanModel(false)} 
+      />
     </div>
   );
 }
