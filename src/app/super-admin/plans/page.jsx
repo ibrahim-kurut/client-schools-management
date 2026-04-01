@@ -18,8 +18,20 @@ import CreatePlanModal from "@/components/dashboard/super-admin/CreatePlanModal"
 
 export default function PlansManagement() {
   const dispatch = useDispatch();
-  const { plans, status, error } = useSelector((state) => state.plan);
+   const { plans, status, error } = useSelector((state) => state.plan);
   const [addPlanModel, setAddPlanModel] = useState(false);
+  const [editPlan, setEditPlan] = useState(null);
+
+  const handleOpenNew = () => {
+    setEditPlan(null);
+    setAddPlanModel(true);
+  };
+
+  const handleOpenEdit = (plan) => {
+    setEditPlan(plan);
+    setAddPlanModel(true);
+  };
+
 
   useEffect(() => {
     dispatch(fetchPlans());
@@ -36,8 +48,9 @@ export default function PlansManagement() {
           label: "إضافة باقة جديدة",
           icon: Plus,
           variant: "indigo",
-          onClick: () => setAddPlanModel(true)
+          onClick: handleOpenNew
         }}
+
       />
 
       {/* Global Plan Stats */}
@@ -110,8 +123,9 @@ export default function PlansManagement() {
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {plans.map((plan) => (
-              <PlanCard key={plan.id} plan={plan} />
+              <PlanCard key={plan.id} plan={plan} onEdit={handleOpenEdit} />
             ))}
+
           </div>
         )}
       </div>
@@ -135,10 +149,12 @@ export default function PlansManagement() {
          </div>
       </div>
 
-      <CreatePlanModal 
+       <CreatePlanModal 
         isOpen={addPlanModel} 
         onClose={() => setAddPlanModel(false)} 
+        editPlan={editPlan}
       />
+
     </div>
   );
 }

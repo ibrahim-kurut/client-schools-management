@@ -157,3 +157,8 @@ body {
   outline: 2px solid #3b82f6;
   outline-offset: 2px;
 }
+
+/* Fix Toastify Z-Index to appear above portaled modals */
+.Toastify__toast-container {
+  z-index: 10001 !important;
+}

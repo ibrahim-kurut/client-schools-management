@@ -3,8 +3,14 @@
 import React from "react";
 import { Check, X, Layers, Edit3, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useDispatch } from "react-redux";
+import { deletePlan } from "@/redux/slices/planSlice";
+import Swal from "sweetalert2";
+import { toast } from "react-toastify";
 
-export default function PlanCard({ plan }) {
+
+export default function PlanCard({ plan, onEdit }) {
+
   const { 
     name, 
     description, 
@@ -21,6 +27,40 @@ export default function PlanCard({ plan }) {
   } = plan;
 
   const intervalLabel = durationInDays === 365 ? "سنوياً" : "شهرياً";
+
+  const dispatch = useDispatch();
+
+  const handleDelete = () => {
+    Swal.fire({
+      title: 'هل أنت متأكد؟',
+      text: "لن تتمكن من التراجع عن هذه العملية!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#4f46e5',
+      cancelButtonColor: '#f43f5e',
+      confirmButtonText: 'نعم، احذفها!',
+      cancelButtonText: 'إلغاء',
+      reverseButtons: true,
+      customClass: {
+        container: 'font-arabic',
+        popup: 'rounded-[1.5rem]',
+        confirmButton: 'rounded-xl font-bold px-6 py-2.5',
+        cancelButton: 'rounded-xl font-bold px-6 py-2.5'
+      }
+    }).then((result) => {
+      if (result.isConfirmed) {
+        dispatch(deletePlan(plan.id)).then((action) => {
+          if (action.meta.requestStatus === 'fulfilled') {
+            toast.success("تم حذف الباقة بنجاح");
+          } else {
+            toast.error(action.payload?.message || "فشل في حذف الباقة");
+          }
+        });
+
+      }
+    });
+  };
+
 
 
   return (
@@ -87,12 +127,23 @@ export default function PlanCard({ plan }) {
               <span className="text-lg font-black text-slate-800 dark:text-white mt-1">{activeSchools}</span>
            </div>
            <div className="flex items-center gap-2">
-              <button className="p-3 bg-slate-50 dark:bg-slate-800 hover:bg-white dark:hover:bg-slate-700 text-slate-500 hover:text-indigo-600 rounded-2xl border border-transparent hover:border-slate-100 dark:hover:border-slate-700 transition-all active:scale-90">
+              <button 
+                onClick={() => onEdit(plan)}
+                className="p-3 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-600 dark:hover:bg-emerald-600 hover:text-white dark:hover:text-white rounded-2xl border border-emerald-100 dark:border-emerald-500/20 transition-all duration-300 active:scale-90 cursor-pointer shadow-sm hover:shadow-lg hover:shadow-emerald-500/20"
+                title="تعديل الباقة"
+              >
                  <Edit3 className="w-5 h-5" />
               </button>
-              <button className="p-3 bg-slate-50 dark:bg-slate-800 hover:bg-white dark:hover:bg-slate-700 text-slate-500 hover:text-rose-600 rounded-2xl border border-transparent hover:border-slate-100 dark:hover:border-slate-700 transition-all active:scale-90">
+
+              <button 
+                onClick={handleDelete}
+                className="p-3 bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 hover:bg-rose-600 dark:hover:bg-rose-600 hover:text-white dark:hover:text-white rounded-2xl border border-rose-100 dark:border-rose-500/20 transition-all duration-300 active:scale-90 cursor-pointer shadow-sm hover:shadow-lg hover:shadow-rose-500/20"
+                title="حذف الباقة"
+              >
                  <Trash2 className="w-5 h-5" />
               </button>
+
+
            </div>
         </div>
       </div>

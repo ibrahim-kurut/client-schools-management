@@ -16,8 +16,12 @@ import {
   BarChart3
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
-import { createPlan } from "@/redux/slices/planSlice";
+import { createPlan, updatePlan, clearMessages } from "@/redux/slices/planSlice";
+
+
 import { cn } from "@/lib/utils";
+import { toast } from "react-toastify";
+
 
 
 
@@ -57,7 +61,8 @@ const FormTextarea = memo(({ label, icon: Icon, inputRef, ...props }) => {
 
 FormTextarea.displayName = "FormTextarea";
 
-export default function CreatePlanModal({ isOpen, onClose }) {
+export default function CreatePlanModal({ isOpen, onClose, editPlan }) {
+
   const [mounted, setMounted] = useState(false);
   const dispatch = useDispatch();
   const { status, error, successMessage } = useSelector((state) => state.plan);
@@ -80,18 +85,54 @@ export default function CreatePlanModal({ isOpen, onClose }) {
   }, []);
 
   useEffect(() => {
-    if (successMessage && status === "succeeded") {
-      setAllowReports(false);
+    if (isOpen) {
+      if (editPlan) {
+        if (nameRef.current) nameRef.current.value = editPlan.name || "";
+        if (priceRef.current) priceRef.current.value = editPlan.price || "";
+        if (descriptionRef.current) descriptionRef.current.value = editPlan.description || "";
+        if (maxStudentsRef.current) maxStudentsRef.current.value = editPlan.maxStudents || "";
+        if (maxTeachersRef.current) maxTeachersRef.current.value = editPlan.maxTeachers || "";
+        if (storageLimitRef.current) storageLimitRef.current.value = editPlan.storageLimit || "";
+        setAllowReports(editPlan.allowReports || false);
+      } else {
+        // Reset for new plan
+        if (nameRef.current) nameRef.current.value = "";
+        if (priceRef.current) priceRef.current.value = "";
+        if (descriptionRef.current) descriptionRef.current.value = "";
+        if (maxStudentsRef.current) maxStudentsRef.current.value = "";
+        if (maxTeachersRef.current) maxTeachersRef.current.value = "";
+        if (storageLimitRef.current) storageLimitRef.current.value = "";
+        setAllowReports(false);
+      }
+    }
+  }, [isOpen, editPlan]);
+
+  useEffect(() => {
+    if (isOpen && successMessage && status === "succeeded") {
+      toast.success(successMessage || (editPlan ? "تم تحديث الباقة بنجاح" : "تم إنشاء الباقة بنجاح"));
+      dispatch(clearMessages());
       onClose();
     }
-  }, [successMessage, status, onClose]);
+
+  }, [successMessage, status, onClose, editPlan, isOpen, dispatch]);
+
+  useEffect(() => {
+    if (isOpen && error && status === "failed") {
+      toast.error(error);
+      dispatch(clearMessages());
+    }
+
+  }, [error, status, isOpen, dispatch]);
+
+
+
 
   if (!isOpen || !mounted) return null;
 
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    dispatch(createPlan({
+    const planData = {
       name: nameRef.current?.value || "",
       description: descriptionRef.current?.value || "",
       price: parseFloat(priceRef.current?.value) || 0,
@@ -99,8 +140,15 @@ export default function CreatePlanModal({ isOpen, onClose }) {
       maxTeachers: parseInt(maxTeachersRef.current?.value) || 10,
       storageLimit: parseInt(storageLimitRef.current?.value) || 100,
       allowReports
-    }));
+    };
+
+    if (editPlan) {
+      dispatch(updatePlan({ id: editPlan.id, planData }));
+    } else {
+      dispatch(createPlan(planData));
+    }
   };
+
 
   const modalContent = (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 overflow-hidden">
@@ -120,9 +168,12 @@ export default function CreatePlanModal({ isOpen, onClose }) {
               <Plus className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight">إضافة خطة جديدة</h2>
+              <h2 className="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight">
+                {editPlan ? 'تعديل الباقة' : 'إضافة خطة جديدة'}
+              </h2>
               <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">تحسين أداء الواجهة 60FPS</p>
             </div>
+
           </div>
           <button 
             onClick={onClose}
@@ -244,14 +295,14 @@ export default function CreatePlanModal({ isOpen, onClose }) {
             <button
               onClick={onClose}
               type="button"
-              className="px-6 py-3 rounded-xl text-xs font-black text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition-colors"
+              className="px-8 py-3 bg-red-900 hover:bg-red-700 text-white rounded-xl  font-black shadow-lg shadow-indigo-600/20 disabled:opacity-50 transition-all active:scale-95 flex items-center gap-2 cursor-pointer "
             >
               إلغاء
             </button>
             <button
               onClick={handleSubmit}
               disabled={status === 'loading'}
-              className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-black shadow-lg shadow-indigo-600/20 disabled:opacity-50 transition-all active:scale-95 flex items-center gap-2"
+              className="px-8 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-black shadow-lg shadow-indigo-600/20 disabled:opacity-50 transition-all active:scale-95 flex items-center gap-2 cursor-pointer"
             >
               {status === 'loading' ? 'جاري الحفظ...' : (
                 <>

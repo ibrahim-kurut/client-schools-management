@@ -33,6 +33,29 @@ export const fetchPlans = createAsyncThunk('plan/fetchPlans', async (_, { reject
     }
 });
 
+// 4- Update a plan
+export const updatePlan = createAsyncThunk('plan/updatePlan', async ({ id, planData }, { rejectWithValue }) => {
+    try {
+        const res = await axiosInstance.put(`/plans/${id}`, planData);
+        return res.data;
+    } catch (e) {
+        const errorMessage = e.response?.data?.message || e.response?.data?.error || "Plan update failed";
+        return rejectWithValue({ message: errorMessage });
+    }
+});
+
+// 5- Delete a plan
+export const deletePlan = createAsyncThunk('plan/deletePlan', async (id, { rejectWithValue }) => {
+    try {
+        const res = await axiosInstance.delete(`/plans/${id}`);
+        return { id, message: res.data.message };
+    } catch (e) {
+        const errorMessage = e.response?.data?.message || e.response?.data?.error || "Plan deletion failed";
+        return rejectWithValue({ message: errorMessage });
+    }
+});
+
+
 // 4- create slice
 const planSlice = createSlice({
     name: "plan",
@@ -75,9 +98,45 @@ const planSlice = createSlice({
             .addCase(fetchPlans.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.payload.message;
+            })
+            // Update Plan
+            .addCase(updatePlan.pending, (state) => {
+                state.status = 'loading';
+                state.error = null;
+                state.successMessage = null;
+            })
+            .addCase(updatePlan.fulfilled, (state, action) => {
+                state.status = 'succeeded';
+                if (action.payload.plan) {
+                    const index = state.plans.findIndex(p => p.id === action.payload.plan.id);
+                    if (index !== -1) {
+                        state.plans[index] = action.payload.plan;
+                    }
+                }
+                state.successMessage = action.payload.message;
+            })
+            .addCase(updatePlan.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload.message;
+            })
+            // Delete Plan
+            .addCase(deletePlan.pending, (state) => {
+                state.status = 'loading';
+                state.error = null;
+                state.successMessage = null;
+            })
+            .addCase(deletePlan.fulfilled, (state, action) => {
+                state.status = 'succeeded';
+                state.plans = state.plans.filter(p => p.id !== action.payload.id);
+                state.successMessage = action.payload.message;
+            })
+            .addCase(deletePlan.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload.message;
             });
     }
 });
+
 
 export const { clearMessages } = planSlice.actions;
 export default planSlice.reducer;
