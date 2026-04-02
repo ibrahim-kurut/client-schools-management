@@ -1,19 +1,21 @@
 "use client";
-import React, { useState } from 'react';
-import { Plus, Edit2, Trash2, Users } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { Plus, Edit2, Trash2, Users, Loader2 } from 'lucide-react';
 import ClassModal from './ClassModal';
 import Swal from 'sweetalert2';
-
-const mockClasses = [
-  { id: '1', name: 'الصف الأول الابتدائي', tuitionFee: 500, studentsCount: 45 },
-  { id: '2', name: 'الصف الثاني الابتدائي', tuitionFee: 500, studentsCount: 38 },
-  { id: '3', name: 'الصف الثالث الابتدائي', tuitionFee: 550, studentsCount: 42 },
-];
+import { fetchClasses, createClass, resetCreateStatus } from '@/redux/slices/classesSlice';
 
 export default function ClassesManagement({ slug }) {
-  const [classes, setClasses] = useState(mockClasses);
+  const dispatch = useDispatch();
+  const { classes, status, createStatus } = useSelector((state) => state.classes);
+  
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedClass, setSelectedClass] = useState(null);
+
+  useEffect(() => {
+    dispatch(fetchClasses());
+  }, [dispatch]);
 
   const handleAddClick = () => {
     setSelectedClass(null);
@@ -26,66 +28,66 @@ export default function ClassesManagement({ slug }) {
   };
 
   const handleDelete = (id) => {
+    // For now, we only handle create and fetch based on user request.
+    // The delete UI remains, but we use a SweetAlert to indicate it's not hooked up yet, or just local simulate.
     Swal.fire({
-      title: 'هل أنت متأكد؟',
-      text: "سيتم حذف هذا الصف نهائياً.",
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#ef4444',
-      cancelButtonColor: '#64748b',
-      confirmButtonText: 'نعم، احذف',
-      cancelButtonText: 'إلغاء',
-      reverseButtons: true,
-      direction: 'rtl',
+      title: 'ميزة الحذف',
+      text: "سيتم تفعيل هذه الميزة في الخطوة القادمة.",
+      icon: 'info',
+      confirmButtonColor: '#2563eb',
+      confirmButtonText: 'حسناً',
       customClass: {
-        popup: 'rounded-[32px] font-sans border border-slate-100 shadow-2xl',
-        title: 'font-black text-slate-800',
-        htmlContainer: 'text-slate-500 font-bold',
-        confirmButton: 'rounded-2xl px-10 py-3 font-black text-sm',
-        cancelButton: 'rounded-2xl px-10 py-3 font-black text-sm'
-      }
-    }).then((result) => {
-      if (result.isConfirmed) {
-        setClasses(classes.filter(c => c.id !== id));
-        Swal.fire({
-          title: 'تم الحذف!',
-          text: 'تم حذف الصف بنجاح.',
-          icon: 'success',
-          confirmButtonColor: '#2563eb',
-          customClass: {
-             confirmButton: 'rounded-2xl px-10 py-3 font-black text-sm',
-             popup: 'rounded-[32px] font-sans rtl'
-          }
-        });
+        popup: 'rounded-[32px] font-sans rtl border border-slate-100 shadow-2xl',
+        confirmButton: 'rounded-2xl px-10 py-3 font-black text-sm'
       }
     });
   };
 
-  const handleSave = (classData) => {
+  const handleSave = async (classData) => {
     if (selectedClass) {
-      setClasses(classes.map(c => c.id === selectedClass.id ? { ...c, ...classData } : c));
+      // Edit is currently not hooked up per requirements, showing info message
       Swal.fire({
-        title: 'تم التعديل',
-        text: 'تم تعديل بيانات الصف بنجاح.',
-        icon: 'success',
+        title: 'ميزة التعديل',
+        text: "سيتم تفعيل هذه الميزة في الخطوة القادمة.",
+        icon: 'info',
         confirmButtonColor: '#2563eb',
-        timer: 2000,
-        showConfirmButton: false,
-        customClass: { popup: 'rounded-[32px] font-sans rtl' }
+        confirmButtonText: 'حسناً',
+        customClass: {
+          popup: 'rounded-[32px] font-sans rtl'
+        }
       });
     } else {
-      setClasses([...classes, { ...classData, id: Date.now().toString(), studentsCount: 0 }]);
-      Swal.fire({
-        title: 'تمت الإضافة',
-        text: 'تمت إضافة الصف بنجاح.',
-        icon: 'success',
-        confirmButtonColor: '#2563eb',
-        timer: 2000,
-        showConfirmButton: false,
-        customClass: { popup: 'rounded-[32px] font-sans rtl' }
-      });
+      // Create new class
+      try {
+        const resultAction = await dispatch(createClass(classData)).unwrap();
+        Swal.fire({
+          title: 'تمت الإضافة',
+          text: resultAction.message || 'تم إنشاء الصف بنجاح.',
+          icon: 'success',
+          confirmButtonColor: '#2563eb',
+          timer: 2000,
+          showConfirmButton: false,
+          customClass: { popup: 'rounded-[32px] font-sans rtl' }
+        });
+      } catch (err) {
+        Swal.fire({
+          title: 'خطأ',
+          text: err.message || 'فشلت عملية الإضافة',
+          icon: 'error',
+          confirmButtonColor: '#ef4444',
+          customClass: { popup: 'rounded-[32px] font-sans rtl' }
+        });
+      }
     }
   };
+
+  if (status === 'loading') {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <Loader2 className="w-10 h-10 text-blue-600 animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -104,7 +106,7 @@ export default function ClassesManagement({ slug }) {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {classes.map((cls) => (
+        {classes && classes.map((cls) => (
           <div key={cls.id} className="bg-white rounded-[32px] p-6 shadow-sm border border-slate-100 hover:shadow-md transition-shadow group relative overflow-hidden">
             <div className="absolute top-0 right-0 w-2 h-full bg-blue-600 rounded-r-[32px]"></div>
             
@@ -125,19 +127,19 @@ export default function ClassesManagement({ slug }) {
                 <span className="text-slate-500 font-semibold flex items-center gap-2">
                   <span className="text-xl">💰</span> القسط الدراسي
                 </span>
-                <span className="font-bold text-slate-800">{cls.tuitionFee} <span className="text-sm text-slate-500">دولار</span></span>
+                <span className="font-bold text-slate-800">{cls.tuitionFee || 0} <span className="text-sm text-slate-500">دولار</span></span>
               </div>
               <div className="flex justify-between items-center p-3 bg-blue-50/50 rounded-2xl">
                 <span className="text-blue-600 font-semibold flex items-center gap-2">
                   <Users className="w-5 h-5" /> عدد الطلاب
                 </span>
-                <span className="font-bold text-blue-700">{cls.studentsCount}</span>
+                <span className="font-bold text-blue-700">{cls.studentsCount || 0}</span>
               </div>
             </div>
           </div>
         ))}
 
-        {classes.length === 0 && (
+        {(!classes || classes.length === 0) && status === 'succeeded' && (
           <div className="col-span-full bg-white rounded-[32px] p-12 text-center border border-dashed border-slate-200">
             <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
               <Plus className="w-10 h-10 text-slate-400" />
