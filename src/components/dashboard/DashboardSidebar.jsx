@@ -43,6 +43,9 @@ export default function DashboardSidebar({ slug }) {
     setMounted(true);
   }, []);
 
+
+
+
   const handleLogout = async () => {
     const result = await Swal.fire({
       title: 'هل أنت متأكد؟',

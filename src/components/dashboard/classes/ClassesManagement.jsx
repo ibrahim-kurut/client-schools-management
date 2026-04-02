@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Plus, Edit2, Trash2, Users, Loader2 } from 'lucide-react';
 import ClassModal from './ClassModal';
 import Swal from 'sweetalert2';
-import { fetchClasses, createClass, resetCreateStatus } from '@/redux/slices/classesSlice';
+import { fetchClasses, createClass, updateClass, deleteClass } from '@/redux/slices/classesSlice';
 
 export default function ClassesManagement({ slug }) {
   const dispatch = useDispatch();
@@ -28,34 +28,74 @@ export default function ClassesManagement({ slug }) {
   };
 
   const handleDelete = (id) => {
-    // For now, we only handle create and fetch based on user request.
-    // The delete UI remains, but we use a SweetAlert to indicate it's not hooked up yet, or just local simulate.
     Swal.fire({
-      title: 'ميزة الحذف',
-      text: "سيتم تفعيل هذه الميزة في الخطوة القادمة.",
-      icon: 'info',
-      confirmButtonColor: '#2563eb',
-      confirmButtonText: 'حسناً',
+      title: 'هل أنت متأكد؟',
+      text: "سيتم حذف هذا الصف نهائياً.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#64748b',
+      confirmButtonText: 'نعم، احذف',
+      cancelButtonText: 'إلغاء',
+      reverseButtons: true,
+      direction: 'rtl',
       customClass: {
-        popup: 'rounded-[32px] font-sans rtl border border-slate-100 shadow-2xl',
-        confirmButton: 'rounded-2xl px-10 py-3 font-black text-sm'
+        popup: 'rounded-[32px] font-sans border border-slate-100 shadow-2xl',
+        title: 'font-black text-slate-800',
+        htmlContainer: 'text-slate-500 font-bold',
+        confirmButton: 'rounded-2xl px-10 py-3 font-black text-sm',
+        cancelButton: 'rounded-2xl px-10 py-3 font-black text-sm'
+      }
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          await dispatch(deleteClass(id)).unwrap();
+          Swal.fire({
+            title: 'تم الحذف!',
+            text: 'تم حذف الصف بنجاح.',
+            icon: 'success',
+            confirmButtonColor: '#2563eb',
+            customClass: {
+               confirmButton: 'rounded-2xl px-10 py-3 font-black text-sm',
+               popup: 'rounded-[32px] font-sans rtl'
+            }
+          });
+        } catch (err) {
+          Swal.fire({
+            title: 'خطأ',
+            text: err.message || 'فشلت عملية الحذف',
+            icon: 'error',
+            confirmButtonColor: '#ef4444',
+            customClass: { popup: 'rounded-[32px] font-sans rtl' }
+          });
+        }
       }
     });
   };
 
   const handleSave = async (classData) => {
     if (selectedClass) {
-      // Edit is currently not hooked up per requirements, showing info message
-      Swal.fire({
-        title: 'ميزة التعديل',
-        text: "سيتم تفعيل هذه الميزة في الخطوة القادمة.",
-        icon: 'info',
-        confirmButtonColor: '#2563eb',
-        confirmButtonText: 'حسناً',
-        customClass: {
-          popup: 'rounded-[32px] font-sans rtl'
-        }
-      });
+      // Edit class
+      try {
+        const resultAction = await dispatch(updateClass({ id: selectedClass.id, classData })).unwrap();
+        Swal.fire({
+          title: 'تم التعديل',
+          text: resultAction.message || 'تم تعديل بيانات الصف بنجاح.',
+          icon: 'success',
+          confirmButtonColor: '#2563eb',
+          timer: 2000,
+          showConfirmButton: false,
+          customClass: { popup: 'rounded-[32px] font-sans rtl' }
+        });
+      } catch (err) {
+        Swal.fire({
+          title: 'خطأ',
+          text: err.message || 'فشلت عملية التعديل',
+          icon: 'error',
+          confirmButtonColor: '#ef4444',
+          customClass: { popup: 'rounded-[32px] font-sans rtl' }
+        });
+      }
     } else {
       // Create new class
       try {

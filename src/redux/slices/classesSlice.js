@@ -29,6 +29,34 @@ export const createClass = createAsyncThunk(
     }
 );
 
+// Update class
+export const updateClass = createAsyncThunk(
+    'classes/updateClass',
+    async ({ id, classData }, { rejectWithValue }) => {
+        try {
+            const res = await axiosInstance.put(`/classes/${id}`, classData);
+            return res.data;
+        } catch (e) {
+            const errorMessage = e.response?.data?.message || e.response?.data?.error || "حدث خطأ أثناء تحديث الصف";
+            return rejectWithValue({ message: errorMessage });
+        }
+    }
+);
+
+// Delete class
+export const deleteClass = createAsyncThunk(
+    'classes/deleteClass',
+    async (id, { rejectWithValue }) => {
+        try {
+            const res = await axiosInstance.delete(`/classes/${id}`);
+            return { id, message: res.data.message };
+        } catch (e) {
+            const errorMessage = e.response?.data?.message || e.response?.data?.error || "حدث خطأ أثناء حذف الصف";
+            return rejectWithValue({ message: errorMessage });
+        }
+    }
+);
+
 const initialState = {
     classes: [],
     status: 'idle', // 'idle' | 'loading' | 'succeeded' | 'failed'
@@ -75,6 +103,19 @@ const classesSlice = createSlice({
             .addCase(createClass.rejected, (state, action) => {
                 state.createStatus = 'failed';
                 state.createError = action.payload.message;
+            })
+            // Update
+            .addCase(updateClass.fulfilled, (state, action) => {
+                if(action.payload.class) {
+                    const index = state.classes.findIndex(c => c.id === action.payload.class.id);
+                    if (index !== -1) {
+                        state.classes[index] = action.payload.class;
+                    }
+                }
+            })
+            // Delete
+            .addCase(deleteClass.fulfilled, (state, action) => {
+                state.classes = state.classes.filter(c => c.id !== action.payload.id);
             })
     }
 });
