@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '@/redux/slices/authSlice';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { toast } from 'react-toastify';
 import Swal from 'sweetalert2';
 import Link from 'next/link';
@@ -35,6 +35,7 @@ const SidebarItem = ({ icon: Icon, label, isActive = false, href = "/" }) => (
 export default function DashboardSidebar({ slug }) {
   const dispatch = useDispatch();
   const router = useRouter();
+  const pathname = usePathname();
   const { user } = useSelector((state) => state.auth);
   const [mounted, setMounted] = React.useState(false);
 
@@ -106,13 +107,13 @@ export default function DashboardSidebar({ slug }) {
 
       {/* Navigation Menu */}
       <nav className="flex-1 space-y-2">
-        <SidebarItem icon={LayoutDashboard} label="لوحة التحكم" isActive={true} />
-        <SidebarItem icon={Users} label="إدارة الطلاب" />
-        <SidebarItem icon={BookOpen} label="المراحل والصفوف" />
-        <SidebarItem icon={GraduationCap} label="الكادر التدريسي" />
-        <SidebarItem icon={Wallet} label="الشؤون المالية" />
-        <SidebarItem icon={TrendingUp} label="التقارير والإحصائيات" />
-        <SidebarItem icon={Settings} label="الإعدادات العامة" />
+        <SidebarItem icon={LayoutDashboard} label="لوحة التحكم" href={`/school/${slug}`} isActive={pathname === `/school/${slug}`} />
+        <SidebarItem icon={Users} label="إدارة الطلاب" href={`/school/${slug}/students`} isActive={pathname === `/school/${slug}/students`} />
+        <SidebarItem icon={BookOpen} label="المراحل والصفوف" href={`/school/${slug}/classes`} isActive={pathname === `/school/${slug}/classes`} />
+        <SidebarItem icon={GraduationCap} label="الكادر التدريسي" href={`/school/${slug}/teachers`} isActive={pathname === `/school/${slug}/teachers`} />
+        <SidebarItem icon={Wallet} label="الشؤون المالية" href={`/school/${slug}/finance`} isActive={pathname === `/school/${slug}/finance`} />
+        <SidebarItem icon={TrendingUp} label="التقارير والإحصائيات" href={`/school/${slug}/reports`} isActive={pathname === `/school/${slug}/reports`} />
+        <SidebarItem icon={Settings} label="الإعدادات العامة" href={`/school/${slug}/settings`} isActive={pathname === `/school/${slug}/settings`} />
       </nav>
 
       {/* Logout */}
