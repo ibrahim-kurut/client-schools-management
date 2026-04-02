@@ -17,6 +17,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { toast } from 'react-toastify';
 import Swal from 'sweetalert2';
 import Link from 'next/link';
+import Image from 'next/image';
 
 const SidebarItem = ({ icon: Icon, label, isActive = false, href = "/" }) => (
   <Link 
@@ -42,9 +43,6 @@ export default function DashboardSidebar({ slug }) {
   React.useEffect(() => {
     setMounted(true);
   }, []);
-
-
-
 
   const handleLogout = async () => {
     const result = await Swal.fire({
@@ -80,15 +78,18 @@ export default function DashboardSidebar({ slug }) {
     }
   };
 
+  const actualUser = user?.userData || user;
+
+
   // Use default mockup if not mounted to match server state and avoid hydration mismatch
   const displayUser = mounted ? {
-    name: user?.name || user?.userName || user?.userData?.name || "مدير المدرسة",
-    email: user?.email || user?.userData?.email || "admin@school.com",
-    avatar: user?.avatar || null
+    name: actualUser?.firstName ? `${actualUser.firstName} ${actualUser.lastName || ''}`.trim() : "مدير المدرسة",
+    email: actualUser?.email || "admin@school.com",
+    schoolLogo: actualUser?.schoolLogo || null
   } : {
     name: "مدير المدرسة",
     email: "admin@school.com",
-    avatar: null
+    schoolLogo: null
   };
 
   return (
@@ -97,15 +98,15 @@ export default function DashboardSidebar({ slug }) {
       <div className="flex flex-col items-center mb-10 text-center">
         <div className="w-20 h-20 rounded-full bg-slate-700 p-1 mb-4 shadow-xl border-2 border-slate-600">
           <div className="w-full h-full rounded-full bg-blue-100 flex items-center justify-center overflow-hidden">
-             {displayUser.avatar ? (
-               <img src={displayUser.avatar} alt={displayUser.name} className="w-full h-full object-cover" />
+             {displayUser.schoolLogo ? (
+               <Image src={displayUser.schoolLogo} alt={displayUser.name} width={80} height={80} className="w-full h-full object-cover" />
              ) : (
                <User className="w-10 h-10 text-blue-600" />
              )}
           </div>
         </div>
         <h3 className="text-white font-black text-lg leading-tight mb-1">{displayUser.name}</h3>
-        <p className="text-slate-500 text-xs font-semibold">{displayUser.email}</p>
+        <p className="text-slate-500 font-semibold">مدير المدرسة</p>
       </div>
 
       {/* Navigation Menu */}

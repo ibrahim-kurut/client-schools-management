@@ -1,8 +1,11 @@
 "use client";
 import { Bell, Search, Settings, Sun, Moon } from 'lucide-react';
+import { useSelector } from 'react-redux';
 
 export default function DashboardHeader({ slug }) {
-  const userName = "school admin";
+  const { user } = useSelector((state) => state.auth);
+
+  const userName = user?.firstName + " " + user?.lastName || "مدير المدرسة";
 
   return (
     <div className="sticky top-0 z-20 flex items-center justify-between gap-6 px-10 py-6 bg-[#f8fafc]/80 backdrop-blur-md border-b border-slate-200">
