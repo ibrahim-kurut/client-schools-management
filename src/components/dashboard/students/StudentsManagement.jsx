@@ -1,5 +1,6 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { 
   Users, UserPlus, Search, Filter, MoreVertical, Edit, Trash2, 
   Eye, GraduationCap, Mail, Phone, MapPin, Activity, CheckCircle2, XCircle
@@ -7,92 +8,45 @@ import {
 import AddStudentModal from './AddStudentModal';
 import Pagination from '../../ui/Pagination';
 import SearchInput from '../../ui/SearchInput';
+import { fetchStudents } from '../../../redux/slices/studentsSlice';
+import { fetchClasses } from '../../../redux/slices/classesSlice';
 
-// Mock data for initial frontend view
-// Mock data matching exact Prisma schema ('User' with role='STUDENT' and 'StudentProfile')
-const MOCK_STUDENTS = [
-  {
-    id: "f47ac10b-58cc-4372-a567-0e02b2c3d479",
-    firstName: "أحمد",
-    lastName: "محمود",
-    email: "ahmed.s@example.com",
-    phone: "07712345678",
-    gender: "MALE",
-    className: "الصف العاشر", // From relation Class
-    birthDate: "2008-05-14",
-    createdAt: "2023-09-01T10:00:00.000Z",
-    image: "https://api.dicebear.com/7.x/notionists/svg?seed=Ahmed&backgroundColor=e2e8f0",
-    isDeleted: false,
-    discountAmount: 0 // From StudentProfile
-  },
-  {
-    id: "550e8400-e29b-41d4-a716-446655440000",
-    firstName: "سارة",
-    lastName: "أحمد",
-    email: "sarah@example.com",
-    phone: "07898765432",
-    gender: "FEMALE",
-    className: "الصف العاشر",
-    birthDate: "2008-11-20",
-    createdAt: "2023-09-02T08:30:00.000Z",
-    image: "https://api.dicebear.com/7.x/notionists/svg?seed=Sarah&backgroundColor=fee2e2",
-    isDeleted: false,
-    discountAmount: 50
-  },
-  {
-    id: "550e8400-e29b-41d4-a716-446655440001",
-    firstName: "علي",
-    lastName: "محمد",
-    email: "ali.s@example.com",
-    phone: "07712345678",
-    gender: "MALE",
-    className: "الصف العاشر", // From relation Class
-    birthDate: "2008-05-14",
-    createdAt: "2023-09-01T10:00:00.000Z",
-    image: "https://api.dicebear.com/7.x/notionists/svg?seed=Ahmed&backgroundColor=e2e8f0",
-    isDeleted: false,
-    discountAmount: 0 // From StudentProfile
-  },
-   {
-    id: "550e8400-e29b-41d4-a716-446655440021",
-    firstName: "علي",
-    lastName: "محمد",
-    email: "ali.s@example.com",
-    phone: "07712345678",
-    gender: "MALE",
-    className: "الصف العاشر", // From relation Class
-    birthDate: "2008-05-14",
-    createdAt: "2023-09-01T10:00:00.000Z",
-    image: "https://api.dicebear.com/7.x/notionists/svg?seed=Ahmed&backgroundColor=e2e8f0",
-    isDeleted: false,
-    discountAmount: 0 // From StudentProfile
-  },
-  {
-      id: "550e8400-e29b-41d4-a716-446655440031",
-    firstName: "علي",
-    lastName: "محمد",
-    email: "ali.s@example.com",
-    phone: "07712345678",
-    gender: "MALE",
-    className: "الصف العاشر", // From relation Class
-    birthDate: "2008-05-14",
-    createdAt: "2023-09-01T10:00:00.000Z",
-    image: "https://api.dicebear.com/7.x/notionists/svg?seed=Ahmed&backgroundColor=e2e8f0",
-    isDeleted: false,
-    discountAmount: 0 // From StudentProfile
-  }
-];
+// Mock data has been removed and replaced by real API connection
+// Mock data has been removed and replaced by real API connection
 
 export default function StudentsManagement({ slug }) {
+  const dispatch = useDispatch();
+  const { students, pagination, status } = useSelector((state) => state.students);
+  const { classes, status: classesStatus } = useSelector((state) => state.classes);
+
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [classFilter, setClassFilter] = useState('ALL');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 4;
+  const itemsPerPage = 5;
+
+  // Debounce search update
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+      setCurrentPage(1);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  useEffect(() => {
+    dispatch(fetchStudents({ page: currentPage, limit: itemsPerPage, search: debouncedSearch }));
+  }, [dispatch, currentPage, debouncedSearch]);
+
+  useEffect(() => {
+    if (classesStatus === 'idle') {
+      dispatch(fetchClasses());
+    }
+  }, [classesStatus, dispatch]);
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
-    setCurrentPage(1);
   };
 
   const handleFilterChange = (e) => {
@@ -100,24 +54,15 @@ export default function StudentsManagement({ slug }) {
     setCurrentPage(1);
   };
 
-  // Filter students
-  const filteredStudents = MOCK_STUDENTS.filter(student => 
-    (searchTerm === '' || 
-      `${student.firstName} ${student.lastName}`.includes(searchTerm) || 
-      student.email.includes(searchTerm)
-    ) &&
-    (classFilter === 'ALL' || student.className === classFilter)
-  );
-
-  const paginatedStudents = filteredStudents.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
+  // Filter mainly on backend, but if there's a local class filter:
+  const filteredStudents = students.filter(student => 
+    classFilter === 'ALL' || student.className === classFilter
   );
 
   // Computed Stats
-  const totalStudents = MOCK_STUDENTS.length;
-  const activeStudents = MOCK_STUDENTS.filter(s => !s.isDeleted).length;
-  const femaleCount = MOCK_STUDENTS.filter(s => s.gender === 'FEMALE').length;
+  const totalStudents = pagination.totalMembers || 0;
+  const activeStudents = filteredStudents.filter(s => !s.isDeleted).length;
+  const femaleCount = filteredStudents.filter(s => s.gender === 'FEMALE').length;
 
   return (
     <div className="space-y-8">
@@ -192,8 +137,9 @@ export default function StudentsManagement({ slug }) {
               className="appearance-none bg-slate-50 border border-slate-200 text-slate-700 rounded-2xl py-3 pr-10 pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500/20 font-medium cursor-pointer transition-all hover:bg-slate-100"
             >
               <option value="ALL">جميع الصفوف</option>
-              <option value="الصف العاشر">الصف العاشر</option>
-              <option value="الصف التاسع">الصف التاسع</option>
+              {classes.map(c => (
+                <option key={c.id} value={c.name}>{c.name}</option>
+              ))}
             </select>
           </div>
 
@@ -214,39 +160,41 @@ export default function StudentsManagement({ slug }) {
             <thead>
               <tr className="bg-slate-50/80 border-b border-slate-100 text-slate-500 text-sm font-bold">
                 <th className="p-6 whitespace-nowrap">الطالب</th>
+                <th className="p-6 whitespace-nowrap">رقم الهاتف</th>
                 <th className="p-6 whitespace-nowrap">البريد الإلكتروني</th>
                 <th className="p-6 whitespace-nowrap">الصف الدراسي</th>
                 <th className="p-6 whitespace-nowrap">الجنس</th>
-                <th className="p-6 whitespace-nowrap">المعلومات المالية</th>
                 <th className="p-6 whitespace-nowrap text-center">إجراءات</th>
               </tr>
             </thead>
             <tbody>
-              {paginatedStudents.map((student, idx) => (
+              {filteredStudents.map((student, idx) => (
                 <tr 
                   key={student.id} 
-                  className={`border-b border-slate-50 hover:bg-blue-50/30 transition-colors group ${idx === paginatedStudents.length - 1 ? 'border-0' : ''}`}
+                  className={`border-b border-slate-50 hover:bg-blue-50/30 transition-colors group ${idx === filteredStudents.length - 1 ? 'border-0' : ''}`}
                 >
                   <td className="p-6">
                     <div className="flex items-center gap-4">
-                      <div className="relative">
+                      {/* <div className="relative">
                         <img 
-                          src={student.image} 
+                          src={student.image || `https://api.dicebear.com/7.x/notionists/svg?seed=${student.firstName}&backgroundColor=e2e8f0`} 
                           alt={student.firstName} 
                           className="w-12 h-12 rounded-full object-cover border-2 border-slate-100 shadow-sm bg-white"
                         />
-                      </div>
+                      </div> */}
                       <div>
                         <div className="font-bold text-slate-800 text-lg group-hover:text-blue-700 transition-colors">
                           {student.firstName} {student.lastName}
-                        </div>
-                        <div className="text-sm font-medium text-slate-400 flex items-center gap-1">
-                          رقم الهاتف: <span dir="ltr" className="font-mono">{student.phone || 'غير محدد'}</span>
                         </div>
                       </div>
                     </div>
                   </td>
                   
+                  <td className="p-6">
+                    <div className="text-sm font-medium text-slate-400 flex items-center gap-1">
+                         <span dir="ltr" className="font-mono">{student.phone || 'غير محدد'}</span>
+                        </div>
+                  </td>
                   <td className="p-6">
                     <div className="inline-flex items-center gap-2 text-slate-600 font-medium text-sm" dir="ltr">
                       <Mail className="w-4 h-4 text-slate-400" />
@@ -265,18 +213,6 @@ export default function StudentsManagement({ slug }) {
                   </td>
                   
                   <td className="p-6">
-                    {student.discountAmount > 0 ? (
-                      <div className="text-emerald-600 font-bold text-sm bg-emerald-50 px-3 py-1.5 rounded-lg inline-block">
-                        خصم: ${student.discountAmount}
-                      </div>
-                    ) : (
-                      <div className="text-slate-400 font-medium text-sm">
-                        لا يوجد خصم مالي
-                      </div>
-                    )}
-                  </td>
-                  
-                  <td className="p-6">
                     <div className="flex items-center justify-center gap-2 transition-opacity">
                       <button className="p-2 bg-slate-50 text-slate-600 hover:bg-indigo-600 hover:text-white rounded-xl transition-colors">
                         <Edit className="w-4 h-4" />
@@ -291,7 +227,13 @@ export default function StudentsManagement({ slug }) {
             </tbody>
           </table>
           
-          {paginatedStudents.length === 0 && (
+          {status === 'loading' && (
+            <div className="p-12 text-center text-slate-500 font-bold">
+              جاري تحميل بيانات الطلاب...
+            </div>
+          )}
+
+          {status !== 'loading' && filteredStudents.length === 0 && (
             <div className="p-12 text-center flex flex-col items-center">
               <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-4">
                 <Users className="w-10 h-10 text-slate-300" />
@@ -304,9 +246,9 @@ export default function StudentsManagement({ slug }) {
         
         {/* Pagination */}
         <Pagination 
-          currentPage={currentPage}
-          totalPages={Math.ceil(filteredStudents.length / itemsPerPage) || 1}
-          totalItems={filteredStudents.length}
+          currentPage={pagination.currentPage || 1}
+          totalPages={pagination.totalPages || 1}
+          totalItems={pagination.totalMembers || 0}
           itemsPerPage={itemsPerPage}
           itemName="طالب"
           onPageChange={setCurrentPage}
