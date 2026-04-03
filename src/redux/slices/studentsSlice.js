@@ -34,6 +34,39 @@ export const createStudent = createAsyncThunk(
     }
 );
 
+// Update student (Multipart for image upload)
+export const updateStudent = createAsyncThunk(
+    'students/updateStudent',
+    async ({ id, formData }, { rejectWithValue }) => {
+        try {
+            const res = await axiosInstance.put(`/school-user/${id}`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+            return res.data;
+        } catch (e) {
+            const errorMessage = e.response?.data?.message || e.response?.data?.error || "حدث خطأ أثناء تحديث بيانات الطالب";
+            return rejectWithValue({ message: errorMessage });
+        }
+    }
+);
+
+// Delete student
+export const deleteStudent = createAsyncThunk(
+    'students/deleteStudent',
+    async (id, { rejectWithValue }) => {
+        try {
+            const res = await axiosInstance.delete(`/school-user/${id}`);
+            return { id, message: res.data.message };
+        } catch (e) {
+            const errorMessage = e.response?.data?.message || e.response?.data?.error || "حدث خطأ أثناء حذف الطالب";
+            return rejectWithValue({ message: errorMessage });
+        }
+    }
+);
+
+
 const initialState = {
     students: [],
     pagination: {
@@ -89,6 +122,29 @@ const studentsSlice = createSlice({
             .addCase(createStudent.rejected, (state, action) => {
                 state.createStatus = 'failed';
                 state.createError = action.payload.message;
+            })
+            // Update
+            .addCase(updateStudent.pending, (state) => {
+                state.createStatus = 'loading'; // reuse loading status for modals
+                state.createError = null;
+            })
+            .addCase(updateStudent.fulfilled, (state, action) => {
+                state.createStatus = 'succeeded';
+                if (action.payload.member) {
+                    const index = state.students.findIndex(s => s.id === action.payload.member.id);
+                    if (index !== -1) {
+                        state.students[index] = action.payload.member;
+                    }
+                }
+            })
+            .addCase(updateStudent.rejected, (state, action) => {
+                state.createStatus = 'failed';
+                state.createError = action.payload.message;
+            })
+            // Delete
+            .addCase(deleteStudent.fulfilled, (state, action) => {
+                state.students = state.students.filter(s => s.id !== action.payload.id);
+                state.pagination.totalMembers -= 1;
             });
     }
 });

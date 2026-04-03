@@ -6,10 +6,12 @@ import {
   Eye, GraduationCap, Mail, Phone, MapPin, Activity, CheckCircle2, XCircle
 } from 'lucide-react';
 import AddStudentModal from './AddStudentModal';
+import EditStudentModal from './EditStudentModal';
 import Pagination from '../../ui/Pagination';
 import SearchInput from '../../ui/SearchInput';
-import { fetchStudents } from '../../../redux/slices/studentsSlice';
+import { fetchStudents, deleteStudent } from '../../../redux/slices/studentsSlice';
 import { fetchClasses } from '../../../redux/slices/classesSlice';
+import Swal from 'sweetalert2';
 
 // Mock data has been removed and replaced by real API connection
 // Mock data has been removed and replaced by real API connection
@@ -18,11 +20,14 @@ export default function StudentsManagement({ slug }) {
   const dispatch = useDispatch();
   const { students, pagination, status } = useSelector((state) => state.students);
   const { classes, status: classesStatus } = useSelector((state) => state.classes);
-
+  const { user } = useSelector((state) => state.auth);
+  
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [classFilter, setClassFilter] = useState('ALL');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
@@ -54,10 +59,37 @@ export default function StudentsManagement({ slug }) {
     setCurrentPage(1);
   };
 
+  const handleEdit = (student) => {
+    setSelectedStudent(student);
+    setIsEditModalOpen(true);
+  };
+
+  const handleDelete = (id, name) => {
+    Swal.fire({
+      title: 'هل أنت متأكد؟',
+      text: `سيتم حذف الطالب ${name} نهائياً من النظام!`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'نعم، احذف',
+      cancelButtonText: 'إلغاء'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        dispatch(deleteStudent(id)).then((action) => {
+          if (action.meta.requestStatus === 'fulfilled') {
+            Swal.fire('تم الحذف!', 'تم حذف الطالب بنجاح.', 'success');
+          }
+        });
+      }
+    });
+  };
+
   // Filter mainly on backend, but if there's a local class filter:
   const filteredStudents = students.filter(student => 
     classFilter === 'ALL' || student.className === classFilter
   );
+
 
   // Computed Stats
   const totalStudents = pagination.totalMembers || 0;
@@ -175,13 +207,6 @@ export default function StudentsManagement({ slug }) {
                 >
                   <td className="p-6">
                     <div className="flex items-center gap-4">
-                      {/* <div className="relative">
-                        <img 
-                          src={student.image || `https://api.dicebear.com/7.x/notionists/svg?seed=${student.firstName}&backgroundColor=e2e8f0`} 
-                          alt={student.firstName} 
-                          className="w-12 h-12 rounded-full object-cover border-2 border-slate-100 shadow-sm bg-white"
-                        />
-                      </div> */}
                       <div>
                         <div className="font-bold text-slate-800 text-lg group-hover:text-blue-700 transition-colors">
                           {student.firstName} {student.lastName}
@@ -214,12 +239,22 @@ export default function StudentsManagement({ slug }) {
                   
                   <td className="p-6">
                     <div className="flex items-center justify-center gap-2 transition-opacity">
-                      <button className="p-2 bg-slate-50 text-slate-600 hover:bg-indigo-600 hover:text-white rounded-xl transition-colors">
-                        <Edit className="w-4 h-4" />
-                      </button>
-                      <button className="p-2 bg-red-50 text-red-600 hover:bg-red-600 hover:text-white rounded-xl transition-colors">
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      {(user?.role === 'SCHOOL_ADMIN' || user?.role === 'ASSISTANT') && (
+                        <button 
+                          onClick={() => handleEdit(student)}
+                          className="p-2 bg-slate-50 text-slate-600 hover:bg-indigo-600 hover:text-white rounded-xl transition-colors cursor-pointer"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                      )}
+                      {user?.role === 'SCHOOL_ADMIN' && (
+                        <button 
+                          onClick={() => handleDelete(student.id, `${student.firstName} ${student.lastName}`)}
+                          className="p-2 bg-red-50 text-red-600 hover:bg-red-600 hover:text-white rounded-xl transition-colors cursor-pointer"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -259,6 +294,19 @@ export default function StudentsManagement({ slug }) {
       {isAddModalOpen && (
         <AddStudentModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} />
       )}
+
+      {/* Edit Student Modal */}
+      {isEditModalOpen && (
+        <EditStudentModal 
+          isOpen={isEditModalOpen} 
+          onClose={() => {
+            setIsEditModalOpen(false);
+            setSelectedStudent(null);
+          }} 
+          student={selectedStudent} 
+        />
+      )}
     </div>
+
   );
 }
