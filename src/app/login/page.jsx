@@ -32,11 +32,18 @@ function LoginContent() {
         return;
       }
 
-      // 2. Check for School Admin with slug
+      // 2. Staff members → welcome page
+      const staffRoles = ['TEACHER', 'ACCOUNTANT', 'ASSISTANT', 'STUDENT'];
+      if (staffRoles.includes(userData?.role) && userData?.schoolSlug) {
+        router.replace(`/school/${userData.schoolSlug}/welcome`);
+        return;
+      }
+
+      // 3. Check for School Admin with slug
       if (userData?.schoolSlug) {
         router.replace(`/school/${userData.schoolSlug}`);
       } else {
-        // 3. New School Admin without school yet
+        // 4. New School Admin without school yet
         router.replace('/create-school');
       }
     }
@@ -83,12 +90,16 @@ function LoginContent() {
           // 1. Handle Super Admin redirection
           if (userData?.role === "SUPER_ADMIN") {
             router.push('/super-admin');
-          } 
-          // 2. Handle School Admin with slug
+          }
+          // 2. Staff members → welcome page
+          else if (['TEACHER', 'ACCOUNTANT', 'ASSISTANT', 'STUDENT'].includes(userData?.role) && userData?.schoolSlug) {
+            router.push(`/school/${userData.schoolSlug}/welcome`);
+          }
+          // 3. Handle School Admin with slug
           else if (userData?.schoolSlug) {
             router.push(`/school/${userData.schoolSlug}`);
           } 
-          // 3. Handle School Admin without school yet
+          // 4. Handle School Admin without school yet
           else {
             router.push('/create-school');
           }

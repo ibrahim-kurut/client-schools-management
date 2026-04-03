@@ -25,6 +25,7 @@ export default function AuthInput({
           <Icon className="absolute start-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
         )}
         <input
+          suppressHydrationWarning
           type={isPassword ? (showPassword ? 'text' : 'password') : type}
           className={`auth-input ${Icon ? 'ps-14' : 'ps-5'} ${isPassword ? 'pe-14' : 'pe-5'} ${
             error ? 'border-red-300 focus:border-red-500 focus:ring-red-100' : ''

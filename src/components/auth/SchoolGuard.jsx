@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter, useParams, usePathname } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import Swal from 'sweetalert2';
 
@@ -9,9 +9,18 @@ export default function SchoolGuard({ children }) {
   const { user, isLoggedIn, status } = useSelector((state) => state.auth);
   const router = useRouter();
   const params = useParams();
+  const pathname = usePathname();
   const [isAuthorized, setIsAuthorized] = useState(false);
 
   useEffect(() => {
+    const isLoginPage = pathname?.endsWith('/login');
+
+    // Login page is PUBLIC — always accessible, skip all auth checks
+    if (isLoginPage) {
+      setIsAuthorized(true);
+      return;
+    }
+
     // Wait for Redux to initialize if checking localStorage
     const storedUser = localStorage.getItem("user");
     if (!storedUser && !isLoggedIn && status !== 'loading') {
@@ -24,18 +33,32 @@ export default function SchoolGuard({ children }) {
     if (!userData) return;
 
     const currentSlug = params?.slug;
+    const isWelcomePage = pathname?.endsWith('/welcome');
 
-    // Super Admin has access
+    // Super Admin has access to everything
     if (userData?.role === 'SUPER_ADMIN') {
       setIsAuthorized(true);
       return;
     }
 
-    // Normal School users check
+    // Check slug match
     const decodedCurrentSlug = currentSlug ? decodeURIComponent(currentSlug) : null;
     const userSchoolSlug = userData?.schoolSlug ? decodeURIComponent(userData.schoolSlug) : null;
 
     if (userSchoolSlug && decodedCurrentSlug === userSchoolSlug) {
+      // Staff members (non SCHOOL_ADMIN) can only access the welcome page
+      const staffRoles = ['TEACHER', 'ACCOUNTANT', 'ASSISTANT', 'STUDENT'];
+      if (staffRoles.includes(userData.role)) {
+        if (isWelcomePage) {
+          setIsAuthorized(true);
+        } else {
+          // Redirect staff to welcome page
+          router.replace(`/school/${currentSlug}/welcome`);
+        }
+        return;
+      }
+
+      // School Admin has full access
       setIsAuthorized(true);
     } else {
       // Unauthorized! Attempting to access another school
@@ -58,7 +81,7 @@ export default function SchoolGuard({ children }) {
         }
       });
     }
-  }, [user, isLoggedIn, status, router, params]);
+  }, [user, isLoggedIn, status, router, params, pathname]);
 
   if (!isAuthorized) {
     return (
@@ -73,3 +96,4 @@ export default function SchoolGuard({ children }) {
 
   return <>{children}</>;
 }
+

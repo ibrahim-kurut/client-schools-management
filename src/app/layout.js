@@ -29,8 +29,9 @@ export default function RootLayout({ children }) {
       lang="ar"
       dir="rtl"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full flex flex-col" suppressHydrationWarning>
         <ReduxProvider>
           <ToastContainer theme="colored" rtl={true} closeOnClick pauseOnHover />
           {children}

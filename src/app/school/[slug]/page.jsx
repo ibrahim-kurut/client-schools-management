@@ -5,6 +5,7 @@ import QuickActions from "@/components/dashboard/QuickActions";
 import RecentActivity from "@/components/dashboard/RecentActivity";
 import SubscriptionStats from "@/components/dashboard/SubscriptionStats";
 import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
+import SchoolLinkCard from "@/components/dashboard/SchoolLinkCard";
 
 export default async function SchoolPage({ params }) {
   const resolvedParams = await params;
@@ -38,9 +39,7 @@ export default async function SchoolPage({ params }) {
               </div>
               <div className="space-y-8">
                 <SubscriptionStats />
-                <div className="bg-white rounded-[32px] p-8 shadow-sm border border-slate-100 h-64 flex items-center justify-center text-slate-300 font-bold border-dashed">
-                  إحصائيات إضافية قريباً
-                </div>
+                <SchoolLinkCard slug={slug} />
               </div>
             </div>
           </div>

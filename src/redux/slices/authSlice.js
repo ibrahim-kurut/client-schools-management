@@ -29,6 +29,18 @@ export const login = createAsyncThunk('user/login', async (loginData, { rejectWi
     }
 })
 
+// 3.5- Login with school slug (for staff members)
+export const loginWithSchoolSlug = createAsyncThunk('user/loginWithSchoolSlug',
+    async ({ slug, email, password }, { rejectWithValue }) => {
+        try {
+            const res = await axiosInstance.post(`/auth/${slug}/login`, { email, password });
+            return res.data;
+        } catch (e) {
+            const errorMessage = e.response?.data?.message || e.response?.data?.error || "Login failed";
+            return rejectWithValue({ message: errorMessage });
+        }
+    }
+);
 
 // 4- Logout process
 export const logout = createAsyncThunk('user/logout', async (_, { rejectWithValue }) => {
@@ -43,13 +55,9 @@ export const logout = createAsyncThunk('user/logout', async (_, { rejectWithValu
 
 
 // 1- Initial state
-const storedUser =
-    typeof window !== "undefined"
-        ? JSON.parse(localStorage.getItem("user"))
-        : null;
 const initialState = {
-    user: storedUser,
-    isLoggedIn: !!storedUser,
+    user: null,
+    isLoggedIn: false,
     status: 'idle',
     error: null,
     successMessage: null,
@@ -60,7 +68,12 @@ const initialState = {
 const authSlice = createSlice({
     name: "auth",
     initialState,
-    reducers: {},
+    reducers: {
+        setCredentials: (state, action) => {
+            state.user = action.payload.user;
+            state.isLoggedIn = !!action.payload.user;
+        }
+    },
     extraReducers: (builder) => {
         builder
             .addCase(register.pending, (state) => {
@@ -96,6 +109,24 @@ const authSlice = createSlice({
                 state.status = 'failed';
                 state.error = action.payload?.message || "Login failed";
             })
+            // Login with School Slug Process
+            .addCase(loginWithSchoolSlug.pending, (state) => {
+                state.status = 'loading';
+                state.error = null;
+            })
+            .addCase(loginWithSchoolSlug.fulfilled, (state, action) => {
+                state.status = 'succeeded';
+                state.user = action.payload;
+                state.isLoggedIn = true;
+                state.error = null;
+                if (typeof window !== "undefined") {
+                    localStorage.setItem("user", JSON.stringify(action.payload.userData));
+                }
+            })
+            .addCase(loginWithSchoolSlug.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload?.message || "Login failed";
+            })
             // Logout Process
             .addCase(logout.pending, (state) => {
                 state.status = 'loading';
@@ -117,4 +148,5 @@ const authSlice = createSlice({
     }
 });
 
+export const { setCredentials } = authSlice.actions;
 export default authSlice.reducer;

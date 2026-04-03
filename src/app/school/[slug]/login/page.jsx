@@ -1,0 +1,177 @@
+'use client';
+
+import { useState } from 'react';
+import Link from 'next/link';
+import { useRouter, useParams } from 'next/navigation';
+import { GraduationCap, Mail, Lock, ArrowLeft, Loader2, School } from 'lucide-react';
+import AuthInput from '@/components/AuthInput';
+import { validateLogin } from '@/lib/validation/authSchemas';
+import { useDispatch } from 'react-redux';
+import { loginWithSchoolSlug } from '@/redux/slices/authSlice';
+import { toast } from 'react-toastify';
+
+export default function SchoolLoginPage() {
+  const router = useRouter();
+  const params = useParams();
+  const slug = params?.slug || '';
+  const dispatch = useDispatch();
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+
+  const schoolDisplayName = decodeURIComponent(slug).replace(/-/g, ' ');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+
+    const validation = validateLogin({ email, password });
+    if (!validation.ok) {
+      setError(validation.error);
+      return;
+    }
+
+    setIsLoading(true);
+
+    dispatch(loginWithSchoolSlug({ slug, email: validation.data.email, password: validation.data.password }))
+      .unwrap()
+      .then((res) => {
+        toast.success(
+          res.message && res.message !== 'Login successful'
+            ? res.message
+            : 'تم تسجيل الدخول بنجاح'
+        );
+
+        setTimeout(() => {
+          setIsLoading(false);
+          const userData = res.userData;
+
+          // School Admin → Dashboard
+          if (userData?.role === 'SCHOOL_ADMIN') {
+            router.push(`/school/${slug}`);
+          }
+          // Staff members → Welcome page (temporary)
+          else {
+            router.push(`/school/${slug}/welcome`);
+          }
+        }, 1500);
+      })
+      .catch((err) => {
+        toast.error(err.message || 'فشل تسجيل الدخول');
+        setIsLoading(false);
+      });
+  };
+
+  return (
+    <div className="min-h-screen flex" dir="ltr">
+      {/* Left Side — School Branded Panel */}
+      <div dir="rtl" className="hidden lg:flex lg:w-1/2 relative bg-gradient-to-br from-emerald-600 via-teal-700 to-emerald-900 items-center justify-center overflow-hidden">
+        {/* Background blurs */}
+        <div className="absolute -top-32 -right-32 w-[500px] h-[500px] bg-white/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-teal-400/20 rounded-full blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-emerald-400/10 rounded-full blur-2xl" />
+
+        {/* Floating shapes */}
+        <div className="absolute top-20 left-20 w-16 h-16 border-2 border-white/20 rounded-2xl rotate-12 animate-float" />
+        <div className="absolute bottom-32 right-20 w-12 h-12 border-2 border-white/15 rounded-full animate-float-delayed" />
+        <div className="absolute top-1/3 right-16 w-8 h-8 bg-white/10 rounded-lg rotate-45 animate-float" />
+
+        <div className="relative z-10 text-center px-12 max-w-lg">
+          <div className="bg-white/15 backdrop-blur-sm p-5 rounded-3xl inline-flex mb-8">
+            <School className="h-14 w-14 text-white" />
+          </div>
+          <h2 className="text-4xl font-bold text-white mb-4 leading-snug capitalize">
+            {schoolDisplayName}
+          </h2>
+          <div className="w-16 h-1 bg-emerald-300/50 rounded-full mx-auto mb-6" />
+          <p className="text-emerald-100/80 text-lg leading-relaxed">
+            مرحباً بك في بوابة الدخول الخاصة بمدرستك.
+            <br />
+            سجّل دخولك للوصول إلى نظام الإدارة المدرسية.
+          </p>
+
+          {/* Powered by Badge */}
+          <div className="mt-16 flex items-center justify-center gap-2 text-emerald-200/60">
+            <GraduationCap className="w-5 h-5" />
+            <span className="text-sm font-bold">Powered by EduFlow</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Right Side — Login Form */}
+      <div dir="rtl" className="flex-1 flex items-center justify-center p-6 sm:p-12 bg-slate-50 text-right">
+        <div className="w-full max-w-md">
+          {/* Mobile School Header */}
+          <div className="lg:hidden flex flex-col items-center gap-3 mb-10">
+            <div className="bg-emerald-600 p-3 rounded-2xl text-white">
+              <School className="h-8 w-8" />
+            </div>
+            <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-emerald-700 to-teal-700 capitalize">
+              {schoolDisplayName}
+            </span>
+          </div>
+
+          {/* Header */}
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-slate-900 mb-2">تسجيل الدخول</h1>
+            <p className="text-slate-500">
+              أدخل بياناتك للوصول إلى نظام{' '}
+              <span className="font-bold text-emerald-600 capitalize">{schoolDisplayName}</span>
+            </p>
+          </div>
+
+          {/* Error */}
+          {error && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-2xl text-red-700 text-sm flex items-center gap-2 animate-shake">
+              <div className="w-2 h-2 bg-red-500 rounded-full flex-shrink-0" />
+              {error}
+            </div>
+          )}
+
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <AuthInput
+              id="school-login-email"
+              label="البريد الإلكتروني"
+              type="email"
+              icon={Mail}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="example@email.com"
+              dir="ltr"
+              className="text-right"
+              autoComplete="email"
+            />
+
+            <AuthInput
+              id="school-login-password"
+              label="كلمة المرور"
+              type="password"
+              icon={Lock}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              className="text-right"
+              autoComplete="current-password"
+            />
+
+            {/* Submit */}
+            <button type="submit" disabled={isLoading} className="auth-btn w-full !from-emerald-600 !to-teal-600 hover:!from-emerald-700 hover:!to-teal-700 hover:!shadow-emerald-900/20">
+              {isLoading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  جاري تسجيل الدخول...
+                </span>
+              ) : (
+                'تسجيل الدخول'
+              )}
+            </button>
+          </form>
+
+        </div>
+      </div>
+    </div>
+  );
+}
