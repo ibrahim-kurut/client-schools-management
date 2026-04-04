@@ -98,7 +98,7 @@ const authSlice = createSlice({
             })
             .addCase(login.fulfilled, (state, action) => {
                 state.status = 'succeeded';
-                state.user = action.payload;
+                state.user = action.payload.userData || action.payload;
                 state.isLoggedIn = true;
                 state.error = null;
                 if (typeof window !== "undefined") {
@@ -116,7 +116,7 @@ const authSlice = createSlice({
             })
             .addCase(loginWithSchoolSlug.fulfilled, (state, action) => {
                 state.status = 'succeeded';
-                state.user = action.payload;
+                state.user = action.payload.userData || action.payload;
                 state.isLoggedIn = true;
                 state.error = null;
                 if (typeof window !== "undefined") {
