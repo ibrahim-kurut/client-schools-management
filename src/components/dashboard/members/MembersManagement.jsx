@@ -1,95 +1,40 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { 
   Users, UserPlus, Search, Filter, MoreVertical, Edit, Trash2, 
   Eye, GraduationCap, Mail, Phone, MapPin, Activity, CheckCircle2, XCircle,
-  BookOpen, Calendar, Award
+  BookOpen, Calendar, Award, Loader2
 } from 'lucide-react';
+import { fetchMembers, deleteMember, resetMembersStatus, createMember, updateMember } from '../../../redux/slices/membersSlice';
+import { fetchClasses } from '../../../redux/slices/classesSlice';
 import MembersModal from './MembersModal';
 import Pagination from '../../ui/Pagination';
 import SearchInput from '../../ui/SearchInput';
-import { fetchClasses } from '../../../redux/slices/classesSlice';
 import Swal from 'sweetalert2';
 
-// Mock data for members (to simulate backend response structure)
-const MOCK_MEMBERS = [
-  {
-    id: '1',
-    firstName: 'زياد',
-    lastName: 'أحمد',
-    email: 'ziad.ahmed@eduflow.app',
-    phone: '07701234567',
-    subject: 'الرياضيات',
-    role: 'TEACHER',
-    status: 'ACTIVE',
-    joinDate: '2023-09-01',
-    gender: 'MALE'
-  },
-  {
-    id: '2',
-    firstName: 'سارة',
-    lastName: 'محمود',
-    email: 'sara.m@eduflow.app',
-    phone: '07809876543',
-    subject: 'اللغة الإنجليزية',
-    role: 'TEACHER',
-    status: 'ACTIVE',
-    joinDate: '2022-10-15',
-    gender: 'FEMALE'
-  },
-  {
-    id: '3',
-    firstName: 'عمر',
-    lastName: 'علي',
-    email: 'omar.ali@eduflow.app',
-    phone: '07504445566',
-    subject: '',
-    role: 'ASSISTANT',
-    status: 'INACTIVE',
-    joinDate: '2024-01-10',
-    gender: 'MALE'
-  },
-  {
-    id: '4',
-    firstName: 'ليلى',
-    lastName: 'خالد',
-    email: 'layla.k@eduflow.app',
-    phone: '07712223344',
-    subject: '',
-    role: 'ACCOUNTANT',
-    status: 'ACTIVE',
-    joinDate: '2021-08-20',
-    gender: 'FEMALE'
-  },
-  {
-    id: '5',
-    firstName: 'يوسف',
-    lastName: 'إبراهيم',
-    email: 'youssef.i@eduflow.app',
-    phone: '07908887766',
-    subject: 'الكيمياء',
-    role: 'TEACHER',
-    status: 'ACTIVE',
-    joinDate: '2023-11-05',
-    gender: 'MALE'
-  }
-];
-
 export default function MembersManagement({ slug }) {
+  const dispatch = useDispatch();
+  
+  // -- Redux State --
   const { user } = useSelector((state) => state.auth);
   const userData = user?.userData || user;
   
   const { classes, status: classesStatus } = useSelector((state) => state.classes);
-  const dispatch = useDispatch();
+  const { members, pagination, status, error, createStatus, createError } = useSelector((state) => state.members);
   
-  const [members, setMembers] = useState(MOCK_MEMBERS);
+  // -- Local State --
   const [searchTerm, setSearchTerm] = useState('');
-  const [subjectFilter, setSubjectFilter] = useState('ALL');
+  const [roleFilter, setRoleFilter] = useState(''); // Empty means all staff
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedTeacher, setSelectedTeacher] = useState(null);
+  const [selectedMember, setSelectedMember] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const itemsPerPage = 8;
+
+  // -- Initial Fetch --
+  useEffect(() => {
+    dispatch(fetchMembers({ page: currentPage, limit: itemsPerPage, search: searchTerm, role: roleFilter }));
+  }, [dispatch, currentPage, searchTerm, roleFilter]);
 
   useEffect(() => {
     if (classesStatus === 'idle') {
@@ -97,6 +42,7 @@ export default function MembersManagement({ slug }) {
     }
   }, [classesStatus, dispatch]);
 
+  // -- Helpers --
   const getRoleLabel = (r) => {
     switch (r) {
       case 'TEACHER': return 'معلم';
@@ -106,26 +52,8 @@ export default function MembersManagement({ slug }) {
     }
   };
 
-  // Filter Logic (Mocking backend filtering)
-  const filteredMembers = members.filter(m => {
-    const fullName = `${m.firstName} ${m.lastName}`.toLowerCase();
-    const search = searchTerm.toLowerCase();
-    const roleLabel = getRoleLabel(m.role).toLowerCase();
-    const subject = (m.subject || '').toLowerCase();
-    
-    const matchesSearch = fullName.includes(search) || 
-                          m.email.toLowerCase().includes(search) ||
-                          subject.includes(search) ||
-                          roleLabel.includes(search);
-
-    const matchesSubject = subjectFilter === 'ALL' || m.subject === subjectFilter;
-    return matchesSearch && matchesSubject;
-  });
-
-  const subjects = ['ALL', ...new Set(MOCK_MEMBERS.map(m => m.subject).filter(Boolean))];
-
   const handleEdit = (member) => {
-    setSelectedTeacher(member); // Kept state variable name for brevity or rename to selectedMember
+    setSelectedMember(member);
     setIsModalOpen(true);
   };
 
@@ -143,87 +71,93 @@ export default function MembersManagement({ slug }) {
       direction: 'rtl'
     }).then((result) => {
       if (result.isConfirmed) {
-        setMembers(prev => prev.filter(m => m.id !== id));
-        Swal.fire('تم الحذف!', 'تم حذف العضو بنجاح.', 'success');
+        dispatch(deleteMember(id)).then((res) => {
+          if (!res.error) {
+            Swal.fire('تم الحذف!', 'تم حذف العضو من قاعدة البيانات بنجاح.', 'success');
+          } else {
+            Swal.fire('خطأ!', 'فشل حذف العضو، يرجى المحاولة لاحقاً.', 'error');
+          }
+        });
       }
     });
   };
 
-  const handleSave = (memberData) => {
-    if (selectedTeacher) {
-      setMembers(prev => prev.map(m => m.id === selectedTeacher.id ? { ...m, ...memberData } : m));
-    } else {
-      const newMember = {
-        ...memberData,
-        id: Math.random().toString(36).substr(2, 9),
-        status: 'ACTIVE',
-        joinDate: new Date().toISOString().split('T')[0]
-      };
-      setMembers(prev => [newMember, ...prev]);
+  const handleSave = async (memberData) => {
+    // Collect data into FormData for Multipart support
+    const formData = new FormData();
+    Object.keys(memberData).forEach(key => {
+      if (memberData[key] !== null && memberData[key] !== undefined) {
+        formData.append(key, memberData[key]);
+      }
+    });
+
+    try {
+      if (selectedMember) {
+        await dispatch(updateMember({ id: selectedMember.id, formData })).unwrap();
+        Swal.fire('تم التحديث!', 'تم تحديث بيانات العضو بنجاح.', 'success');
+      } else {
+        await dispatch(createMember(formData)).unwrap();
+        Swal.fire('تمت الإضافة!', 'تم إضافة العضو الجديد بنجاح.', 'success');
+      }
+      setIsModalOpen(false);
+    } catch (err) {
+      // Error is handled in the form normally, but we can log here
+      console.error("Save Error:", err);
     }
-    setIsModalOpen(false);
   };
 
-  // Computed Stats
-  const totalMembersCount = members.length;
-  const activeMembersCount = members.filter(m => m.status === 'ACTIVE').length;
-  const femaleCount = members.filter(m => m.gender === 'FEMALE').length;
+  // -- Render Helpers --
+  const isLoading = status === 'loading';
 
   return (
     <div className="space-y-8">
       
-      {/* ─── Header & Stats ─── */}
+      {/* Stats Section */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="md:col-span-1 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-[2rem] p-8 text-white shadow-lg shadow-blue-600/20 relative overflow-hidden flex flex-col justify-center min-h-[160px]">
+        <div className="md:col-span-1 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-[2.5rem] p-8 text-white shadow-lg shadow-blue-600/20 relative overflow-hidden flex flex-col justify-center min-h-[160px]">
           <div className="absolute -right-6 -top-6 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
-          <div className="absolute -left-6 -bottom-6 w-24 h-24 bg-white/10 rounded-full blur-xl"></div>
-          
           <div className="relative z-10">
             <h1 className="text-2xl font-black mb-2 flex items-center gap-3">
               <Award className="w-8 h-8" />
               أعضاء المدرسة
             </h1>
-            <p className="text-blue-100 font-medium">إدارة شؤون الموظفين</p>
+            <p className="text-blue-100 font-medium">إدارة شؤون الطاقم الوظيفي</p>
           </div>
         </div>
 
-        <div className="bg-white rounded-[2rem] p-6 border border-slate-100 shadow-sm flex items-center gap-5 relative overflow-hidden group">
-          <div className="w-16 h-16 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0 group-hover:scale-110 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300">
+        <div className="bg-white rounded-[2.5rem] p-6 border border-slate-100 shadow-sm flex items-center gap-5 group transition-all hover:shadow-md">
+          <div className="w-16 h-16 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-all">
             <Users className="w-8 h-8" />
           </div>
           <div>
-            <p className="text-slate-500 font-bold mb-1">إجمالي الأعضاء</p>
-            <h3 className="text-3xl font-black text-slate-800">{totalMembersCount}</h3>
+            <p className="text-slate-500 font-bold mb-1">إجمالي الطاقم</p>
+            <h3 className="text-3xl font-black text-slate-800">{pagination.totalMembers || 0}</h3>
           </div>
-          <div className="absolute left-0 bottom-0 w-full h-1 bg-gradient-to-r from-blue-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
         </div>
 
-        <div className="bg-white rounded-[2rem] p-6 border border-slate-100 shadow-sm flex items-center gap-5 relative overflow-hidden group">
-          <div className="w-16 h-16 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0 group-hover:scale-110 group-hover:bg-emerald-600 group-hover:text-white transition-all duration-300">
+        <div className="bg-white rounded-[2.5rem] p-6 border border-slate-100 shadow-sm flex items-center gap-5 group">
+          <div className="w-16 h-16 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-all">
             <CheckCircle2 className="w-8 h-8" />
           </div>
           <div>
-            <p className="text-slate-500 font-bold mb-1">الأعضاء النشطين</p>
-            <h3 className="text-3xl font-black text-slate-800">{activeMembersCount}</h3>
+            <p className="text-slate-500 font-bold mb-1">الحسابات النشطة</p>
+            <h3 className="text-3xl font-black text-slate-800">{pagination.totalMembers || 0}</h3>
           </div>
-          <div className="absolute left-0 bottom-0 w-full h-1 bg-gradient-to-r from-emerald-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
         </div>
 
-        <div className="bg-white rounded-[2rem] p-6 border border-slate-100 shadow-sm flex items-center gap-5 relative overflow-hidden group">
-          <div className="w-16 h-16 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center flex-shrink-0 group-hover:scale-110 group-hover:bg-purple-600 group-hover:text-white transition-all duration-300">
-            <Users className="w-8 h-8" />
+        <div className="bg-white rounded-[2.5rem] p-6 border border-slate-100 shadow-sm flex items-center gap-5 group">
+          <div className="w-16 h-16 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center group-hover:bg-purple-600 group-hover:text-white transition-all">
+            <Activity className="w-8 h-8" />
           </div>
           <div>
-            <p className="text-slate-500 font-bold mb-1">كادر (إناث)</p>
-            <h3 className="text-3xl font-black text-slate-800">{femaleCount}</h3>
+            <p className="text-slate-500 font-bold mb-1">الكفاءات المسجلة</p>
+            <h3 className="text-3xl font-black text-slate-800">{classes.length} مادة</h3>
           </div>
-          <div className="absolute left-0 bottom-0 w-full h-1 bg-gradient-to-r from-purple-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
         </div>
       </div>
 
-      {/* ─── Controls & Filters ─── */}
-      <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 flex flex-col md:flex-row gap-4 items-center justify-between">
-        
+      {/* Filters */}
+      <div className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-100 flex flex-col md:flex-row gap-4 items-center justify-between transition-all focus-within:shadow-md">
         <SearchInput 
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
@@ -235,90 +169,96 @@ export default function MembersManagement({ slug }) {
           <div className="relative">
             <Filter className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <select 
-              value={subjectFilter}
-              onChange={(e) => setSubjectFilter(e.target.value)}
-              className="appearance-none bg-slate-50 border border-slate-200 text-slate-700 rounded-2xl py-3 pr-10 pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500/20 font-medium cursor-pointer transition-all hover:bg-slate-100"
+              value={roleFilter}
+              onChange={(e) => setRoleFilter(e.target.value)}
+              className="appearance-none bg-slate-50 border border-slate-200 text-slate-700 rounded-2xl py-3 pr-10 pl-10 focus:outline-none focus:border-blue-500 font-bold cursor-pointer transition-all hover:bg-slate-100 min-w-[160px]"
             >
-              <option value="ALL">جميع التخصصات</option>
-              {subjects.filter(s => s !== 'ALL').map(s => (
-                <option key={s} value={s}>{s}</option>
-              ))}
+              <option value="">جميع الكادر</option>
+              <option value="TEACHER">المعلمين</option>
+              <option value="ASSISTANT">المعاونين</option>
+              <option value="ACCOUNTANT">المحاسبين</option>
             </select>
           </div>
 
-          <button 
-            onClick={() => {
-              setSelectedTeacher(null);
-              setIsModalOpen(true);
-            }}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-2xl font-bold transition-all shadow-lg shadow-blue-600/30 hover:shadow-blue-600/50 hover:-translate-y-0.5"
-          >
-            <UserPlus className="w-5 h-5" />
-            إضافة عضو
-          </button>
+          {(userData?.role === 'SCHOOL_ADMIN' || userData?.role === 'ASSISTANT') && (
+            <button 
+              onClick={() => {
+                setSelectedMember(null);
+                setIsModalOpen(true);
+              }}
+              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-8 py-3.5 rounded-2xl font-black transition-all shadow-lg shadow-blue-600/20 hover:scale-[1.02]"
+            >
+              <UserPlus className="w-5 h-5" />
+              عضو جديد
+            </button>
+          )}
         </div>
       </div>
 
-      {/* ─── Data Table ─── */}
-      <div className="bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden">
-        <div className="overflow-x-auto custom-scrollbar">
+      {/* Members Table */}
+      <div className="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden relative">
+        {isLoading && (
+          <div className="absolute inset-0 bg-white/60 backdrop-blur-[1px] z-20 flex items-center justify-center">
+            <Loader2 className="w-10 h-10 text-blue-600 animate-spin" />
+          </div>
+        )}
+
+        <div className="overflow-x-auto no-scrollbar">
           <table className="w-full text-right border-collapse">
             <thead>
-              <tr className="bg-slate-50/80 border-b border-slate-100 text-slate-500 text-sm font-bold">
-                <th className="p-6 whitespace-nowrap">العضو</th>
-                <th className="p-6 whitespace-nowrap">رقم الهاتف</th>
-                <th className="p-6 whitespace-nowrap">البريد الإلكتروني</th>
-                <th className="p-6 whitespace-nowrap">التخصص/الوظيفة</th>
-                <th className="p-6 whitespace-nowrap">الجنس</th>
-                <th className="p-6 whitespace-nowrap text-center">إجراءات</th>
+              <tr className="bg-slate-50/80 border-b border-slate-100 text-slate-500 text-[10px] font-black uppercase tracking-widest">
+                <th className="p-8 text-[1rem]">العضو</th>
+                <th className="p-8 text-[1rem]">رقم الهاتف</th>
+                <th className="p-8 text-[1rem]">البريد الإلكتروني</th>
+                <th className="p-8 text-[1rem]">التخصص/الوظيفة</th>
+                <th className="p-8 text-[1rem]">الحالة</th>
+                <th className="p-8 text-[1rem] text-center">إجراءات</th>
               </tr>
             </thead>
-            <tbody>
-              {filteredMembers.map((member, idx) => (
-                <tr 
-                  key={member.id} 
-                  className={`border-b border-slate-50 hover:bg-blue-50/30 transition-colors group ${idx === filteredMembers.length - 1 ? 'border-0' : ''}`}
-                >
-                  <td className="p-6">
+            <tbody className="divide-y divide-slate-50">
+              {members.map((member) => (
+                <tr key={member.id} className="hover:bg-blue-50/30 transition-all group">
+                  <td className="p-8">
                     <div className="flex items-center gap-4">
+                      {/* <div className="w-11 h-11 rounded-2xl bg-blue-100 flex items-center justify-center font-black text-blue-600 text-lg overflow-hidden">
+                         {member.image ? <img src={member.image} className="w-full h-full object-cover" /> : member.firstName[0]}
+                      </div> */}
                       <div>
-                        <div className="font-bold text-slate-800 text-lg group-hover:text-blue-700 transition-colors">
+                        <div className="font-black text-slate-800 text-lg group-hover:text-blue-700 transition-colors">
                           {member.firstName} {member.lastName}
                         </div>
+                        {/* <div className="text-[10px] font-bold text-slate-400 capitalize">{member.gender === 'MALE' ? 'ذكر' : 'أنثى'}</div> */}
                       </div>
                     </div>
                   </td>
                   
-                  <td className="p-6">
-                    <div className="text-sm font-medium text-slate-400 flex items-center gap-1">
-                          <span dir="ltr" className="font-mono">{member.phone || 'غير محدد'}</span>
-                        </div>
+                  <td className="p-8">
+                    <span dir="ltr" className="font-mono font-bold text-slate-600">{member.phone || '---'}</span>
                   </td>
-                  <td className="p-6">
-                    <div className="inline-flex items-center gap-2 text-slate-600 font-medium text-sm" dir="ltr">
-                      <Mail className="w-4 h-4 text-slate-400" />
-                      {member.email}
-                    </div>
+
+                  <td className="p-8">
+                    <div className="text-slate-500 font-bold" dir="ltr">{member.email}</div>
                   </td>
                   
-                  <td className="p-6">
-                    <div className="font-bold text-slate-700">
+                  <td className="p-8">
+                    <div className="font-black text-slate-700 flex items-center gap-2">
+                      <span className={`w-2 h-2 rounded-full ${member.role === 'TEACHER' ? 'bg-blue-500' : 'bg-slate-400'}`}></span>
                       {member.role === 'TEACHER' ? member.subject : getRoleLabel(member.role)}
                     </div>
                   </td>
                   
-                  <td className="p-6">
-                    <span className={`inline-flex px-3 py-1 rounded-full text-xs font-bold ${member.gender === 'MALE' ? 'bg-blue-50 text-blue-600' : 'bg-pink-50 text-pink-600'}`}>
-                      {member.gender === 'MALE' ? 'ذكر' : 'أنثى'}
+                  <td className="p-8">
+                    <span className="inline-flex px-4 py-1.5 rounded-xl text-[10px] font-black bg-emerald-50 text-emerald-600 border border-emerald-100">
+                      نشط حالياً
                     </span>
                   </td>
                   
-                  <td className="p-6">
-                    <div className="flex items-center justify-center gap-2 transition-opacity">
+                  <td className="p-8">
+                    <div className="flex items-center justify-center gap-3">
                       {(userData?.role === 'SCHOOL_ADMIN' || userData?.role === 'ASSISTANT') && (
                         <button 
                           onClick={() => handleEdit(member)}
-                          className="p-2 bg-slate-50 text-slate-600 hover:bg-indigo-600 hover:text-white rounded-xl transition-colors cursor-pointer"
+                          className="p-3 bg-slate-50 text-slate-400 hover:bg-blue-600 hover:text-white rounded-2xl transition-all cursor-pointer shadow-sm"
                         >
                           <Edit className="w-4 h-4" />
                         </button>
@@ -326,7 +266,7 @@ export default function MembersManagement({ slug }) {
                       {userData?.role === 'SCHOOL_ADMIN' && (
                         <button 
                           onClick={() => handleDelete(member.id, `${member.firstName} ${member.lastName}`)}
-                          className="p-2 bg-red-50 text-red-600 hover:bg-red-600 hover:text-white rounded-xl transition-colors cursor-pointer"
+                          className="p-3 bg-red-50 text-red-500 hover:bg-red-600 hover:text-white rounded-2xl transition-all cursor-pointer shadow-sm"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -338,25 +278,25 @@ export default function MembersManagement({ slug }) {
             </tbody>
           </table>
 
-          {filteredMembers.length === 0 && (
-            <div className="p-12 text-center flex flex-col items-center">
-              <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-4">
-                <Users className="w-10 h-10 text-slate-300" />
+          {members.length === 0 && !isLoading && (
+            <div className="p-20 text-center flex flex-col items-center animate-in fade-in slide-in-from-top-4">
+              <div className="w-24 h-24 bg-slate-50 rounded-[2.5rem] flex items-center justify-center mb-6">
+                <Users className="w-12 h-12 text-slate-300" />
               </div>
-              <h3 className="text-xl font-bold text-slate-700 mb-2">لا يوجد أعضاء</h3>
-              <p className="text-slate-400">لم يتم إضافة أي أعضاء بعد أو أنه لا توجد نتائج مطابقة لبحثك.</p>
+              <h3 className="text-2xl font-black text-slate-700 mb-2">لا يوجد أعضاء في هذا القسم</h3>
+              <p className="text-slate-400 font-medium">ابدأ بإضافة أول عضو في طاقم مدرستك الآن</p>
             </div>
           )}
         </div>
         
-        {/* Pagination */}
+        {/* Pagination Integration */}
         <Pagination 
-          currentPage={currentPage}
-          totalPages={1}
-          totalItems={filteredMembers.length}
+          currentPage={pagination.currentPage || 1}
+          totalPages={pagination.totalPages || 1}
+          totalItems={pagination.totalMembers || 0}
           itemsPerPage={itemsPerPage}
           itemName="عضو"
-          onPageChange={setCurrentPage}
+          onPageChange={(page) => setCurrentPage(page)}
         />
       </div>
 
@@ -365,8 +305,10 @@ export default function MembersManagement({ slug }) {
           isOpen={isModalOpen} 
           onClose={() => setIsModalOpen(false)} 
           onSave={handleSave}
-          initialData={selectedTeacher}
+          initialData={selectedMember}
           classes={classes}
+          createStatus={createStatus}
+          createError={createError}
         />
       )}
     </div>

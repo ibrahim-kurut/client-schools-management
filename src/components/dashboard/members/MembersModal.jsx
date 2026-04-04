@@ -3,7 +3,7 @@ import React from 'react';
 import { X, Sparkles } from 'lucide-react';
 import AddMemberForm from '../students/AddMemberForm';
 
-export default function MembersModal({ isOpen, onClose, onSave, initialData, classes, defaultRole = 'TEACHER' }) {
+export default function MembersModal({ isOpen, onClose, onSave, initialData, classes, defaultRole = 'TEACHER', createStatus, createError }) {
   
   const handleSubmit = (formData) => {
     // We pass the data back to the parent (TeachersManagement) to update local state
@@ -55,11 +55,11 @@ export default function MembersModal({ isOpen, onClose, onSave, initialData, cla
         {/* Reusable Form Component */}
         <AddMemberForm 
           role={initialData?.role || defaultRole}
-          onSubmit={handleSubmit}
+          onSubmit={onSave} // Passed directly to parent handleSave
           onCancel={onClose}
           initialData={initialData}
-          loading={false} // No backend loading for now
-          error={null}
+          loading={createStatus === 'loading'}
+          error={createError}
           classes={classes}
         />
       </div>
