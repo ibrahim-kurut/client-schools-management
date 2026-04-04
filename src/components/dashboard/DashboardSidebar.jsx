@@ -117,7 +117,7 @@ export default function DashboardSidebar({ slug }) {
         <SidebarItem icon={Layers} label="المراحل والصفوف" href={`/school/${slug}/classes`} isActive={pathname === `/school/${slug}/classes`} />
         <SidebarItem icon={BookOpen} label="إدارة المواد الدراسية" href={`/school/${slug}/subjects`} isActive={pathname === `/school/${slug}/subjects`} />
         <SidebarItem icon={GraduationCap} label="إدارة الأعضاء" href={`/school/${slug}/members`} isActive={pathname === `/school/${slug}/members`} />
-        <SidebarItem icon={Wallet} label="الشؤون المالية" href={`/school/${slug}/finance`} isActive={pathname === `/school/${slug}/finance`} />
+        <SidebarItem icon={Wallet} label="الشؤون المالية" href={`/school/${slug}/financial`} isActive={pathname.startsWith(`/school/${slug}/financial`)} />
         <SidebarItem icon={TrendingUp} label="التقارير والإحصائيات" href={`/school/${slug}/reports`} isActive={pathname === `/school/${slug}/reports`} />
         <SidebarItem icon={Settings} label="الإعدادات العامة" href={`/school/${slug}/settings`} isActive={pathname === `/school/${slug}/settings`} />
       </nav>
