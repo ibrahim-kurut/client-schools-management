@@ -72,7 +72,6 @@ export default function AddMemberForm({
     
     // Final Validation Step 2
     if (!phoneRef.current?.value.trim()) return setValidationError('رقم الهاتف مطلوب');
-    if (role === 'TEACHER' && !subjectRef.current?.value.trim()) return setValidationError('يرجى تحديد التخصص الدراسي');
 
     const finalData = {
       firstName: firstNameRef.current.value,
@@ -191,25 +190,27 @@ export default function AddMemberForm({
 
         {/* --- STEP 2 contents (Hidden when not active) --- */}
         <div className={`space-y-8 animate-in fade-in slide-in-from-left-6 duration-500 ${step === 2 ? 'block' : 'hidden'}`}>
-            {/* Role Selection */}
-            <div className="p-6 bg-blue-50/40 rounded-3xl border border-blue-100/50">
-               <h3 className=" font-black text-blue-800 flex items-center gap-2 mb-4">
-                  <ShieldCheck className="w-4 h-4" />
-                  تحديد الدور الوظيفي
-               </h3>
-               <div className="grid grid-cols-3 gap-2">
-                  {['TEACHER', 'ASSISTANT', 'ACCOUNTANT'].map((r) => (
-                    <button 
-                      key={r}
-                      type="button"
-                      onClick={() => setRole(r)}
-                      className={`py-3 rounded-2xl font-black  transition-all duration-300 ${role === r ? 'bg-blue-600 text-white shadow-xl shadow-blue-600/20' : 'bg-white border border-slate-200 text-slate-400 hover:border-blue-300'}`}
-                    >
-                      {getRoleLabel(r)}
-                    </button>
-                  ))}
-               </div>
-            </div>
+            {/* Role Selection - Hidden for STUDENT role */}
+            {role !== 'STUDENT' && (
+              <div className="p-6 bg-blue-50/40 rounded-3xl border border-blue-100/50">
+                <h3 className=" font-black text-blue-800 flex items-center gap-2 mb-4">
+                    <ShieldCheck className="w-4 h-4" />
+                    تحديد الدور الوظيفي
+                </h3>
+                <div className="grid grid-cols-3 gap-2">
+                    {['TEACHER', 'ASSISTANT', 'ACCOUNTANT'].map((r) => (
+                      <button 
+                        key={r}
+                        type="button"
+                        onClick={() => setRole(r)}
+                        className={`py-3 rounded-2xl font-black  transition-all duration-300 ${role === r ? 'bg-blue-600 text-white shadow-xl shadow-blue-600/20' : 'bg-white border border-slate-200 text-slate-400 hover:border-blue-300'}`}
+                      >
+                        {getRoleLabel(r)}
+                      </button>
+                    ))}
+                </div>
+              </div>
+            )}
 
             <div className="space-y-5">
                <div className="space-y-1.5">
@@ -220,27 +221,31 @@ export default function AddMemberForm({
                   </div>
                </div>
 
-               {/* Teacher-Specific Fields (Conditionally Rendered but Refs checked) */}
+               {/* Subject - Only for Teachers */}
                {role === 'TEACHER' && (
-                 <div className="space-y-5 animate-in slide-in-from-top-4 duration-300">
-                    <div className="space-y-1.5">
-                      <label className=" font-black text-slate-500 mr-2">التخصص الدراسي الرئيسي</label>
-                      <div className="relative">
-                        <BookOpen className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                        <input ref={subjectRef} defaultValue={initialData?.subject} type="text" placeholder="مثال: الرياضيات المتقدمة" className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3.5 pr-11 pl-4 focus:border-blue-500 font-bold outline-none" />
-                      </div>
+                  <div className="space-y-1.5 animate-in slide-in-from-top-4 duration-300">
+                    <label className=" font-black text-slate-500 mr-2">التخصص الدراسي الرئيسي</label>
+                    <div className="relative">
+                      <BookOpen className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                      <input ref={subjectRef} defaultValue={initialData?.subject} type="text" placeholder="مثال: الرياضيات المتقدمة" className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3.5 pr-11 pl-4 focus:border-blue-500 font-bold outline-none" />
                     </div>
-                    <div className="space-y-1.5">
-                      <label className=" font-black text-slate-500 mr-2">الصف الدراسي المرتبط (اختياري)</label>
-                      <div className="relative">
-                        <Layers className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                        <select ref={classNameRef} defaultValue={initialData?.className || ''} className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3.5 pr-11 pl-4 focus:border-blue-500 font-bold appearance-none cursor-pointer outline-none">
-                           <option value="">غير مرتبط بصف محدد</option>
-                           {classes.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
-                        </select>
-                      </div>
+                  </div>
+               )}
+
+               {/* Class Selection - For both Teachers and Students */}
+               {(role === 'TEACHER' || role === 'STUDENT') && (
+                  <div className="space-y-1.5 animate-in slide-in-from-top-4 duration-300">
+                    <label className=" font-black text-slate-500 mr-2">
+                       {role === 'STUDENT' ? 'الصف الدراسي المسجل (إجباري)' : 'الصف الدراسي المرتبط (اختياري)'}
+                    </label>
+                    <div className="relative">
+                      <Layers className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                      <select ref={classNameRef} defaultValue={initialData?.className || ''} className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3.5 pr-11 pl-4 focus:border-blue-500 font-bold appearance-none cursor-pointer outline-none">
+                         <option value="">{role === 'STUDENT' ? 'اختر الصف...' : 'غير مرتبط بصف محدد'}</option>
+                         {classes.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+                      </select>
                     </div>
-                 </div>
+                  </div>
                )}
             </div>
         </div>

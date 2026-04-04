@@ -38,7 +38,7 @@ export default function AddStudentModal({ isOpen, onClose }) {
     });
 
     // Enforce role
-    data.append('role', 'STUDENT');
+    data.set('role', 'STUDENT');
 
     dispatch(createStudent(data));
   };

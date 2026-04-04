@@ -5,6 +5,7 @@ import {
   Users, 
   GraduationCap, 
   BookOpen, 
+  Layers,
   Wallet, 
   TrendingUp, 
   Settings, 
@@ -113,7 +114,8 @@ export default function DashboardSidebar({ slug }) {
       <nav className="flex-1 space-y-2">
         <SidebarItem icon={LayoutDashboard} label="لوحة التحكم" href={`/school/${slug}`} isActive={pathname === `/school/${slug}`} />
         <SidebarItem icon={Users} label="إدارة الطلاب" href={`/school/${slug}/students`} isActive={pathname === `/school/${slug}/students`} />
-        <SidebarItem icon={BookOpen} label="المراحل والصفوف" href={`/school/${slug}/classes`} isActive={pathname === `/school/${slug}/classes`} />
+        <SidebarItem icon={Layers} label="المراحل والصفوف" href={`/school/${slug}/classes`} isActive={pathname === `/school/${slug}/classes`} />
+        <SidebarItem icon={BookOpen} label="إدارة المواد الدراسية" href={`/school/${slug}/subjects`} isActive={pathname === `/school/${slug}/subjects`} />
         <SidebarItem icon={GraduationCap} label="إدارة الأعضاء" href={`/school/${slug}/members`} isActive={pathname === `/school/${slug}/members`} />
         <SidebarItem icon={Wallet} label="الشؤون المالية" href={`/school/${slug}/finance`} isActive={pathname === `/school/${slug}/finance`} />
         <SidebarItem icon={TrendingUp} label="التقارير والإحصائيات" href={`/school/${slug}/reports`} isActive={pathname === `/school/${slug}/reports`} />

@@ -217,7 +217,7 @@ export default function MembersManagement({ slug }) {
             </thead>
             <tbody className="divide-y divide-slate-50">
               {members.map((member) => (
-                <tr key={member.id} className="hover:bg-blue-50/30 transition-all group">
+                <tr key={member.id} className="hover:bg-slate-100 transition-all group">
                   <td className="p-8">
                     <div className="flex items-center gap-4">
                       {/* <div className="w-11 h-11 rounded-2xl bg-blue-100 flex items-center justify-center font-black text-blue-600 text-lg overflow-hidden">
@@ -243,7 +243,10 @@ export default function MembersManagement({ slug }) {
                   <td className="p-8">
                     <div className="font-black text-slate-700 flex items-center gap-2">
                       <span className={`w-2 h-2 rounded-full ${member.role === 'TEACHER' ? 'bg-blue-500' : 'bg-slate-400'}`}></span>
-                      {member.role === 'TEACHER' ? member.subject : getRoleLabel(member.role)}
+                      {member.role === 'TEACHER' 
+                        ? (member.subjects?.length > 0 ? member.subjects.map(s => s.name).join('، ') : 'لم يتم التعيين') 
+                        : getRoleLabel(member.role)
+                      }
                     </div>
                   </td>
                   
