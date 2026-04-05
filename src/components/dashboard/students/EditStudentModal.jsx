@@ -1,10 +1,10 @@
 "use client";
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { X } from 'lucide-react';
+import { X, GraduationCap } from 'lucide-react';
 import { updateStudent, resetCreateStatus } from '../../../redux/slices/studentsSlice';
 import { fetchClasses } from '../../../redux/slices/classesSlice';
-import AddMemberForm from './AddMemberForm';
+import AddStudentForm from './AddStudentForm';
 
 export default function EditStudentModal({ isOpen, onClose, student }) {
   const dispatch = useDispatch();
@@ -50,37 +50,40 @@ export default function EditStudentModal({ isOpen, onClose, student }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
       <div 
-        className="absolute inset-0 bg-slate-900/60 transition-opacity duration-300"
+        className="absolute inset-0 bg-slate-900/60 backdrop-blur-[2px] transition-opacity duration-300"
         onClick={onClose}
       />
       
       {/* Modal Content */}
       <div 
-        className="relative bg-white rounded-[2rem] w-full max-w-2xl overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200" 
+        className="relative bg-white rounded-[2.5rem] w-full max-w-2xl overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200" 
         dir="rtl"
       >
         {/* Header */}
-        <div className="bg-gradient-to-r from-indigo-600 to-blue-700 p-6 text-white flex items-center justify-between relative overflow-hidden">
-          <div className="relative z-10">
-            <h2 className="text-2xl font-black mb-1">تعديل بيانات الطالب</h2>
-            <p className="text-blue-100 text-sm">تعديل معلومات {student.firstName} {student.lastName}</p>
+        <div className="bg-gradient-to-r from-indigo-600 to-blue-700 p-7 text-white flex items-center justify-between relative overflow-hidden">
+          <div className="flex items-center gap-4 relative z-10">
+            <div className="w-14 h-14 rounded-2xl bg-white/15 flex items-center justify-center ring-1 ring-white/25">
+              <GraduationCap className="w-7 h-7" />
+            </div>
+            <div>
+              <h2 className="text-xl font-black mb-1">تعديل بيانات الطالب</h2>
+              <p className="text-blue-100/80 text-[10px] font-bold">تعديل بيانات {student.firstName} {student.lastName}</p>
+            </div>
           </div>
           <button 
             onClick={onClose}
-            className="w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-colors relative z-10"
+            className="w-11 h-11 bg-white/10 hover:bg-white/20 rounded-2xl flex items-center justify-center transition-all relative z-10"
           >
             <X className="w-5 h-5 text-white" />
           </button>
           
-          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl"></div>
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 blur-2xl"></div>
         </div>
 
-        {/* Reusable Form Component */}
-        <AddMemberForm 
-          role="STUDENT"
+        {/* Dedicated Student Form with initial data */}
+        <AddStudentForm 
           initialData={{
             ...student,
-            // AddMemberForm expects image preview if it exists
             image: student.image
           }}
           onSubmit={handleSubmit}

@@ -1,14 +1,55 @@
-import React from 'react';
+"use client";
+import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { Search, Filter, MoreVertical, CreditCard, CheckCircle2, Clock, XCircle } from 'lucide-react';
+import { fetchStudentsSummary } from '../../../redux/slices/feesSlice';
+import { fetchClasses } from '../../../redux/slices/classesSlice';
+import Pagination from '../../ui/Pagination';
+import SearchInput from '../../ui/SearchInput';
 
 export default function FeesTable() {
-  const students = [
-    { id: 1, name: "أحمد محمد", class: "الصف الأول", totalFees: 1200, paid: 1200, balance: 0, status: "COMPLETED" },
-    { id: 2, name: "ريان خالد", class: "الصف الثالث", totalFees: 1500, paid: 500, balance: 1000, status: "PARTIAL" },
-    { id: 3, name: "سارة علي", class: "الصف الثاني", totalFees: 1200, paid: 0, balance: 1200, status: "PENDING" },
-    { id: 4, name: "لينا يوسف", class: "الصف الأول", totalFees: 1200, paid: 1200, balance: 0, status: "COMPLETED" },
-    { id: 5, name: "عمر فاروق", class: "الصف الرابع", totalFees: 2000, paid: 1000, balance: 1000, status: "PARTIAL" },
-  ];
+  const dispatch = useDispatch();
+  const { students, pagination, status } = useSelector((state) => state.fees);
+  const { classes, status: classesStatus } = useSelector((state) => state.classes);
+  
+  const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [classFilter, setClassFilter] = useState('ALL');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  // Debounce search update
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+      setCurrentPage(1);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  useEffect(() => {
+    dispatch(fetchStudentsSummary({ 
+      page: currentPage, 
+      limit: itemsPerPage, 
+      search: debouncedSearch,
+      classFilter: classFilter
+    }));
+  }, [dispatch, currentPage, debouncedSearch, classFilter]);
+
+  useEffect(() => {
+    if (classesStatus === 'idle') {
+      dispatch(fetchClasses());
+    }
+  }, [classesStatus, dispatch]);
+
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+  };
+
+  const handleFilterChange = (e) => {
+    setClassFilter(e.target.value);
+    setCurrentPage(1);
+  };
 
   const getStatusBadge = (status) => {
     switch (status) {
@@ -24,58 +65,108 @@ export default function FeesTable() {
   };
 
   return (
-    <div className="bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden">
-      <div className="p-6 border-b border-slate-50 flex flex-col md:flex-row justify-between items-center gap-4">
-        <h3 className="text-xl font-black text-slate-800">رسوم الطلاب</h3>
-        <div className="flex gap-2">
-            <div className="relative">
-                <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                <input type="text" placeholder="ابحث عن طالب..." className="bg-slate-50 border border-slate-200 rounded-xl py-2 pr-9 pl-4 focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-sm" />
-            </div>
-            <button className="p-2 bg-slate-50 text-slate-600 rounded-xl hover:bg-slate-100 transition-colors">
-                <Filter className="w-5 h-5" />
-            </button>
+    <div className="space-y-6">
+      {/* ─── Controls & Filters ─── */}
+      <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 flex flex-col md:flex-row gap-4 items-center justify-between">
+        
+        {/* Search */}
+        <SearchInput 
+          value={searchTerm}
+          onChange={handleSearchChange}
+          placeholder="ابحث عن طالب..."
+          className="w-full md:w-96"
+        />
+
+        {/* Filters */}
+        <div className="w-full md:w-auto flex flex-wrap items-center gap-3">
+          <div className="relative">
+            <Filter className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <select 
+              value={classFilter}
+              onChange={handleFilterChange}
+              className="appearance-none bg-slate-50 border border-slate-200 text-slate-700 rounded-2xl py-3 pr-10 pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500/20 font-medium cursor-pointer transition-all hover:bg-slate-100"
+            >
+              <option value="ALL">جميع الصفوف</option>
+              {classes.map(c => (
+                <option key={c.id} value={c.name}>{c.name}</option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
-      
-      <div className="overflow-x-auto">
-        <table className="w-full text-right">
-          <thead>
-            <tr className="bg-slate-50/80 border-b border-slate-100 text-slate-500 text-sm font-bold">
-              <th className="p-6 whitespace-nowrap">اسم الطالب</th>
-              <th className="p-6 whitespace-nowrap">الصف</th>
-              <th className="p-6 whitespace-nowrap">إجمالي الرسوم</th>
-              <th className="p-6 whitespace-nowrap">المدفوع</th>
-              <th className="p-6 whitespace-nowrap">المتبقي</th>
-              <th className="p-6 whitespace-nowrap text-center">الحالة</th>
-              <th className="p-6 whitespace-nowrap text-center">إجراءات</th>
-            </tr>
-          </thead>
-          <tbody>
-            {students.map((student, idx) => (
-              <tr key={student.id} className="border-b border-slate-50 hover:bg-blue-50/30 transition-colors group">
-                <td className="p-6">
-                  <div className="font-bold text-slate-800 group-hover:text-blue-700 transition-colors">{student.name}</div>
-                </td>
-                <td className="p-6 text-slate-600 font-medium">{student.class}</td>
-                <td className="p-6 text-slate-800 font-black">{student.totalFees} $</td>
-                <td className="p-6 text-emerald-600 font-black">{student.paid} $</td>
-                <td className="p-6 text-rose-600 font-black">{student.balance} $</td>
-                <td className="p-6 flex justify-center">{getStatusBadge(student.status)}</td>
-                <td className="p-6">
-                  <div className="flex items-center justify-center gap-2">
-                    <button className="p-2 bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white rounded-xl transition-all shadow-sm">
-                      <CreditCard className="w-4 h-4" />
-                    </button>
-                    <button className="p-2 bg-slate-50 text-slate-400 hover:bg-slate-100 rounded-xl transition-all">
-                      <MoreVertical className="w-4 h-4" />
-                    </button>
-                  </div>
-                </td>
+
+      {/* ─── Data Table ─── */}
+      <div className="bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-right">
+            <thead>
+              <tr className="bg-slate-50/80 border-b border-slate-100 text-slate-500 text-sm font-bold">
+                <th className="p-6 whitespace-nowrap">اسم الطالب</th>
+                <th className="p-6 whitespace-nowrap">الصف</th>
+                <th className="p-6 whitespace-nowrap text-center">إجمالي الرسوم</th>
+                <th className="p-6 whitespace-nowrap text-center">المدفوع</th>
+                <th className="p-6 whitespace-nowrap text-center">المتبقي</th>
+                <th className="p-6 whitespace-nowrap text-center">الحالة</th>
+                <th className="p-6 whitespace-nowrap text-center">إجراءات</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {status === 'loading' ? (
+                <tr>
+                  <td colSpan="7" className="p-12 text-center text-slate-500 font-bold">
+                    جاري تحميل بيانات الرسوم...
+                  </td>
+                </tr>
+              ) : students.length === 0 ? (
+                <tr>
+                  <td colSpan="7" className="p-12 text-center text-slate-400 font-bold">
+                    لا توجد سجلات مطابقة للبحث
+                  </td>
+                </tr>
+              ) : (
+                students.map((student, idx) => (
+                  <tr key={student.id} className="border-b border-slate-50 hover:bg-blue-50/30 transition-colors group">
+                    <td className="p-6">
+                      <div className="font-bold text-slate-800 group-hover:text-blue-700 transition-colors">{student.name}</div>
+                    </td>
+                    <td className="p-6 text-slate-600 font-medium">{student.className}</td>
+                    <td className="p-6 text-slate-800 font-black text-center">{student.totalFees} $</td>
+                    <td className="p-6 text-emerald-600 font-black text-center">{student.paid} $</td>
+                    <td className="p-6 text-rose-600 font-black text-center">{student.balance} $</td>
+                    <td className="p-6 flex justify-center">
+                      <div className="flex items-center justify-center w-full">
+                        {getStatusBadge(student.status)}
+                      </div>
+                    </td>
+                    <td className="p-6">
+                      <div className="flex items-center justify-center gap-2">
+                        <button 
+                          className="p-2 bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white rounded-xl transition-all shadow-sm"
+                          title="تسجيل دفعة"
+                        >
+                          <CreditCard className="w-4 h-4" />
+                        </button>
+                        <button className="p-2 bg-slate-50 text-slate-400 hover:bg-slate-100 rounded-xl transition-all">
+                          <MoreVertical className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination */}
+        <Pagination 
+          currentPage={pagination.currentPage || 1}
+          totalPages={pagination.totalPages || 1}
+          totalItems={pagination.totalStudents || 0}
+          itemsPerPage={itemsPerPage}
+          itemName="طالب"
+          onPageChange={setCurrentPage}
+        />
       </div>
     </div>
   );

@@ -1,13 +1,12 @@
 "use client";
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useRef, useCallback, memo } from 'react';
 import { User, Phone, Mail, Calendar, Loader2, Camera, XCircle, ShieldCheck, BookOpen, Layers } from 'lucide-react';
-import Image from 'next/image';
 
 /**
  * @description Ultra-Performance Form for Adding School Staff (Teachers, Assistants, Accountants)
- * @notice Students are handled in a separate module.
+ * @notice Optimized with React.memo and Specific Transitions
  */
-export default function AddMemberForm({ 
+const AddMemberForm = memo(function AddMemberForm({ 
   role: initialRole = 'TEACHER',
   onSubmit, 
   onCancel, 
@@ -27,7 +26,8 @@ export default function AddMemberForm({
   const classNameRef = useRef(null);
   const fileInputRef = useRef(null);
 
-  // --- UI State (Only for structural changes) ---
+
+  // --- UI State ---
   const [step, setStep] = useState(1);
   const [role, setRole] = useState(initialData?.role || initialRole);
   const [gender, setGender] = useState(initialData?.gender || 'MALE');
@@ -35,15 +35,15 @@ export default function AddMemberForm({
   const [selectedImage, setSelectedImage] = useState(null);
   const [validationError, setValidationError] = useState('');
 
-  // Role labeling (Students removed)
-  const getRoleLabel = (r) => {
+  // Role labeling
+  const getRoleLabel = useCallback((r) => {
     switch (r) {
       case 'TEACHER': return 'معلم';
       case 'ASSISTANT': return 'معاون';
       case 'ACCOUNTANT': return 'محاسب';
       default: return 'عضو';
     }
-  };
+  }, []);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -54,8 +54,7 @@ export default function AddMemberForm({
     }
   };
 
-  const handleNext = () => {
-    // Validate Step 1 using Refs
+  const handleNext = useCallback(() => {
     if (!firstNameRef.current?.value.trim()) return setValidationError('الاسم الأول مطلوب');
     if (!lastNameRef.current?.value.trim()) return setValidationError('اسم العائلة مطلوب');
     if (!emailRef.current?.value.trim()) return setValidationError('البريد الإلكتروني مطلوب');
@@ -65,10 +64,10 @@ export default function AddMemberForm({
     
     setValidationError('');
     setStep(2);
-  };
+  }, [initialData]);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmitInternal = useCallback((e) => {
+    if (e && e.preventDefault) e.preventDefault();
     
     // Final Validation Step 2
     if (!phoneRef.current?.value.trim()) return setValidationError('رقم الهاتف مطلوب');
@@ -88,7 +87,7 @@ export default function AddMemberForm({
     };
 
     onSubmit(finalData);
-  };
+  }, [gender, role, selectedImage, onSubmit]);
 
   const translateError = (errorMsg) => {
     if (!errorMsg) return '';
@@ -102,7 +101,7 @@ export default function AddMemberForm({
 
   return (
     <div className="relative">
-      {/* Stepper (RTL Optimized) */}
+      {/* Stepper */}
       <div className="flex p-6 border-b border-slate-100 bg-slate-50/30">
         {[1, 2].map((s) => (
           <div key={s} className="flex-1 flex flex-col items-center gap-2 relative">
@@ -112,46 +111,32 @@ export default function AddMemberForm({
              <span className={` font-black ${step >= s ? 'text-blue-600' : 'text-slate-400'}`}>
                 {s === 1 ? 'البيانات الشخصية' : 'بيانات الوظيفة'}
              </span>
-             {s === 1 && (
+             {s < 2 && (
                <div className="absolute top-4.5 right-1/2 w-full h-[2px] bg-slate-200 -z-0">
-                  <div className={`h-full bg-blue-600 transition-all duration-700 ${step >= 2 ? 'w-full' : 'w-0'}`}></div>
+                  <div className={`h-full bg-blue-600 transition-property-[width] duration-700 ${step > s ? 'w-full' : 'w-0'}`}></div>
                </div>
              )}
           </div>
         ))}
       </div>
 
-      <form onSubmit={handleSubmit} className="p-8 max-h-[55vh] overflow-y-auto no-scrollbar scroll-smooth">
+      <form onSubmit={handleSubmitInternal} className="p-8 max-h-[55vh] overflow-y-auto no-scrollbar scroll-smooth">
         
-        {/* --- STEP 1 contents (Hidden when not active to keep Refs alive) --- */}
+        {/* --- STEP 1 --- */}
         <div className={`space-y-6 animate-in fade-in zoom-in-95 duration-400 ${step === 1 ? 'block' : 'hidden'}`}>
-            {/* Avatar Upload */}
-            {/* <div className="flex flex-col items-center mb-6">
-              <div onClick={() => fileInputRef.current.click()} className="group relative w-24 h-24 rounded-[2rem] bg-indigo-50 border-2 border-dashed border-indigo-200 flex items-center justify-center cursor-pointer hover:border-blue-400 transition-all overflow-hidden shadow-inner">
-                {imagePreview ? (
-                  <Image src={imagePreview} alt="Avatar" width={96} height={96} className="w-full h-full object-cover" />
-                ) : <Camera className="w-8 h-8 text-indigo-300" />}
-                <div className="absolute inset-0 bg-blue-600/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Camera className="w-6 h-6 text-white" />
-                </div>
-              </div>
-              <input type="file" ref={fileInputRef} onChange={handleImageChange} accept="image/*" className="hidden" />
-              <p className=" font-black text-slate-400 mt-2">تغيير الصورة</p>
-            </div> */}
-
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1.5 focus-within:scale-[1.01] transition-transform">
+              <div className="space-y-1.5 focus-within:scale-[1.01] transition-transform duration-200">
                 <label className=" font-black text-slate-500 mr-2 uppercase tracking-tighter">الاسم الأول</label>
                 <div className="relative">
                    <User className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                   <input ref={firstNameRef} defaultValue={initialData?.firstName} type="text" placeholder="مثال: يوسف" className="w-full bg-slate-50/50 border border-slate-200 rounded-2xl py-3.5 pr-11 pl-4 focus:bg-white focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500 font-bold transition-all outline-none" />
+                   <input ref={firstNameRef} defaultValue={initialData?.firstName} type="text" placeholder="مثال: يوسف" className="w-full bg-slate-50/50 border border-slate-200 rounded-2xl py-3.5 pr-11 pl-4 focus:bg-white focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500 font-bold transition-colors outline-none" />
                 </div>
               </div>
-              <div className="space-y-1.5">
+              <div className="space-y-1.5 focus-within:scale-[1.01] transition-transform duration-200">
                 <label className=" font-black text-slate-500 mr-2 uppercase tracking-tighter">اسم العائلة</label>
                 <div className="relative">
                    <User className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                   <input ref={lastNameRef} defaultValue={initialData?.lastName} type="text" placeholder="اللقب" className="w-full bg-slate-50/50 border border-slate-200 rounded-2xl py-3.5 pr-11 pl-4 focus:bg-white focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500 font-bold transition-all outline-none" />
+                   <input ref={lastNameRef} defaultValue={initialData?.lastName} type="text" placeholder="اللقب" className="w-full bg-slate-50/50 border border-slate-200 rounded-2xl py-3.5 pr-11 pl-4 focus:bg-white focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500 font-bold transition-colors outline-none" />
                 </div>
               </div>
             </div>
@@ -161,12 +146,12 @@ export default function AddMemberForm({
                  <label className=" font-black text-slate-500 mr-2">البريد الإلكتروني</label>
                  <div className="relative">
                    <Mail className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                   <input ref={emailRef} defaultValue={initialData?.email} type="email" dir="ltr" placeholder="staff@school.com" className="w-full bg-slate-50/50 border border-slate-200 rounded-2xl py-3.5 pr-11 pl-4 focus:bg-white focus:border-blue-500 font-bold transition-all outline-none" />
+                   <input ref={emailRef} defaultValue={initialData?.email} type="email" dir="ltr" placeholder="staff@school.com" className="w-full bg-slate-50/50 border border-slate-200 rounded-2xl py-3.5 pr-11 pl-4 focus:bg-white focus:border-blue-500 font-bold transition-colors outline-none" />
                  </div>
                </div>
                <div className="space-y-1.5 col-span-2 md:col-span-1">
                  <label className=" font-black text-slate-500 mr-2">كلمة المرور</label>
-                 <input ref={passwordRef} type="password" dir="ltr" placeholder="••••••••" className="w-full bg-slate-50/50 border border-slate-200 rounded-2xl py-3.5 px-5 focus:bg-white focus:border-blue-500 font-bold transition-all outline-none" />
+                 <input ref={passwordRef} type="password" dir="ltr" placeholder="••••••••" className="w-full bg-slate-50/50 border border-slate-200 rounded-2xl py-3.5 px-5 focus:bg-white focus:border-blue-500 font-bold transition-colors outline-none" />
                </div>
             </div>
 
@@ -188,29 +173,26 @@ export default function AddMemberForm({
             </div>
         </div>
 
-        {/* --- STEP 2 contents (Hidden when not active) --- */}
+        {/* --- STEP 2 --- */}
         <div className={`space-y-8 animate-in fade-in slide-in-from-left-6 duration-500 ${step === 2 ? 'block' : 'hidden'}`}>
-            {/* Role Selection - Hidden for STUDENT role */}
-            {role !== 'STUDENT' && (
-              <div className="p-6 bg-blue-50/40 rounded-3xl border border-blue-100/50">
-                <h3 className=" font-black text-blue-800 flex items-center gap-2 mb-4">
-                    <ShieldCheck className="w-4 h-4" />
-                    تحديد الدور الوظيفي
-                </h3>
-                <div className="grid grid-cols-3 gap-2">
-                    {['TEACHER', 'ASSISTANT', 'ACCOUNTANT'].map((r) => (
-                      <button 
-                        key={r}
-                        type="button"
-                        onClick={() => setRole(r)}
-                        className={`py-3 rounded-2xl font-black  transition-all duration-300 ${role === r ? 'bg-blue-600 text-white shadow-xl shadow-blue-600/20' : 'bg-white border border-slate-200 text-slate-400 hover:border-blue-300'}`}
-                      >
-                        {getRoleLabel(r)}
-                      </button>
-                    ))}
-                </div>
+            <div className="p-6 bg-blue-50/40 rounded-3xl border border-blue-100/50">
+              <h3 className=" font-black text-blue-800 flex items-center gap-2 mb-4">
+                  <ShieldCheck className="w-4 h-4" />
+                  تحديد الدور الوظيفي
+              </h3>
+              <div className="grid grid-cols-3 gap-2">
+                  {['TEACHER', 'ASSISTANT', 'ACCOUNTANT'].map((r) => (
+                    <button 
+                      key={r}
+                      type="button"
+                      onClick={() => setRole(r)}
+                      className={`py-3 rounded-2xl font-black transition-all duration-300 ${role === r ? 'bg-blue-600 text-white shadow-xl shadow-blue-600/20' : 'bg-white border border-slate-200 text-slate-400 hover:border-blue-300'}`}
+                    >
+                      {getRoleLabel(r)}
+                    </button>
+                  ))}
               </div>
-            )}
+            </div>
 
             <div className="space-y-5">
                <div className="space-y-1.5">
@@ -221,7 +203,6 @@ export default function AddMemberForm({
                   </div>
                </div>
 
-               {/* Subject - Only for Teachers */}
                {role === 'TEACHER' && (
                   <div className="space-y-1.5 animate-in slide-in-from-top-4 duration-300">
                     <label className=" font-black text-slate-500 mr-2">التخصص الدراسي الرئيسي</label>
@@ -232,16 +213,15 @@ export default function AddMemberForm({
                   </div>
                )}
 
-               {/* Class Selection - For both Teachers and Students */}
-               {(role === 'TEACHER' || role === 'STUDENT') && (
+               {role === 'TEACHER' && (
                   <div className="space-y-1.5 animate-in slide-in-from-top-4 duration-300">
                     <label className=" font-black text-slate-500 mr-2">
-                       {role === 'STUDENT' ? 'الصف الدراسي المسجل (إجباري)' : 'الصف الدراسي المرتبط (اختياري)'}
+                       الصف الدراسي المرتبط (اختياري)
                     </label>
                     <div className="relative">
                       <Layers className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                       <select ref={classNameRef} defaultValue={initialData?.className || ''} className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3.5 pr-11 pl-4 focus:border-blue-500 font-bold appearance-none cursor-pointer outline-none">
-                         <option value="">{role === 'STUDENT' ? 'اختر الصف...' : 'غير مرتبط بصف محدد'}</option>
+                         <option value="">غير مرتبط بصف محدد</option>
                          {classes.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
                       </select>
                     </div>
@@ -254,20 +234,24 @@ export default function AddMemberForm({
       {/* Actions & Feedback */}
       <div className="p-8 pt-0 space-y-4">
         {(validationError || error) && (
-          <div className="p-4 bg-red-50 text-red-600 rounded-2xl  font-black flex items-center gap-3 border border-red-100 animate-shake">
+          <div className="p-4 bg-red-50 text-red-600 rounded-2xl font-black flex items-center gap-3 border border-red-100 animate-shake">
             <XCircle className="w-4 h-4 flex-shrink-0" />
             <span>{validationError || translateError(error)}</span>
           </div>
         )}
 
         <div className="flex items-center gap-3">
-          <button type="button" onClick={() => step === 2 ? setStep(1) : onCancel()} className="flex-1 py-4 bg-slate-100 text-slate-500 rounded-2xl font-black  transition-hover hover:bg-slate-200 cursor-pointer">
-            {step === 2 ? 'العودة للخلف' : 'إلغاء العملية'}
+          <button type="button" onClick={() => step > 1 ? setStep(step - 1) : onCancel()} className="flex-1 py-4 bg-slate-100 text-slate-500 rounded-2xl font-black transition-colors hover:bg-slate-200">
+            {step > 1 ? 'العودة للخلف' : 'إلغاء العملية'}
           </button>
           <button 
-            onClick={step === 1 ? handleNext : handleSubmit} 
+            type="button"
+            onClick={() => {
+              if (step === 1) handleNext();
+              else handleSubmitInternal();
+            }} 
             disabled={loading} 
-            className="flex-[2] py-4 bg-blue-600 text-white rounded-2xl font-black  shadow-xl shadow-blue-600/30 hover:bg-blue-700 hover:shadow-blue-600/50 transition-all flex items-center justify-center gap-2 cursor-pointer"
+            className="flex-[2] py-4 bg-blue-600 text-white rounded-2xl font-black shadow-xl shadow-blue-600/30 hover:bg-blue-700 hover:shadow-blue-600/50 transition-all flex items-center justify-center gap-2 cursor-pointer"
           >
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 
              (step === 1 ? 'الخطوة التالية' : (initialData ? 'تحديث البيانات' : 'حفظ العضو الجديد'))}
@@ -287,4 +271,8 @@ export default function AddMemberForm({
       `}</style>
     </div>
   );
-}
+});
+
+AddMemberForm.displayName = 'AddMemberForm';
+
+export default AddMemberForm;
