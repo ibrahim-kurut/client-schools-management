@@ -1,9 +1,12 @@
 "use client";
-import React from 'react';
+import React, { useState } from 'react';
 import { CreditCard, Plus, Download } from 'lucide-react';
 import FeesTable from '@/components/dashboard/financial/FeesTable';
+import AddPaymentModal from '@/components/dashboard/financial/AddPaymentModal';
 
 export default function StudentFeesPage() {
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+
   return (
     <div className="space-y-8 pb-10">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 text-right">
@@ -21,11 +24,14 @@ export default function StudentFeesPage() {
         </div>
 
         <div className="flex flex-wrap gap-3">
-            <button className="flex items-center gap-2 bg-white text-slate-700 px-6 py-3 rounded-2xl font-bold transition-all shadow-sm border border-slate-100 hover:bg-slate-50">
+            <button className="flex items-center gap-2 bg-white text-slate-700 px-6 py-3 rounded-2xl font-bold transition-all shadow-sm border border-slate-100 hover:bg-slate-50 cursor-pointer">
                 <Download className="w-5 h-5 text-blue-600" />
                 تحميل كشف الرسوم
             </button>
-            <button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-2xl font-bold transition-all shadow-lg shadow-blue-600/30 hover:-translate-y-0.5">
+            <button 
+                onClick={() => setIsPaymentModalOpen(true)}
+                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-2xl font-bold transition-all shadow-lg shadow-blue-600/30 hover:-translate-y-0.5 cursor-pointer"
+            >
                 <Plus className="w-5 h-5" />
                 تسجيل دفعة جديدة
             </button>
@@ -33,6 +39,11 @@ export default function StudentFeesPage() {
       </div>
 
       <FeesTable />
+
+      <AddPaymentModal 
+        isOpen={isPaymentModalOpen} 
+        onClose={() => setIsPaymentModalOpen(false)} 
+      />
     </div>
   );
 }

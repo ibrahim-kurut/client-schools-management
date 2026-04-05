@@ -15,6 +15,20 @@ export const fetchStudentsSummary = createAsyncThunk(
     }
 );
 
+// Create Payment
+export const createPayment = createAsyncThunk(
+    'fees/createPayment',
+    async (paymentData, { rejectWithValue }) => {
+        try {
+            const res = await axiosInstance.post('/payments', paymentData);
+            return res.data;
+        } catch (e) {
+            const errorMessage = e.response?.data?.message || e.response?.data?.error || "حدث خطأ أثناء تسجيل الدفعة";
+            return rejectWithValue({ message: errorMessage });
+        }
+    }
+);
+
 const initialState = {
     students: [],
     pagination: {
@@ -23,6 +37,9 @@ const initialState = {
         totalStudents: 0,
         itemsPerPage: 10
     },
+    createStatus: 'idle', // idle | loading | succeeded | failed
+    createError: null,
+    createdRecord: null,
     status: 'idle',
     error: null,
 };
@@ -33,6 +50,11 @@ const feesSlice = createSlice({
     reducers: {
         clearFeesError: (state) => {
             state.error = null;
+        },
+        resetCreateStatus: (state) => {
+            state.createStatus = 'idle';
+            state.createError = null;
+            state.createdRecord = null;
         }
     },
     extraReducers: (builder) => {
@@ -49,9 +71,21 @@ const feesSlice = createSlice({
             .addCase(fetchStudentsSummary.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.payload.message;
+            })
+            .addCase(createPayment.pending, (state) => {
+                state.createStatus = 'loading';
+                state.createError = null;
+            })
+            .addCase(createPayment.fulfilled, (state, action) => {
+                state.createStatus = 'succeeded';
+                state.createdRecord = action.payload.data;
+            })
+            .addCase(createPayment.rejected, (state, action) => {
+                state.createStatus = 'failed';
+                state.createError = action.payload.message;
             });
     }
 });
 
-export const { clearFeesError } = feesSlice.actions;
+export const { clearFeesError, resetCreateStatus } = feesSlice.actions;
 export default feesSlice.reducer;
