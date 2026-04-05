@@ -176,7 +176,7 @@ const AddPaymentModal = memo(function AddPaymentModal({ isOpen, onClose }) {
                 <div className="flex justify-between items-start mb-10 pb-6 border-b border-dashed border-slate-300 print:border-slate-400">
                   <div>
                     <h1 className="text-3xl font-black text-slate-800 tracking-tight print:text-black">وصل استلام</h1>
-                    <p className="text-slate-500 font-medium mt-1">نظام إدارة مدرسة {schoolName}</p>
+                    <p className="text-slate-500 font-medium mt-1">نظام إدارة {schoolName}</p>
                   </div>
                   <div className="text-left">
                     <div className="text-sm font-bold text-slate-400 mb-1">رقم الوصل (رقم الفاتورة)</div>
