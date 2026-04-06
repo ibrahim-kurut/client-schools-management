@@ -62,13 +62,13 @@ export default function SubjectsManagement() {
 
   const handleDelete = (id, name) => {
     Swal.fire({
-      title: 'هل أنت متأكد؟',
-      text: `سيتم حذف مادة "${name}" نهائياً. لا يمكن التراجع عن هذا الإجراء!`,
+      title: 'أرشفة المادة؟',
+      text: `سيتم نقل مادة "${name}" إلى الأرشيف. يمكنك استعادتها لاحقاً، ولكن سيتم المنع إذا كانت المادة مرتبطة بدرجات مسجلة للطلاب.`,
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#ef4444',
+      confirmButtonColor: '#2563eb',
       cancelButtonColor: '#64748b',
-      confirmButtonText: 'نعم، احذف المادة',
+      confirmButtonText: 'نعم، انقل للأرشيف',
       cancelButtonText: 'إلغاء',
       reverseButtons: true,
       direction: 'rtl'

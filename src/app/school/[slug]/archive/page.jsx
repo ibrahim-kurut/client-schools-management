@@ -63,14 +63,16 @@ const ArchivePage = () => {
 
   const handleRestore = (type, id, name) => {
     Swal.fire({
-      title: 'هل أنت متأكد؟',
-      text: `سيتم استعادة "${name}" إلى القائمة النشطة.`,
+      title: 'استعادة البيانات؟',
+      text: `سيتم إعادة "${name}" إلى القائمة النشطة. سيتم المنع إذا كان هناك سجل نشط حالياً بنفس الاسم.`,
       icon: 'question',
       showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'نعم، استعادة',
-      cancelButtonText: 'إلغاء'
+      confirmButtonColor: '#2563eb',
+      cancelButtonColor: '#64748b',
+      confirmButtonText: 'نعم، استعادة الآن',
+      cancelButtonText: 'إلغاء',
+      reverseButtons: true,
+      direction: 'rtl'
     }).then((result) => {
       if (result.isConfirmed) {
         dispatch(restoreData({ type, id }));
@@ -80,14 +82,16 @@ const ArchivePage = () => {
 
   const handlePermanentDelete = (type, id, name) => {
     Swal.fire({
-      title: 'حذف نهائي؟',
-      text: `تحذير: سيتم حذف "${name}" نهائياً من قاعدة البيانات ولا يمكن التراجع عن هذه الخطوة!`,
+      title: 'تأكيد الحذف النهائي؟',
+      text: `سيتم حذف "${name}" تماماً من قاعدة البيانات. تنبيه: لن تنجح العملية إذا كان السجل مرتبطاً بطلاب أو درجات أو بيانات مالية حيوية.`,
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#d33',
-      cancelButtonColor: '#3085d6',
-      confirmButtonText: 'نعم، احذف نهائياً',
-      cancelButtonText: 'إلغاء'
+      cancelButtonColor: '#64748b',
+      confirmButtonText: 'نعم، حذف نهائي',
+      cancelButtonText: 'إلغاء',
+      reverseButtons: true,
+      direction: 'rtl'
     }).then((result) => {
       if (result.isConfirmed) {
         dispatch(permanentDelete({ type, id }));

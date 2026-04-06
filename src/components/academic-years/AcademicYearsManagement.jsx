@@ -110,15 +110,16 @@ export default function AcademicYearsManagement({ slug }) {
     }
 
     Swal.fire({
-      title: 'هل أنت متأكد؟',
-      text: `سيتم حذف السنة الدراسية (${year.name})، لا يمكن التراجع عن هذا الإجراء!`,
+      title: 'أرشفة السنة الدراسية؟',
+      text: `سيتم نقل السنة (${year.name}) إلى الأرشيف. يمكنك استعادتها لاحقاً، ولكن سيتم المنع إذا كانت السنة تحتوي على درجات مرصودة لضمان سلامة السجلات التاريخية.`,
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#ef4444',
+      confirmButtonColor: '#2563eb',
       cancelButtonColor: '#64748b',
-      confirmButtonText: 'نعم، احذف',
+      confirmButtonText: 'نعم، انقل للأرشيف',
       cancelButtonText: 'إلغاء',
       reverseButtons: true,
+      direction: 'rtl',
       customClass: {
         popup: 'rounded-[32px] font-sans border border-slate-100 shadow-2xl',
         title: 'font-black text-slate-800',

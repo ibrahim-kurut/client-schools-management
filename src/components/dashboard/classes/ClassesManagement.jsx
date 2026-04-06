@@ -29,13 +29,13 @@ export default function ClassesManagement({ slug }) {
 
   const handleDelete = (id) => {
     Swal.fire({
-      title: 'هل أنت متأكد؟',
-      text: "سيتم حذف هذا الصف نهائياً.",
+      title: 'أرشفة الصف الدراسي؟',
+      text: "سيتم نقل هذا الصف إلى الأرشيف. يمكنك استعادته لاحقاً، ولكن سيتم المنع إذا كان الصف يحتوي على طلاب مسجلين لضمان سلامة البيانات.",
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#ef4444',
+      confirmButtonColor: '#2563eb',
       cancelButtonColor: '#64748b',
-      confirmButtonText: 'نعم، احذف',
+      confirmButtonText: 'نعم، انقل للأرشيف',
       cancelButtonText: 'إلغاء',
       reverseButtons: true,
       direction: 'rtl',
