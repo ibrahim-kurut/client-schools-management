@@ -11,7 +11,8 @@ import {
   Settings, 
   LogOut,
   User,
-  CalendarDays
+  CalendarDays,
+  Archive
 } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '@/redux/slices/authSlice';
@@ -121,6 +122,7 @@ export default function DashboardSidebar({ slug }) {
         <SidebarItem icon={Wallet} label="الشؤون المالية" href={`/school/${slug}/financial`} isActive={pathname.startsWith(`/school/${slug}/financial`)} />
         <SidebarItem icon={CalendarDays} label="إدارة السنوات الدراسية" href={`/school/${slug}/academic-years`} isActive={pathname === `/school/${slug}/academic-years`} />
         <SidebarItem icon={TrendingUp} label="التقارير والإحصائيات" href={`/school/${slug}/reports`} isActive={pathname === `/school/${slug}/reports`} />
+        <SidebarItem icon={Archive} label="الأرشيف" href={`/school/${slug}/archive`} isActive={pathname === `/school/${slug}/archive`} />
         <SidebarItem icon={Settings} label="الإعدادات العامة" href={`/school/${slug}/settings`} isActive={pathname === `/school/${slug}/settings`} />
       </nav>
 
