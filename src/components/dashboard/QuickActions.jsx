@@ -9,7 +9,7 @@ export default function QuickActions({slug}) {
     { title: "تسجيل مصروف", icon: ArrowLeftRight, desc: "إدارة الرواتب والصيانة والمصروفات", href: `/school/${slug}/financial/expenses`, color: "text-orange-600", bg: "bg-orange-50" },
     { title: "إدارة الصفوف", icon: BookOpen, desc: "عرض المراحل الأكاديمية والمواد", href: `/school/${slug}/classes`, color: "text-purple-600", bg: "bg-purple-50" },
     { title: "تحديث الدرجات", icon: FileText, desc: "إدخال نتائج امتحانات الفصل الدراسي", href: `/school/${slug}/grades`, color: "text-rose-600", bg: "bg-rose-50" },
-    { title: "إدارة السنة الدراسية", icon: Calendar, desc: "إعدادات والمواسم والتقويم للطلاب", href: `/school/${slug}/academic-year`, color: "text-amber-600", bg: "bg-amber-50" },
+    { title: "إدارة السنة الدراسية", icon: Calendar, desc: "إعدادات والمواسم والتقويم للطلاب", href: `/school/${slug}/academic-years`, color: "text-amber-600", bg: "bg-amber-50" },
   ];
 
   return (

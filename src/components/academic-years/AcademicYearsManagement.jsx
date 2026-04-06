@@ -1,5 +1,12 @@
 "use client";
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { 
+  fetchAcademicYears, 
+  createAcademicYear, 
+  updateAcademicYear, 
+  deleteAcademicYear 
+} from '../../redux/slices/academicYearsSlice';
 import { 
   CalendarDays, 
   Plus, 
@@ -18,42 +25,33 @@ import { toast } from 'react-toastify';
 import { format } from 'date-fns';
 import { arSA } from 'date-fns/locale';
 
-// MOCK DATA (المحاكاة الوهمية)
-const MOCK_YEARS = [
-  {
-    id: '1',
-    name: '2024 - 2025',
-    startDate: '2024-09-01T00:00:00.000Z',
-    endDate: '2025-06-30T00:00:00.000Z',
-    isCurrent: true,
-  },
-  {
-    id: '2',
-    name: '2023 - 2024',
-    startDate: '2023-09-01T00:00:00.000Z',
-    endDate: '2024-06-30T00:00:00.000Z',
-    isCurrent: false,
-  },
-  {
-    id: '3',
-    name: '2022 - 2023',
-    startDate: '2022-09-01T00:00:00.000Z',
-    endDate: '2023-06-30T00:00:00.000Z',
-    isCurrent: false,
-  }
-];
+// Mock data removed
 
 export default function AcademicYearsManagement({ slug }) {
-  const [years, setYears] = useState(MOCK_YEARS);
+  const dispatch = useDispatch();
+  const { years, status, error } = useSelector((state) => state.academicYears);
+  
   const [searchQuery, setSearchQuery] = useState('');
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingYear, setEditingYear] = useState(null);
 
-  // Filtered Years
+  useEffect(() => {
+    dispatch(fetchAcademicYears());
+  }, [dispatch]);
+
+  // Filtered & Sorted Years (Current Year first)
   const filteredYears = useMemo(() => {
-    if (!searchQuery.trim()) return years;
-    return years.filter(y => y.name.includes(searchQuery));
+    let result = [...years];
+    
+    // Sort: Current year first, then by name or date/id (existing backend sort usually by date)
+    result.sort((a, b) => {
+      if (a.isCurrent === b.isCurrent) return 0;
+      return a.isCurrent ? -1 : 1;
+    });
+
+    if (!searchQuery.trim()) return result;
+    return result.filter(y => y.name.includes(searchQuery));
   }, [years, searchQuery]);
 
   // Derived Stats
@@ -74,37 +72,24 @@ export default function AcademicYearsManagement({ slug }) {
 
   const handleSaveYear = (formData) => {
     if (editingYear) {
-      // Edit
-      const updatedYears = years.map(y => {
-        if (y.id === editingYear.id) {
-          return { ...y, ...formData };
-        }
-        // If the edited became current, mark others as false
-        if (formData.isCurrent && y.id !== editingYear.id) {
-          return { ...y, isCurrent: false };
-        }
-        return y;
-      });
-      setYears(updatedYears);
-      toast.success("تم تحديث بيانات السنة بنجاح (وهمي)");
+      dispatch(updateAcademicYear({ id: editingYear.id, yearData: formData }))
+        .unwrap()
+        .then(() => {
+          toast.success("تم تحديث بيانات السنة بنجاح");
+          setIsModalOpen(false);
+          dispatch(fetchAcademicYears()); // Ensure sync
+        })
+        .catch((err) => toast.error(err || "فشل التحديث"));
     } else {
-      // Add
-      const newYear = {
-        id: Date.now().toString(),
-        ...formData
-      };
-      
-      let updatedYears = [...years];
-      // If the new year is current, mark others as false
-      if (formData.isCurrent) {
-        updatedYears = updatedYears.map(y => ({ ...y, isCurrent: false }));
-      }
-      
-      updatedYears.unshift(newYear);
-      setYears(updatedYears);
-      toast.success("تم إضافة السنة الدراسية بنجاح (وهمي)");
+      dispatch(createAcademicYear(formData))
+        .unwrap()
+        .then(() => {
+          toast.success("تم إضافة السنة الدراسية بنجاح");
+          setIsModalOpen(false);
+          dispatch(fetchAcademicYears()); // Ensure sync
+        })
+        .catch((err) => toast.error(err || "فشل الإضافة"));
     }
-    setIsModalOpen(false);
   };
 
   const handleDelete = (year) => {
@@ -143,8 +128,13 @@ export default function AcademicYearsManagement({ slug }) {
       }
     }).then((result) => {
       if (result.isConfirmed) {
-        setYears(prev => prev.filter(y => y.id !== year.id));
-        toast.info("تم الحذف بنجاح (وهمي)");
+        dispatch(deleteAcademicYear(year.id))
+          .unwrap()
+          .then(() => {
+            toast.info("تم الحذف بنجاح");
+            dispatch(fetchAcademicYears()); // Ensure sync
+          })
+          .catch((err) => toast.error(err || "فشل الحذف"));
       }
     });
   };
@@ -171,12 +161,16 @@ export default function AcademicYearsManagement({ slug }) {
        }
     }).then((result) => {
       if (result.isConfirmed) {
-        const updatedYears = years.map(y => ({
-          ...y,
-          isCurrent: y.id === year.id
-        }));
-        setYears(updatedYears);
-        toast.success(`تم تعيين ${year.name} كسنة حالية`);
+        dispatch(updateAcademicYear({ 
+          id: year.id, 
+          yearData: { isCurrent: true } 
+        }))
+          .unwrap()
+          .then(() => {
+            toast.success(`تم تعيين ${year.name} كسنة حالية`);
+            dispatch(fetchAcademicYears()); // Ensure sync
+          })
+          .catch((err) => toast.error(err || "فشل التفعيل"));
       }
     });
   };
@@ -258,10 +252,19 @@ export default function AcademicYearsManagement({ slug }) {
           <Search className="w-5 h-5 text-slate-400 absolute right-4 top-1/2 -translate-y-1/2" />
         </div>
         
-        {/* Mock Reminder Badge */}
-        <div className="px-4 py-2 bg-amber-50 border border-amber-200 text-amber-700 rounded-xl text-xs font-bold flex items-center gap-2">
-          <AlertCircle className="w-4 h-4" />
-          وضع المحاكاة الوهمية (Mock Mode) فعال
+        {/* Status Reminder Badge */}
+        <div className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 ${status === 'loading' ? 'bg-blue-50 text-blue-600' : 'bg-green-50 text-green-600'}`}>
+          {status === 'loading' ? (
+            <>
+              <Clock className="w-4 h-4 animate-spin" />
+              جاري مزامنة البيانات...
+            </>
+          ) : (
+            <>
+              <CheckCircle2 className="w-4 h-4" />
+              النظام متصل بالخادم
+            </>
+          )}
         </div>
       </div>
 
@@ -334,7 +337,7 @@ export default function AcademicYearsManagement({ slug }) {
                   ) : (
                     <button 
                       onClick={() => handleSetCurrent(year)}
-                      className="flex-1 font-bold text-xs text-slate-500 hover:text-slate-800 bg-slate-50 hover:bg-slate-100 px-3 py-2 rounded-lg transition-colors border border-slate-200"
+                      className="flex-1 font-bold text-xs text-slate-500 hover:text-slate-800 bg-slate-50 hover:bg-slate-100 px-3 py-2 rounded-lg transition-colors border border-slate-200 cursor-pointer"
                     >
                       تفعيل كسنة حالية
                     </button>

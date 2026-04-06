@@ -11,15 +11,19 @@ import Pagination from '../../ui/Pagination';
 import SearchInput from '../../ui/SearchInput';
 import { fetchStudents, deleteStudent } from '../../../redux/slices/studentsSlice';
 import { fetchClasses } from '../../../redux/slices/classesSlice';
+import { fetchAcademicYears } from '../../../redux/slices/academicYearsSlice';
 import Swal from 'sweetalert2';
+import { useRouter } from 'next/navigation';
 
 // Mock data has been removed and replaced by real API connection
 // Mock data has been removed and replaced by real API connection
 
 export default function StudentsManagement({ slug }) {
   const dispatch = useDispatch();
+  const router = useRouter();
   const { students, pagination, status } = useSelector((state) => state.students);
   const { classes, status: classesStatus } = useSelector((state) => state.classes);
+  const { years, currentYear, status: yearsStatus } = useSelector((state) => state.academicYears);
   const { user } = useSelector((state) => state.auth);
   const userData = user?.userData || user;
   
@@ -49,7 +53,10 @@ export default function StudentsManagement({ slug }) {
     if (classesStatus === 'idle') {
       dispatch(fetchClasses());
     }
-  }, [classesStatus, dispatch]);
+    if (yearsStatus === 'idle') {
+      dispatch(fetchAcademicYears());
+    }
+  }, [classesStatus, yearsStatus, dispatch]);
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
@@ -58,6 +65,56 @@ export default function StudentsManagement({ slug }) {
   const handleFilterChange = (e) => {
     setClassFilter(e.target.value);
     setCurrentPage(1);
+  };
+
+  const handleAddStudentClick = () => {
+    // 1. Check for current academic year
+    if (!currentYear) {
+      Swal.fire({
+        title: 'تنبيه: السنة الدراسية غير محددة',
+        text: 'لا يمكن إضافة طلاب قبل تحديد "السنة الدراسية الحالية". يرجى إعداد السنة الدراسية أولاً.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'الذهاب لإدارة السنوات',
+        cancelButtonText: 'إغلاق',
+        confirmButtonColor: '#2563eb',
+        customClass: {
+          popup: 'rounded-[2rem] font-sans',
+          confirmButton: 'rounded-xl px-6 py-3 font-bold',
+          cancelButton: 'rounded-xl px-6 py-3 font-bold'
+        }
+      }).then((result) => {
+        if (result.isConfirmed) {
+          router.push(`/school/${slug}/academic-years`);
+        }
+      });
+      return;
+    }
+
+    // 2. Check for classes
+    if (classes.length === 0) {
+      Swal.fire({
+        title: 'تنبيه: لا توجد صفوف دراسية',
+        text: 'يجب إنشاء "صف دراسي" واحد على الأقل قبل تسجيل الطلاب.',
+        icon: 'info',
+        showCancelButton: true,
+        confirmButtonText: 'إضافة صفوف',
+        cancelButtonText: 'إغلاق',
+        confirmButtonColor: '#2563eb',
+        customClass: {
+          popup: 'rounded-[2rem] font-sans',
+          confirmButton: 'rounded-xl px-6 py-3 font-bold',
+          cancelButton: 'rounded-xl px-6 py-3 font-bold'
+        }
+      }).then((result) => {
+        if (result.isConfirmed) {
+          router.push(`/school/${slug}/classes`);
+        }
+      });
+      return;
+    }
+
+    setIsAddModalOpen(true);
   };
 
   const handleEdit = (student) => {
@@ -177,7 +234,7 @@ export default function StudentsManagement({ slug }) {
           </div>
 
           <button 
-            onClick={() => setIsAddModalOpen(true)}
+            onClick={handleAddStudentClick}
             className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-2xl font-bold transition-all shadow-lg shadow-blue-600/30 hover:shadow-blue-600/50 hover:-translate-y-0.5"
           >
             <UserPlus className="w-5 h-5" />
