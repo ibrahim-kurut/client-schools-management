@@ -9,6 +9,7 @@ import subjectsReducer from "./slices/subjectsSlice";
 import feesReducer from "./slices/feesSlice";
 import expensesReducer from "./slices/expensesSlice";
 import academicYearsReducer from "./slices/academicYearsSlice";
+import archiveReducer from "./slices/archiveSlice";
 
 
 export const store = configureStore({
@@ -23,6 +24,7 @@ export const store = configureStore({
         fees: feesReducer,
         expenses: expensesReducer,
         academicYears: academicYearsReducer,
+        archive: archiveReducer,
 
     },
 });
