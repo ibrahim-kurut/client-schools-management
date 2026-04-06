@@ -1,13 +1,15 @@
 import { UserPlus, Wallet, ArrowLeftRight, BookOpen, FileText, Calendar } from 'lucide-react';
+import Link from 'next/link';
 
-export default function QuickActions() {
+export default function QuickActions({slug}) {
+
   const quickActions = [
-    { title: "إضافة طالب جديد", icon: UserPlus, desc: "تسجيل طالب في النظام الأكاديمي", href: "#", color: "text-blue-600", bg: "bg-blue-50" },
-    { title: "سداد دفعة جديدة", icon: Wallet, desc: "تسجيل قسط دراسي لطالب", href: "#", color: "text-emerald-600", bg: "bg-emerald-50" },
-    { title: "تسجيل مصروف", icon: ArrowLeftRight, desc: "إدارة الرواتب والصيانة والمصروفات", href: "#", color: "text-orange-600", bg: "bg-orange-50" },
-    { title: "إدارة الصفوف", icon: BookOpen, desc: "عرض المراحل الأكاديمية والمواد", href: "#", color: "text-purple-600", bg: "bg-purple-50" },
-    { title: "تحديث الدرجات", icon: FileText, desc: "إدخال نتائج امتحانات الفصل الدراسي", href: "#", color: "text-rose-600", bg: "bg-rose-50" },
-    { title: "إدارة السنة الدراسية", icon: Calendar, desc: "إعدادات والمواسم والتقويم للطلاب", href: "#", color: "text-amber-600", bg: "bg-amber-50" },
+    { title: "إضافة طالب جديد", icon: UserPlus, desc: "تسجيل طالب في النظام الأكاديمي", href: `/school/${slug}/students`, color: "text-blue-600", bg: "bg-blue-50" },
+    { title: "سداد دفعة جديدة", icon: Wallet, desc: "تسجيل قسط دراسي لطالب", href: `/school/${slug}/financial/fees`, color: "text-emerald-600", bg: "bg-emerald-50" },
+    { title: "تسجيل مصروف", icon: ArrowLeftRight, desc: "إدارة الرواتب والصيانة والمصروفات", href: `/school/${slug}/financial/expenses`, color: "text-orange-600", bg: "bg-orange-50" },
+    { title: "إدارة الصفوف", icon: BookOpen, desc: "عرض المراحل الأكاديمية والمواد", href: `/school/${slug}/classes`, color: "text-purple-600", bg: "bg-purple-50" },
+    { title: "تحديث الدرجات", icon: FileText, desc: "إدخال نتائج امتحانات الفصل الدراسي", href: `/school/${slug}/grades`, color: "text-rose-600", bg: "bg-rose-50" },
+    { title: "إدارة السنة الدراسية", icon: Calendar, desc: "إعدادات والمواسم والتقويم للطلاب", href: `/school/${slug}/academic-year`, color: "text-amber-600", bg: "bg-amber-50" },
   ];
 
   return (
@@ -19,7 +21,7 @@ export default function QuickActions() {
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {quickActions.map((action, idx) => (
-          <a 
+          <Link 
             href={action.href} 
             key={idx} 
             className="group flex flex-col gap-4 p-8 bg-white rounded-[32px] shadow-sm border border-slate-100 hover:border-blue-200 hover:shadow-xl hover:shadow-blue-500/5 transition-all duration-300 hover:-translate-y-1"
@@ -31,7 +33,7 @@ export default function QuickActions() {
               <h3 className="text-lg font-black text-slate-800 group-hover:text-blue-600 transition-colors">{action.title}</h3>
               <p className="text-slate-400 text-sm mt-1 leading-relaxed font-medium">{action.desc}</p>
             </div>
-          </a>
+          </Link>
         ))}
       </div>
     </section>
