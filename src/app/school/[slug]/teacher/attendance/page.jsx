@@ -103,9 +103,9 @@ export default function AttendancePage() {
                   onChange={handleClassChange}
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-sm font-bold text-slate-700 appearance-none"
                 >
-                  <option value="">اختر الفصل...</option>
-                  {teacherClasses.map((cls) => (
-                    <option key={cls.id} value={cls.id}>{cls.name}</option>
+                  <option key="default-class" value="">اختر الفصل...</option>
+                  {teacherClasses.map((cls, idx) => (
+                    <option key={cls.id || `class-${idx}`} value={cls.id}>{cls.name}</option>
                   ))}
                 </select>
               </div>
@@ -149,10 +149,10 @@ export default function AttendancePage() {
                       </tr>
                     </thead>
                     <tbody>
-                      {students.slice(0, 5).map((student) => {
+                      {students.slice(0, 5).map((student, idx) => {
                         const isPresent = attendance[student.id]?.status === "PRESENT";
                         return (
-                          <tr key={student.id} className="border-t border-slate-50">
+                          <tr key={student.id || `student-${idx}`} className="border-t border-slate-50">
                             <td className="px-5 py-4">
                               <span className="font-bold text-sm text-slate-700">{student.firstName} {student.lastName}</span>
                             </td>

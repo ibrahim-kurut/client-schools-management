@@ -4,9 +4,12 @@ import axiosInstance from '../../lib/axios';
 // Fetch all grades for a specific class
 export const fetchClassGrades = createAsyncThunk(
     'teacherGrades/fetchClassGrades',
-    async ({ classId, academicYearId }, { rejectWithValue }) => {
+    async ({ classId, academicYearId, subjectId }, { rejectWithValue }) => {
         try {
-            const params = academicYearId ? { academicYearId } : {};
+            const params = {
+                ...(academicYearId && { academicYearId }),
+                ...(subjectId && { subjectId })
+            };
             const response = await axiosInstance.get(`/grades/teacher-class/${classId}`, {
                 params
             });
@@ -96,7 +99,7 @@ const teacherGradesSlice = createSlice({
                 // Add or replace the local copy
                 const existingIndex = state.grades.findIndex(
                     g => g.studentId === action.payload.studentId && 
-                         g.subjectId === action.payload.subjectId &&
+                         (g.subjectId === action.payload.subjectId || g.subject?.id === action.payload.subjectId) &&
                          g.examType === action.payload.examType
                 );
                 if (existingIndex > -1) {
