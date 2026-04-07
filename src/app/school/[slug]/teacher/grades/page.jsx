@@ -4,19 +4,22 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchTeacherStudents } from "@/redux/slices/teacherProfileSlice";
 import { fetchClassGrades, addGrade, updateGrade, deleteGrade } from "@/redux/slices/teacherGradesSlice";
 import { examTypes } from "@/data/teacherMockData";
-import { ClipboardList, PlusCircle, Save, Trash2, Edit2, AlertCircle, BookOpen, Layers, FileText, User2 } from "lucide-react";
+import { ClipboardList, PlusCircle, Save, Trash2, Edit2, AlertCircle, BookOpen, Layers, FileText, User2, Printer } from "lucide-react";
 import Swal from "sweetalert2";
+import StudentResultModal from "@/components/students/StudentResultModal";
 
 export default function GradesPage() {
   const dispatch = useDispatch();
   const { classes, loading: profileLoading } = useSelector((state) => state.teacherProfile);
   const { grades, loading: gradesLoading, actionLoading } = useSelector((state) => state.teacherGrades);
+  const { user: currentUser } = useSelector((state) => state.auth);
 
   const [selectedClassId, setSelectedClassId] = useState("");
   const [selectedSubjectId, setSelectedSubjectId] = useState("");
   const [selectedExamType, setSelectedExamType] = useState("");
 
   const [drafts, setDrafts] = useState({});
+  const [selectedStudentForModal, setSelectedStudentForModal] = useState(null);
 
   useEffect(() => {
     dispatch(fetchTeacherStudents());
@@ -177,9 +180,9 @@ export default function GradesPage() {
               onChange={handleClassChange}
               className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 cursor-pointer"
             >
-              <option value="">اختر الفصل...</option>
-              {classes.map((cls) => (
-                <option key={cls.id} value={cls.id}>{cls.name}</option>
+              <option key="default-class" value="">اختر الفصل...</option>
+              {classes.map((cls, idx) => (
+                <option key={cls.id || `class-${idx}`} value={cls.id}>{cls.name}</option>
               ))}
             </select>
           </div>
@@ -195,9 +198,9 @@ export default function GradesPage() {
               disabled={!selectedClassId}
               className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <option value="">اختر المادة...</option>
-              {availableSubjects.map((sub) => (
-                <option key={sub.id} value={sub.id}>{sub.name}</option>
+              <option key="default-subject" value="">اختر المادة...</option>
+              {availableSubjects.map((sub, idx) => (
+                <option key={sub.id || `sub-${idx}`} value={sub.id}>{sub.name}</option>
               ))}
             </select>
           </div>
@@ -213,9 +216,9 @@ export default function GradesPage() {
               disabled={!selectedSubjectId}
               className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <option value="">اختر نوع الامتحان...</option>
-              {examTypes.map((type) => (
-                <option key={type.value} value={type.value}>{type.label}</option>
+              <option key="default-exam" value="">اختر نوع الامتحان...</option>
+              {examTypes.map((type, idx) => (
+                <option key={type.value || `exam-${idx}`} value={type.value}>{type.label}</option>
               ))}
             </select>
           </div>
@@ -252,7 +255,7 @@ export default function GradesPage() {
                     <th className="text-right px-5 py-4 text-xs font-black text-slate-400 uppercase tracking-wider">اسم الطالب</th>
                     <th className="text-center px-5 py-4 text-xs font-black text-slate-400 uppercase tracking-wider w-32">الدرجة (100)</th>
                     <th className="text-center px-5 py-4 text-xs font-black text-slate-400 uppercase tracking-wider w-40">ملاحظة (غياب/مؤجل)</th>
-                    <th className="text-center px-5 py-4 text-xs font-black text-slate-400 uppercase tracking-wider w-40">الإجراءات</th>
+                    <th className="text-center px-5 py-4 text-xs font-black text-slate-400 uppercase tracking-wider w-48">الإجراءات</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -271,7 +274,7 @@ export default function GradesPage() {
                     const isDraftDirty = draft.score !== undefined || draft.notes !== undefined;
 
                     return (
-                      <tr key={student.id} className="border-t border-slate-50 hover:bg-slate-50/50 transition-colors group">
+                      <tr key={student.id || `student-${idx}`} className="border-t border-slate-50 hover:bg-slate-50/50 transition-colors group">
                         <td className="px-5 py-4 text-sm font-bold text-slate-400">{idx + 1}</td>
                         <td className="px-5 py-4">
                           <div className="flex items-center gap-3">
@@ -341,6 +344,12 @@ export default function GradesPage() {
                                  </button>
                                </>
                              )}
+                             <button
+                                onClick={() => setSelectedStudentForModal(student)}
+                                className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 text-slate-600 hover:bg-slate-100 rounded-lg text-xs font-black transition-colors"
+                             >
+                                <Printer className="w-3.5 h-3.5" /> طباعة
+                             </button>
                           </div>
                         </td>
                       </tr>
@@ -361,6 +370,17 @@ export default function GradesPage() {
             قم باختيار الفصل الدراسي والمادة ونوع الامتحان من القوائم أعلاه لعرض جدول الطلاب وإدخال أو تعديل الدرجات بشكل مباشر.
           </p>
         </div>
+      )}
+      {/* Student Result Modal */}
+      {selectedStudentForModal && (
+        <StudentResultModal
+          student={selectedStudentForModal}
+          studentGrades={grades.filter((g) => g.studentId === selectedStudentForModal.id)}
+          subjects={selectedClass?.subjects || []}
+          examTypes={examTypes}
+          schoolName={currentUser?.school?.name || "مدرستي"}
+          onClose={() => setSelectedStudentForModal(null)}
+        />
       )}
     </div>
   );
