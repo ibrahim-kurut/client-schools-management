@@ -46,13 +46,23 @@ export default function SchoolGuard({ children }) {
     const userSchoolSlug = userData?.schoolSlug ? decodeURIComponent(userData.schoolSlug) : null;
 
     if (userSchoolSlug && decodedCurrentSlug === userSchoolSlug) {
-      // Staff members (non SCHOOL_ADMIN) can only access the welcome page
+      // Staff members (non SCHOOL_ADMIN) have restricted access
       const staffRoles = ['TEACHER', 'ACCOUNTANT', 'ASSISTANT', 'STUDENT'];
       if (staffRoles.includes(userData.role)) {
+        // Teacher can access /teacher/* routes
+        const isTeacherRoute = pathname?.includes(`/school/${currentSlug}/teacher`);
+        if (userData.role === 'TEACHER' && isTeacherRoute) {
+          setIsAuthorized(true);
+          return;
+        }
+
         if (isWelcomePage) {
           setIsAuthorized(true);
+        } else if (userData.role === 'TEACHER') {
+          // Redirect teacher to their dashboard
+          router.replace(`/school/${currentSlug}/teacher`);
         } else {
-          // Redirect staff to welcome page
+          // Redirect other staff to welcome page
           router.replace(`/school/${currentSlug}/welcome`);
         }
         return;

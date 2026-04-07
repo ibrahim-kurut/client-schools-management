@@ -52,7 +52,11 @@ export default function SchoolLoginPage() {
           if (userData?.role === 'SCHOOL_ADMIN') {
             router.push(`/school/${slug}`);
           }
-          // Staff members → Welcome page (temporary)
+          // Teacher → Teacher Dashboard
+          else if (userData?.role === 'TEACHER') {
+            router.push(`/school/${slug}/teacher`);
+          }
+          // Other Staff → Welcome page (temporary)
           else {
             router.push(`/school/${slug}/welcome`);
           }
