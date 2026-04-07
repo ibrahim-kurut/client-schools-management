@@ -159,17 +159,19 @@ const StudentResultModal = ({
                             const apr = exams['APRIL'];
                             const finalExam = exams['FINAL_EXAM'];
 
-                            // Helper to average available grades
-                            const calcAvg = (...marks) => {
-                              const valid = marks.filter(m => m !== undefined && m !== null);
-                              if (valid.length === 0) return null;
+                            // Helper: Check if values exist and are not null
+                            const hasAll = (...vals) => vals.every(v => v !== undefined && v !== null);
+                            const countAvailable = (...vals) => vals.filter(v => v !== undefined && v !== null).length;
+                            const getAvg = (...vals) => {
+                              const valid = vals.filter(v => v !== undefined && v !== null);
                               return Math.round(valid.reduce((a, b) => a + b, 0) / valid.length);
                             };
 
-                            const firstAvg = calcAvg(oct, nov, dec);
-                            const secondAvg = calcAvg(mar, apr);
-                            const annualEffort = calcAvg(firstAvg, midyear, secondAvg);
-                            const finalGrade = calcAvg(annualEffort, finalExam);
+                            // Logical Calculations (Matching backend)
+                            const firstAvg = countAvailable(oct, nov, dec) >= 2 ? getAvg(oct, nov, dec) : null;
+                            const secondAvg = hasAll(mar, apr) ? getAvg(mar, apr) : null;
+                            const annualEffort = hasAll(firstAvg, midyear, secondAvg) ? getAvg(firstAvg, midyear, secondAvg) : null;
+                            const finalGrade = hasAll(annualEffort, finalExam) ? getAvg(annualEffort, finalExam) : null;
 
                             const renderCell = (val, isCalc = false, extraClass = "") => {
                               if (val === undefined || val === null) return <span className="text-slate-300">—</span>;
