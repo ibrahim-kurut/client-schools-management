@@ -11,7 +11,11 @@ export default function AttendancePage() {
   const [saved, setSaved] = useState(false);
 
   const selectedClass = teacherClasses.find((c) => c.id === selectedClassId);
-  const students = selectedClass?.students || [];
+  const students = [...(selectedClass?.students || [])].sort((a, b) => {
+    const nameA = `${a.firstName} ${a.lastName}`;
+    const nameB = `${b.firstName} ${b.lastName}`;
+    return nameA.localeCompare(nameB, 'ar');
+  });
 
   const handleClassChange = (e) => {
     const val = e.target.value;

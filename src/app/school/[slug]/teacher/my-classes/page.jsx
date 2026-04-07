@@ -1,7 +1,8 @@
 "use client";
 import { useState } from "react";
-import { teacherClasses } from "@/data/teacherMockData";
-import { Users, Search, Phone, ChevronDown, ChevronUp, Layers, BookOpen, User2 } from "lucide-react";
+import { teacherClasses, existingGrades, teacherSubjects, examTypes, teacherProfile } from "@/data/teacherMockData";
+import { Users, Search, Phone, ChevronDown, ChevronUp, Layers, BookOpen, User2, X, Printer, Trophy } from "lucide-react";
+import StudentResultModal from "@/components/students/StudentResultModal";
 
 const classColors = [
   { gradient: "from-indigo-500 to-blue-600", bg: "bg-indigo-50", text: "text-indigo-600", border: "border-indigo-200", shadow: "shadow-indigo-200/50", light: "bg-indigo-500" },
@@ -12,6 +13,7 @@ const classColors = [
 export default function MyClassesPage() {
   const [expandedClass, setExpandedClass] = useState(teacherClasses[0]?.id || null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedStudent, setSelectedStudent] = useState(null);
 
   const toggleClass = (classId) => {
     setExpandedClass(expandedClass === classId ? null : classId);
@@ -46,9 +48,15 @@ export default function MyClassesPage() {
         {teacherClasses.map((cls, i) => {
           const color = classColors[i % classColors.length];
           const isExpanded = expandedClass === cls.id;
-          const filteredStudents = cls.students.filter((s) =>
-            `${s.firstName} ${s.lastName}`.toLowerCase().includes(searchQuery.toLowerCase())
-          );
+          const filteredStudents = cls.students
+            .filter((s) =>
+              `${s.firstName} ${s.lastName}`.toLowerCase().includes(searchQuery.toLowerCase())
+            )
+            .sort((a, b) => {
+              const nameA = `${a.firstName} ${a.lastName}`;
+              const nameB = `${b.firstName} ${b.lastName}`;
+              return nameA.localeCompare(nameB, 'ar');
+            });
 
           return (
             <div
@@ -101,10 +109,10 @@ export default function MyClassesPage() {
                     <table className="w-full">
                       <thead>
                         <tr className="border-b border-slate-100">
-                          <th className="text-right px-5 py-3 text-xs font-black text-slate-400 uppercase tracking-wider">#</th>
+                          <th className="text-center w-16 px-5 py-3 text-xs font-black text-slate-400 uppercase tracking-wider">#</th>
                           <th className="text-right px-5 py-3 text-xs font-black text-slate-400 uppercase tracking-wider">الاسم الكامل</th>
-                          <th className="text-right px-5 py-3 text-xs font-black text-slate-400 uppercase tracking-wider">الجنس</th>
-                          <th className="text-right px-5 py-3 text-xs font-black text-slate-400 uppercase tracking-wider">رقم الهاتف</th>
+                          <th className="text-center px-5 py-3 text-xs font-black text-slate-400 uppercase tracking-wider">الجنس</th>
+                          <th className="text-center px-5 py-3 text-xs font-black text-slate-400 uppercase tracking-wider">رقم الهاتف</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -118,9 +126,10 @@ export default function MyClassesPage() {
                           filteredStudents.map((student, idx) => (
                             <tr
                               key={student.id}
-                              className="border-b border-slate-50 last:border-0 hover:bg-slate-50/50 transition-colors"
+                              onClick={() => setSelectedStudent(student)}
+                              className="border-b border-slate-50 last:border-0 hover:bg-slate-50/50 transition-colors cursor-pointer"
                             >
-                              <td className="px-5 py-3.5 text-sm font-bold text-slate-400">{idx + 1}</td>
+                              <td className="px-5 py-3.5 text-sm font-bold text-slate-400 text-center">{idx + 1}</td>
                               <td className="px-5 py-3.5">
                                 <div className="flex items-center gap-3">
                                   <div className={`w-8 h-8 rounded-lg ${student.gender === 'MALE' ? 'bg-blue-50' : 'bg-pink-50'} flex items-center justify-center`}>
@@ -131,13 +140,13 @@ export default function MyClassesPage() {
                                   </span>
                                 </div>
                               </td>
-                              <td className="px-5 py-3.5">
+                              <td className="px-5 py-3.5 text-center">
                                 <span className={`px-2.5 py-1 rounded-md text-xs font-black ${student.gender === 'MALE' ? 'bg-blue-50 text-blue-600' : 'bg-pink-50 text-pink-600'}`}>
                                   {student.gender === 'MALE' ? 'ذكر' : 'أنثى'}
                                 </span>
                               </td>
                               <td className="px-5 py-3.5">
-                                <div className="flex items-center gap-1.5 text-sm font-semibold text-slate-500" dir="ltr">
+                                <div className="flex items-center justify-center gap-1.5 text-sm font-semibold text-slate-500" dir="ltr">
                                   <Phone className="w-3.5 h-3.5 text-slate-400" />
                                   {student.phone}
                                 </div>
@@ -154,6 +163,18 @@ export default function MyClassesPage() {
           );
         })}
       </div>
+
+      {selectedStudent && (
+        <StudentResultModal
+          student={selectedStudent}
+          studentGrades={existingGrades.filter((g) => g.studentId === selectedStudent?.id)}
+          subjects={teacherSubjects}
+          examTypes={examTypes}
+          schoolName={teacherProfile.schoolName || 'اسم المدرسة'}
+          onClose={() => setSelectedStudent(null)}
+        />
+      )}
     </div>
   );
 }
+
