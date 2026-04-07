@@ -2,67 +2,67 @@
 import { Users, BookOpen, Layers, Banknote, TrendingUp, CalendarCheck } from "lucide-react";
 import { teacherStats } from "@/data/teacherMockData";
 
-const stats = [
-  {
-    label: "الفصول الدراسية",
-    value: teacherStats.totalClasses,
-    icon: Layers,
-    gradient: "from-indigo-500 to-blue-600",
-    bgLight: "bg-indigo-50",
-    textColor: "text-indigo-600",
-    shadowColor: "shadow-indigo-200/50",
-  },
-  {
-    label: "إجمالي الطلاب",
-    value: teacherStats.totalStudents,
-    suffix: "طالب",
-    icon: Users,
-    gradient: "from-emerald-500 to-teal-600",
-    bgLight: "bg-emerald-50",
-    textColor: "text-emerald-600",
-    shadowColor: "shadow-emerald-200/50",
-  },
-  {
-    label: "المواد الدراسية",
-    value: teacherStats.totalSubjects,
-    icon: BookOpen,
-    gradient: "from-violet-500 to-purple-600",
-    bgLight: "bg-violet-50",
-    textColor: "text-violet-600",
-    shadowColor: "shadow-violet-200/50",
-  },
-  {
-    label: "نسبة الحضور",
-    value: `${teacherStats.attendanceRate}%`,
-    icon: CalendarCheck,
-    gradient: "from-amber-500 to-orange-500",
-    bgLight: "bg-amber-50",
-    textColor: "text-amber-600",
-    shadowColor: "shadow-amber-200/50",
-  },
-  {
-    label: "الدرجات المرصودة",
-    value: teacherStats.gradesEntered,
-    suffix: "درجة",
-    icon: TrendingUp,
-    gradient: "from-cyan-500 to-blue-500",
-    bgLight: "bg-cyan-50",
-    textColor: "text-cyan-600",
-    shadowColor: "shadow-cyan-200/50",
-  },
-  {
-    label: "آخر راتب",
-    value: teacherStats.lastSalary.toLocaleString(),
-    suffix: "د.ع",
-    icon: Banknote,
-    gradient: "from-rose-500 to-pink-600",
-    bgLight: "bg-rose-50",
-    textColor: "text-rose-600",
-    shadowColor: "shadow-rose-200/50",
-  },
-];
+export default function TeacherStatsGrid({ statsOverride }) {
+  const stats = [
+    {
+      label: "الفصول الدراسية",
+      value: statsOverride?.totalClasses ?? teacherStats.totalClasses,
+      icon: Layers,
+      gradient: "from-indigo-500 to-blue-600",
+      bgLight: "bg-indigo-50",
+      textColor: "text-indigo-600",
+      shadowColor: "shadow-indigo-200/50",
+    },
+    {
+      label: "إجمالي الطلاب",
+      value: statsOverride?.totalStudents ?? teacherStats.totalStudents,
+      suffix: "طالب",
+      icon: Users,
+      gradient: "from-emerald-500 to-teal-600",
+      bgLight: "bg-emerald-50",
+      textColor: "text-emerald-600",
+      shadowColor: "shadow-emerald-200/50",
+    },
+    {
+      label: "المواد الدراسية",
+      value: statsOverride?.totalSubjects ?? teacherStats.totalSubjects,
+      icon: BookOpen,
+      gradient: "from-violet-500 to-purple-600",
+      bgLight: "bg-violet-50",
+      textColor: "text-violet-600",
+      shadowColor: "shadow-violet-200/50",
+    },
+    {
+      label: "نسبة الحضور",
+      value: `${teacherStats.attendanceRate}%`,
+      icon: CalendarCheck,
+      gradient: "from-amber-500 to-orange-500",
+      bgLight: "bg-amber-50",
+      textColor: "text-amber-600",
+      shadowColor: "shadow-amber-200/50",
+    },
+    {
+      label: "الدرجات المرصودة",
+      value: teacherStats.gradesEntered,
+      suffix: "درجة",
+      icon: TrendingUp,
+      gradient: "from-cyan-500 to-blue-500",
+      bgLight: "bg-cyan-50",
+      textColor: "text-cyan-600",
+      shadowColor: "shadow-cyan-200/50",
+    },
+    {
+      label: "آخر راتب",
+      value: teacherStats.lastSalary.toLocaleString(),
+      suffix: "د.ع",
+      icon: Banknote,
+      gradient: "from-rose-500 to-pink-600",
+      bgLight: "bg-rose-50",
+      textColor: "text-rose-600",
+      shadowColor: "shadow-rose-200/50",
+    },
+  ];
 
-export default function TeacherStatsGrid() {
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
       {stats.map((stat, i) => {

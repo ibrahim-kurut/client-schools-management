@@ -1,15 +1,37 @@
 "use client";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchTeacherStudents } from "@/redux/slices/teacherProfileSlice";
 import TeacherStatsGrid from "@/components/teacher/TeacherStatsGrid";
 import TeacherScheduleCard from "@/components/teacher/TeacherScheduleCard";
 import TeacherRecentActivity from "@/components/teacher/TeacherRecentActivity";
-import { teacherClasses } from "@/data/teacherMockData";
-import { Users, ArrowLeft, Layers } from "lucide-react";
+import { ArrowLeft, Layers } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 
 export default function TeacherDashboard() {
+  const dispatch = useDispatch();
   const params = useParams();
   const slug = params?.slug || '';
+  
+  const { classes, loading } = useSelector((state) => state.teacherProfile);
+
+  useEffect(() => {
+    dispatch(fetchTeacherStudents());
+  }, [dispatch]);
+
+  const totalStudents = classes.reduce((sum, c) => sum + (c.students?.length || 0), 0);
+  const totalSubjects = classes.reduce((sum, c) => sum + (c.subjects?.length || 0), 0);
+
+  const dashboardStats = {
+      totalClasses: classes.length,
+      totalStudents: totalStudents,
+      totalSubjects: totalSubjects
+  };
+
+  if (loading && classes.length === 0) {
+      return <div className="flex items-center justify-center p-10"><div className="animate-spin rounded-full h-12 w-12 border-4 border-indigo-500 border-t-transparent"></div></div>;
+  }
 
   return (
     <div className="space-y-8 animate-fadeIn">
@@ -20,7 +42,7 @@ export default function TeacherDashboard() {
       </div>
 
       {/* Stats Grid */}
-      <TeacherStatsGrid />
+      <TeacherStatsGrid statsOverride={dashboardStats} />
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -28,39 +50,45 @@ export default function TeacherDashboard() {
         <div className="lg:col-span-2 space-y-6">
           {/* Quick Access Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {teacherClasses.map((cls, i) => {
-              const colors = [
-                { gradient: "from-indigo-500 to-blue-600", shadow: "shadow-indigo-200/50", bg: "bg-indigo-50", text: "text-indigo-600" },
-                { gradient: "from-emerald-500 to-teal-600", shadow: "shadow-emerald-200/50", bg: "bg-emerald-50", text: "text-emerald-600" },
-                { gradient: "from-violet-500 to-purple-600", shadow: "shadow-violet-200/50", bg: "bg-violet-50", text: "text-violet-600" },
-              ];
-              const color = colors[i % colors.length];
-
-              return (
-                <Link
-                  key={cls.id}
-                  href={`/school/${slug}/teacher/my-classes`}
-                  className="group bg-white rounded-2xl p-5 border border-slate-100 hover:border-transparent hover:shadow-xl transition-all duration-300 cursor-pointer"
-                >
-                  <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${color.gradient} flex items-center justify-center mb-4 shadow-lg ${color.shadow} group-hover:scale-110 transition-transform duration-300`}>
-                    <Layers className="w-6 h-6 text-white" />
-                  </div>
-                  <h3 className="font-black text-slate-800 text-lg mb-1">{cls.name}</h3>
-                  <div className="flex items-center gap-2">
-                    <div className={`${color.bg} px-2 py-0.5 rounded-md`}>
-                      <span className={`text-xs font-black ${color.text}`}>{cls.studentsCount} طالب</span>
-                    </div>
-                    <div className={`${color.bg} px-2 py-0.5 rounded-md`}>
-                      <span className={`text-xs font-black ${color.text}`}>{cls.subjectsCount} مادة</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-1 mt-3 text-xs font-bold text-slate-400 group-hover:text-indigo-500 transition-colors">
-                    <span>عرض التفاصيل</span>
-                    <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
-                  </div>
-                </Link>
-              );
-            })}
+            {classes.length === 0 ? (
+                <div className="col-span-full bg-white rounded-2xl p-10 border border-slate-100 text-center font-bold text-slate-400">
+                    لم يتم العثور على فصول مرتبطة بك حالياً
+                </div>
+            ) : (
+                classes.map((cls, i) => {
+                  const colors = [
+                    { gradient: "from-indigo-500 to-blue-600", shadow: "shadow-indigo-200/50", bg: "bg-indigo-50", text: "text-indigo-600" },
+                    { gradient: "from-emerald-500 to-teal-600", shadow: "shadow-emerald-200/50", bg: "bg-emerald-50", text: "text-emerald-600" },
+                    { gradient: "from-violet-500 to-purple-600", shadow: "shadow-violet-200/50", bg: "bg-violet-50", text: "text-violet-600" },
+                  ];
+                  const color = colors[i % colors.length];
+    
+                  return (
+                    <Link
+                      key={cls.id}
+                      href={`/school/${slug}/teacher/my-classes`}
+                      className="group bg-white rounded-2xl p-5 border border-slate-100 hover:border-transparent hover:shadow-xl transition-all duration-300 cursor-pointer"
+                    >
+                      <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${color.gradient} flex items-center justify-center mb-4 shadow-lg ${color.shadow} group-hover:scale-110 transition-transform duration-300`}>
+                        <Layers className="w-6 h-6 text-white" />
+                      </div>
+                      <h3 className="font-black text-slate-800 text-lg mb-1 truncate">{cls.name}</h3>
+                      <div className="flex items-center gap-2">
+                        <div className={`${color.bg} px-2 py-0.5 rounded-md`}>
+                          <span className={`text-xs font-black ${color.text}`}>{cls.students?.length || 0} طالب</span>
+                        </div>
+                        <div className={`${color.bg} px-2 py-0.5 rounded-md`}>
+                          <span className={`text-xs font-black ${color.text}`}>{cls.subjects?.length || 0} مادة</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1 mt-3 text-xs font-bold text-slate-400 group-hover:text-indigo-500 transition-colors">
+                        <span>عرض التفاصيل</span>
+                        <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
+                      </div>
+                    </Link>
+                  );
+                })
+            )}
           </div>
 
           {/* Recent Activity */}

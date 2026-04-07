@@ -10,8 +10,8 @@ import feesReducer from "./slices/feesSlice";
 import expensesReducer from "./slices/expensesSlice";
 import academicYearsReducer from "./slices/academicYearsSlice";
 import archiveReducer from "./slices/archiveSlice";
-
-
+import teacherProfileReducer from "./slices/teacherProfileSlice";
+import teacherGradesReducer from "./slices/teacherGradesSlice";
 export const store = configureStore({
     reducer: {
         auth: authReducer,
@@ -25,7 +25,8 @@ export const store = configureStore({
         expenses: expensesReducer,
         academicYears: academicYearsReducer,
         archive: archiveReducer,
-
+        teacherProfile: teacherProfileReducer,
+        teacherGrades: teacherGradesReducer,
     },
 });
 

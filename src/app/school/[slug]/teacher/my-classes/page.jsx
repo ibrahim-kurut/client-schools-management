@@ -1,7 +1,10 @@
 "use client";
-import { useState } from "react";
-import { teacherClasses, existingGrades, teacherSubjects, examTypes, teacherProfile } from "@/data/teacherMockData";
-import { Users, Search, Phone, ChevronDown, ChevronUp, Layers, BookOpen, User2, X, Printer, Trophy } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchTeacherStudents } from "@/redux/slices/teacherProfileSlice";
+import { fetchClassGrades } from "@/redux/slices/teacherGradesSlice";
+import { examTypes } from "@/data/teacherMockData";
+import { Users, Search, Phone, ChevronDown, Layers, BookOpen, User2, Trophy } from "lucide-react";
 import StudentResultModal from "@/components/students/StudentResultModal";
 
 const classColors = [
@@ -11,13 +14,40 @@ const classColors = [
 ];
 
 export default function MyClassesPage() {
-  const [expandedClass, setExpandedClass] = useState(teacherClasses[0]?.id || null);
+  const dispatch = useDispatch();
+  const { classes, loading: profileLoading } = useSelector((state) => state.teacherProfile);
+  const { grades, loading: gradesLoading } = useSelector((state) => state.teacherGrades);
+  const { user: currentUser } = useSelector((state) => state.auth);
+
+  const [expandedClass, setExpandedClass] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStudent, setSelectedStudent] = useState(null);
 
+  useEffect(() => {
+    dispatch(fetchTeacherStudents());
+  }, [dispatch]);
+
+  // Set first class as expanded by default once loaded
+  useEffect(() => {
+    if (classes.length > 0 && expandedClass === null) {
+      setExpandedClass(classes[0].id);
+      dispatch(fetchClassGrades({ classId: classes[0].id }));
+    }
+  }, [classes, expandedClass, dispatch]);
+
   const toggleClass = (classId) => {
-    setExpandedClass(expandedClass === classId ? null : classId);
+    const isExpanding = expandedClass !== classId;
+    setExpandedClass(isExpanding ? classId : null);
+    if (isExpanding) {
+      dispatch(fetchClassGrades({ classId }));
+    }
   };
+
+  const totalStudents = classes.reduce((sum, c) => sum + (c.students?.length || 0), 0);
+
+  if (profileLoading && classes.length === 0) {
+    return <div className="flex items-center justify-center p-10"><div className="animate-spin rounded-full h-12 w-12 border-4 border-indigo-500 border-t-transparent"></div></div>;
+  }
 
   return (
     <div className="space-y-8 animate-fadeIn">
@@ -26,7 +56,7 @@ export default function MyClassesPage() {
         <div>
           <h1 className="text-2xl font-black text-slate-800">فصولي وطلابي</h1>
           <p className="text-sm font-bold text-slate-400 mt-1">
-            {teacherClasses.length} فصول · {teacherClasses.reduce((sum, c) => sum + c.studentsCount, 0)} طالب
+            {classes.length} فصول · {totalStudents} طالب
           </p>
         </div>
 
@@ -38,17 +68,24 @@ export default function MyClassesPage() {
             placeholder="ابحث عن طالب..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-white border border-slate-200 rounded-xl py-2.5 pr-10 pl-4 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-all"
+            className="w-full bg-white border border-slate-200 rounded-xl py-2.5 pr-10 pl-4 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-all font-bold"
           />
         </div>
       </div>
 
       {/* Classes */}
       <div className="space-y-5">
-        {teacherClasses.map((cls, i) => {
+        {classes.length === 0 && !profileLoading && (
+          <div className="bg-white rounded-2xl border border-slate-100 p-16 text-center shadow-sm">
+             <Layers className="w-12 h-12 text-slate-200 mx-auto mb-4" />
+             <p className="text-slate-400 font-bold">لا توجد فصول دراسية مرتبطة بك حالياً.</p>
+          </div>
+        )}
+
+        {classes.map((cls, i) => {
           const color = classColors[i % classColors.length];
           const isExpanded = expandedClass === cls.id;
-          const filteredStudents = cls.students
+          const filteredStudents = (cls.students || [])
             .filter((s) =>
               `${s.firstName} ${s.lastName}`.toLowerCase().includes(searchQuery.toLowerCase())
             )
@@ -61,12 +98,12 @@ export default function MyClassesPage() {
           return (
             <div
               key={cls.id}
-              className={`bg-white rounded-2xl border ${isExpanded ? 'border-slate-200 shadow-lg' : 'border-slate-100'} overflow-hidden transition-all duration-300`}
+              className={`bg-white rounded-2xl border ${isExpanded ? 'border-slate-200 shadow-xl shadow-slate-200/40' : 'border-slate-100'} overflow-hidden transition-all duration-300`}
             >
               {/* Class Header */}
               <button
                 onClick={() => toggleClass(cls.id)}
-                className="w-full flex items-center justify-between p-5 hover:bg-slate-50/50 transition-colors"
+                className={`w-full flex items-center justify-between p-5 hover:bg-slate-50/50 transition-colors ${isExpanded ? 'bg-slate-50/30' : ''}`}
               >
                 <div className="flex items-center gap-4">
                   <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${color.gradient} flex items-center justify-center shadow-lg ${color.shadow}`}>
@@ -74,14 +111,14 @@ export default function MyClassesPage() {
                   </div>
                   <div className="text-right">
                     <h3 className="font-black text-slate-800 text-lg">{cls.name}</h3>
-                    <div className="flex items-center gap-3 mt-1">
-                      <span className="flex items-center gap-1 text-xs font-bold text-slate-400">
+                    <div className="flex items-center gap-3 mt-1 text-xs">
+                      <span className="flex items-center gap-1 font-bold text-slate-400">
                         <Users className="w-3.5 h-3.5" />
-                        {cls.studentsCount} طالب
+                        {cls.students?.length || 0} طالب
                       </span>
-                      <span className="flex items-center gap-1 text-xs font-bold text-slate-400">
+                      <span className="flex items-center gap-1 font-bold text-slate-400">
                         <BookOpen className="w-3.5 h-3.5" />
-                        {cls.subjects.map((s) => s.name).join("، ")}
+                        {cls.subjects?.map((s) => s.name).join("، ")}
                       </span>
                     </div>
                   </div>
@@ -97,8 +134,8 @@ export default function MyClassesPage() {
                 <div className="border-t border-slate-100 animate-fadeIn">
                   {/* Subjects Tags */}
                   <div className="flex items-center gap-2 px-5 pt-4 pb-2 flex-wrap">
-                    {cls.subjects.map((sub) => (
-                      <span key={sub.id} className={`${color.bg} ${color.text} px-3 py-1 rounded-lg text-xs font-black`}>
+                    {(cls.subjects || []).map((sub, j) => (
+                      <span key={j} className={`${color.bg} ${color.text} px-3 py-1 rounded-lg text-xs font-black`}>
                         {sub.name}
                       </span>
                     ))}
@@ -108,18 +145,18 @@ export default function MyClassesPage() {
                   <div className="overflow-x-auto">
                     <table className="w-full">
                       <thead>
-                        <tr className="border-b border-slate-100">
-                          <th className="text-center w-16 px-5 py-3 text-xs font-black text-slate-400 uppercase tracking-wider">#</th>
-                          <th className="text-right px-5 py-3 text-xs font-black text-slate-400 uppercase tracking-wider">الاسم الكامل</th>
-                          <th className="text-center px-5 py-3 text-xs font-black text-slate-400 uppercase tracking-wider">الجنس</th>
-                          <th className="text-center px-5 py-3 text-xs font-black text-slate-400 uppercase tracking-wider">رقم الهاتف</th>
+                        <tr className="border-b border-slate-100 text-right">
+                          <th className="w-16 px-5 py-3 text-xs font-black text-slate-400 uppercase tracking-wider text-center">#</th>
+                          <th className="px-5 py-3 text-xs font-black text-slate-400 uppercase tracking-wider text-right">اسم الطالب</th>
+                          <th className="px-5 py-3 text-xs font-black text-slate-400 uppercase tracking-wider text-center">الجنس</th>
+                          <th className="px-5 py-3 text-xs font-black text-slate-400 uppercase tracking-wider text-center">رقم الهاتف</th>
                         </tr>
                       </thead>
                       <tbody>
                         {filteredStudents.length === 0 ? (
                           <tr>
-                            <td colSpan={4} className="text-center py-8 text-sm font-bold text-slate-400">
-                              لا يوجد طلاب مطابقون للبحث
+                            <td colSpan={4} className="text-center py-10 text-sm font-bold text-slate-300">
+                               {searchQuery ? "لم يتم العثور على نتائج" : "لا يوجد طلاب في هذا الفصل"}
                             </td>
                           </tr>
                         ) : (
@@ -127,28 +164,27 @@ export default function MyClassesPage() {
                             <tr
                               key={student.id}
                               onClick={() => setSelectedStudent(student)}
-                              className="border-b border-slate-50 last:border-0 hover:bg-slate-50/50 transition-colors cursor-pointer"
+                              className="border-b border-slate-50 last:border-0 hover:bg-slate-50/50 transition-colors cursor-pointer group"
                             >
-                              <td className="px-5 py-3.5 text-sm font-bold text-slate-400 text-center">{idx + 1}</td>
-                              <td className="px-5 py-3.5">
+                              <td className="px-5 py-4 text-sm font-bold text-slate-400 text-center">{idx + 1}</td>
+                              <td className="px-5 py-4">
                                 <div className="flex items-center gap-3">
-                                  <div className={`w-8 h-8 rounded-lg ${student.gender === 'MALE' ? 'bg-blue-50' : 'bg-pink-50'} flex items-center justify-center`}>
+                                  <div className={`w-8 h-8 rounded-lg ${student.gender === 'MALE' ? 'bg-blue-50' : 'bg-pink-50'} flex items-center justify-center transition-transform group-hover:scale-110`}>
                                     <User2 className={`w-4 h-4 ${student.gender === 'MALE' ? 'text-blue-500' : 'text-pink-500'}`} />
                                   </div>
-                                  <span className="font-bold text-sm text-slate-700">
+                                  <span className="font-bold text-sm text-slate-700 group-hover:text-indigo-600 transition-colors">
                                     {student.firstName} {student.lastName}
                                   </span>
                                 </div>
                               </td>
-                              <td className="px-5 py-3.5 text-center">
-                                <span className={`px-2.5 py-1 rounded-md text-xs font-black ${student.gender === 'MALE' ? 'bg-blue-50 text-blue-600' : 'bg-pink-50 text-pink-600'}`}>
+                              <td className="px-5 py-4 text-center">
+                                <span className={`px-2.5 py-1 rounded-md text-[10px] font-black ${student.gender === 'MALE' ? 'bg-blue-50 text-blue-600 border border-blue-100' : 'bg-pink-50 text-pink-600 border border-pink-100'}`}>
                                   {student.gender === 'MALE' ? 'ذكر' : 'أنثى'}
                                 </span>
                               </td>
-                              <td className="px-5 py-3.5">
-                                <div className="flex items-center justify-center gap-1.5 text-sm font-semibold text-slate-500" dir="ltr">
-                                  <Phone className="w-3.5 h-3.5 text-slate-400" />
-                                  {student.phone}
+                              <td className="px-5 py-4">
+                                <div className="flex items-center justify-center gap-1.5 text-xs font-black text-slate-500" dir="ltr">
+                                  {student.phone || "—"}
                                 </div>
                               </td>
                             </tr>
@@ -167,14 +203,13 @@ export default function MyClassesPage() {
       {selectedStudent && (
         <StudentResultModal
           student={selectedStudent}
-          studentGrades={existingGrades.filter((g) => g.studentId === selectedStudent?.id)}
-          subjects={teacherSubjects}
+          studentGrades={grades.filter((g) => g.studentId === selectedStudent?.id)}
+          subjects={classes.find(c => c.id === expandedClass)?.subjects || []}
           examTypes={examTypes}
-          schoolName={teacherProfile.schoolName || 'اسم المدرسة'}
+          schoolName={currentUser?.school?.name || 'مدرستي'}
           onClose={() => setSelectedStudent(null)}
         />
       )}
     </div>
   );
 }
-

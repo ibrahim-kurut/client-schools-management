@@ -1,8 +1,37 @@
 "use client";
-import { teacherProfile, teacherSubjects, salaryHistory, teacherStats } from "@/data/teacherMockData";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchFullProfile } from "@/redux/slices/teacherProfileSlice";
 import { User2, Mail, Phone, Calendar, BookOpen, Banknote, GraduationCap, Layers, TrendingUp } from "lucide-react";
 
 export default function ProfilePage() {
+  const dispatch = useDispatch();
+  const { profileData, loading } = useSelector((state) => state.teacherProfile);
+
+  useEffect(() => {
+    dispatch(fetchFullProfile());
+  }, [dispatch]);
+
+  if (loading && !profileData) {
+    return <div className="flex items-center justify-center p-10"><div className="animate-spin rounded-full h-12 w-12 border-4 border-indigo-500 border-t-transparent"></div></div>;
+  }
+
+  if (!profileData) {
+      return <div className="p-10 text-center font-bold text-slate-400">لا توجد بيانات متاحة للملف الشخصي</div>;
+  }
+
+  const teacherName = `${profileData.firstName || ''} ${profileData.lastName || ''}`;
+  const schoolName = profileData.school?.name || "مدرستي";
+  const subjects = profileData.subjects || [];
+  const salaryHistory = profileData.salariesReceived || [];
+  
+  // Calculate stats
+  const totalClasses = [...new Set(subjects.map(s => s.class?.id))].length;
+  const totalSubjects = subjects.length;
+  // Note: Total students might be harder to get from just this profile return if not nested, 
+  // but we can rely on the other slice for that if needed. For now using 0 or placeholder if not in profileData directly.
+  const totalStudents = profileData.totalStudents || 0; 
+
   return (
     <div className="space-y-8 animate-fadeIn">
       {/* Page Header */}
@@ -15,7 +44,7 @@ export default function ProfilePage() {
         {/* Left: Profile Card */}
         <div className="lg:col-span-1 space-y-6">
           {/* Profile Card */}
-          <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
+          <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm">
             {/* Banner */}
             <div className="h-28 bg-gradient-to-br from-indigo-500 via-blue-600 to-violet-600 relative">
               <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl" />
@@ -29,7 +58,7 @@ export default function ProfilePage() {
               </div>
 
               <h2 className="text-xl font-black text-slate-800 mt-4">
-                {teacherProfile.firstName} {teacherProfile.lastName}
+                {teacherName}
               </h2>
 
               <div className="inline-flex items-center gap-1.5 bg-indigo-50 px-3 py-1 rounded-full mt-2">
@@ -37,7 +66,7 @@ export default function ProfilePage() {
                 <span className="text-xs font-black text-indigo-600">معلم</span>
               </div>
 
-              <p className="text-sm font-bold text-slate-400 mt-2">{teacherProfile.schoolName}</p>
+              <p className="text-sm font-bold text-slate-400 mt-2">{schoolName}</p>
             </div>
 
             {/* Info List */}
@@ -46,9 +75,9 @@ export default function ProfilePage() {
                 <div className="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center">
                   <Mail className="w-4 h-4 text-blue-500" />
                 </div>
-                <div>
+                <div className="overflow-hidden">
                   <p className="text-xs font-bold text-slate-400">البريد الإلكتروني</p>
-                  <p className="text-sm font-bold text-slate-700" dir="ltr">{teacherProfile.email}</p>
+                  <p className="text-sm font-bold text-slate-700 truncate" dir="ltr">{profileData.email}</p>
                 </div>
               </div>
 
@@ -58,7 +87,7 @@ export default function ProfilePage() {
                 </div>
                 <div>
                   <p className="text-xs font-bold text-slate-400">رقم الهاتف</p>
-                  <p className="text-sm font-bold text-slate-700" dir="ltr">{teacherProfile.phone}</p>
+                  <p className="text-sm font-bold text-slate-700" dir="ltr">{profileData.phone || "—"}</p>
                 </div>
               </div>
 
@@ -67,8 +96,8 @@ export default function ProfilePage() {
                   <Calendar className="w-4 h-4 text-violet-500" />
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-slate-400">تاريخ الميلاد</p>
-                  <p className="text-sm font-bold text-slate-700">{teacherProfile.birthDate}</p>
+                  <p className="text-xs font-bold text-slate-400">الدور</p>
+                  <p className="text-sm font-bold text-slate-700">{profileData.role === 'TEACHER' ? 'معلم' : profileData.role}</p>
                 </div>
               </div>
 
@@ -78,21 +107,21 @@ export default function ProfilePage() {
                 </div>
                 <div>
                   <p className="text-xs font-bold text-slate-400">الجنس</p>
-                  <p className="text-sm font-bold text-slate-700">{teacherProfile.gender === 'MALE' ? 'ذكر' : 'أنثى'}</p>
+                  <p className="text-sm font-bold text-slate-700">
+                      {profileData.gender === 'MALE' ? 'ذكر' : profileData.gender === 'FEMALE' ? 'أنثى' : '—'}
+                  </p>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Quick Stats */}
-          <div className="bg-white rounded-2xl border border-slate-100 p-5">
+          <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm">
             <h3 className="font-black text-slate-700 text-sm mb-4">إحصائيات سريعة</h3>
             <div className="grid grid-cols-2 gap-3">
               {[
-                { label: "الفصول", value: teacherStats.totalClasses, icon: Layers, color: "text-indigo-500 bg-indigo-50" },
-                { label: "الطلاب", value: teacherStats.totalStudents, icon: User2, color: "text-emerald-500 bg-emerald-50" },
-                { label: "المواد", value: teacherStats.totalSubjects, icon: BookOpen, color: "text-violet-500 bg-violet-50" },
-                { label: "الدرجات", value: teacherStats.gradesEntered, icon: TrendingUp, color: "text-amber-500 bg-amber-50" },
+                { label: "الفصول", value: totalClasses, icon: Layers, color: "text-indigo-500 bg-indigo-50" },
+                { label: "المواد", value: totalSubjects, icon: BookOpen, color: "text-violet-500 bg-violet-50" },
               ].map((stat, i) => {
                 const Icon = stat.icon;
                 return (
@@ -114,19 +143,20 @@ export default function ProfilePage() {
         {/* Right: Subjects & Salary */}
         <div className="lg:col-span-2 space-y-6">
           {/* Subjects */}
-          <div className="bg-white rounded-2xl border border-slate-100 p-6">
+          <div className="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm">
             <div className="flex items-center gap-3 mb-5">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg shadow-violet-200/50">
                 <BookOpen className="w-5 h-5 text-white" />
               </div>
               <div>
                 <h3 className="font-black text-slate-800">المواد التي أدرسها</h3>
-                <p className="text-xs font-bold text-slate-400">{teacherSubjects.length} مواد</p>
+                <p className="text-xs font-bold text-slate-400">{subjects.length} مواد</p>
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {teacherSubjects.map((subject, i) => {
+              {subjects.length === 0 && <p className="text-sm font-bold text-slate-300">لا توجد مواد مسجلة</p>}
+              {subjects.map((subject, i) => {
                 const colors = [
                   "from-indigo-500 to-blue-600 shadow-indigo-200/50",
                   "from-emerald-500 to-teal-600 shadow-emerald-200/50",
@@ -140,7 +170,7 @@ export default function ProfilePage() {
                     </div>
                     <div>
                       <h4 className="font-bold text-sm text-slate-800">{subject.name}</h4>
-                      <p className="text-xs font-semibold text-slate-400">{subject.className}</p>
+                      <p className="text-xs font-semibold text-slate-400">{subject.class?.name || "فصل غير معين"}</p>
                     </div>
                   </div>
                 );
@@ -149,7 +179,7 @@ export default function ProfilePage() {
           </div>
 
           {/* Salary History */}
-          <div className="bg-white rounded-2xl border border-slate-100 p-6">
+          <div className="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm">
             <div className="flex items-center gap-3 mb-5">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center shadow-lg shadow-rose-200/50">
                 <Banknote className="w-5 h-5 text-white" />
@@ -161,6 +191,11 @@ export default function ProfilePage() {
             </div>
 
             <div className="space-y-3">
+              {salaryHistory.length === 0 && (
+                  <div className="p-8 text-center text-slate-300 font-bold border-2 border-dashed border-slate-50 rounded-2xl">
+                    لا يوجد سجل رواتب متاح حالياً
+                  </div>
+              )}
               {salaryHistory.map((salary, i) => (
                 <div
                   key={salary.id}
@@ -171,8 +206,8 @@ export default function ProfilePage() {
                       <Banknote className={`w-5 h-5 ${i === 0 ? 'text-emerald-500' : 'text-slate-400'}`} />
                     </div>
                     <div>
-                      <h4 className="font-bold text-sm text-slate-700">{salary.title}</h4>
-                      <p className="text-xs font-semibold text-slate-400">{salary.date}</p>
+                      <h4 className="font-bold text-sm text-slate-700">{salary.month} - {salary.year}</h4>
+                      <p className="text-xs font-semibold text-slate-400">{new Date(salary.paymentDate).toLocaleDateString('ar-EG')}</p>
                     </div>
                   </div>
                   <div className="text-left">
@@ -186,17 +221,19 @@ export default function ProfilePage() {
             </div>
 
             {/* Total */}
-            <div className="mt-4 p-4 rounded-xl bg-gradient-to-r from-indigo-50 to-blue-50 border border-indigo-100">
-              <div className="flex items-center justify-between">
-                <span className="font-black text-sm text-indigo-700">إجمالي الرواتب المستلمة</span>
-                <div>
-                  <span className="text-xl font-black text-indigo-600">
-                    {salaryHistory.reduce((sum, s) => sum + s.amount, 0).toLocaleString()}
-                  </span>
-                  <span className="text-xs font-bold text-indigo-400 mr-1">د.ع</span>
+            {salaryHistory.length > 0 && (
+              <div className="mt-4 p-4 rounded-xl bg-gradient-to-r from-indigo-50 to-blue-50 border border-indigo-100">
+                <div className="flex items-center justify-between">
+                  <span className="font-black text-sm text-indigo-700">إجمالي الرواتب المستلمة</span>
+                  <div>
+                    <span className="text-xl font-black text-indigo-600">
+                      {salaryHistory.reduce((sum, s) => sum + s.amount, 0).toLocaleString()}
+                    </span>
+                    <span className="text-xs font-bold text-indigo-400 mr-1">د.ع</span>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
