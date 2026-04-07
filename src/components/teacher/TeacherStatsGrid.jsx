@@ -1,12 +1,13 @@
 "use client";
 import { Users, BookOpen, Layers, Banknote, TrendingUp, CalendarCheck } from "lucide-react";
-import { teacherStats } from "@/data/teacherMockData";
 
 export default function TeacherStatsGrid({ statsOverride }) {
+  // We use 0 as a default instead of mock data to ensure that 
+  // if data is loading or missing from DB, it doesn't show confusing mock values.
   const stats = [
     {
       label: "الفصول الدراسية",
-      value: statsOverride?.totalClasses ?? teacherStats.totalClasses,
+      value: statsOverride?.totalClasses ?? 0,
       icon: Layers,
       gradient: "from-indigo-500 to-blue-600",
       bgLight: "bg-indigo-50",
@@ -15,7 +16,7 @@ export default function TeacherStatsGrid({ statsOverride }) {
     },
     {
       label: "إجمالي الطلاب",
-      value: statsOverride?.totalStudents ?? teacherStats.totalStudents,
+      value: statsOverride?.totalStudents ?? 0,
       suffix: "طالب",
       icon: Users,
       gradient: "from-emerald-500 to-teal-600",
@@ -25,7 +26,7 @@ export default function TeacherStatsGrid({ statsOverride }) {
     },
     {
       label: "المواد الدراسية",
-      value: statsOverride?.totalSubjects ?? teacherStats.totalSubjects,
+      value: statsOverride?.totalSubjects ?? 0,
       icon: BookOpen,
       gradient: "from-violet-500 to-purple-600",
       bgLight: "bg-violet-50",
@@ -34,7 +35,7 @@ export default function TeacherStatsGrid({ statsOverride }) {
     },
     {
       label: "نسبة الحضور",
-      value: `${teacherStats.attendanceRate}%`,
+      value: `${statsOverride?.attendanceRate ?? 0}%`,
       icon: CalendarCheck,
       gradient: "from-amber-500 to-orange-500",
       bgLight: "bg-amber-50",
@@ -43,7 +44,7 @@ export default function TeacherStatsGrid({ statsOverride }) {
     },
     {
       label: "الدرجات المرصودة",
-      value: teacherStats.gradesEntered,
+      value: statsOverride?.gradesEnteredCount ?? 0,
       suffix: "درجة",
       icon: TrendingUp,
       gradient: "from-cyan-500 to-blue-500",
@@ -53,7 +54,7 @@ export default function TeacherStatsGrid({ statsOverride }) {
     },
     {
       label: "آخر راتب",
-      value: teacherStats.lastSalary.toLocaleString(),
+      value: statsOverride?.latestSalary?.toLocaleString() ?? "0",
       suffix: "د.ع",
       icon: Banknote,
       gradient: "from-rose-500 to-pink-600",

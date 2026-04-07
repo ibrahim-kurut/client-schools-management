@@ -1,18 +1,11 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+import axiosInstance from '../../lib/axios';
 
 export const fetchTeacherStudents = createAsyncThunk(
     'teacherProfile/fetchStudents',
     async (_, { rejectWithValue }) => {
         try {
-            const token = localStorage.getItem('token');
-            const response = await axios.get(`${API_URL}/profile/teacher/students`, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
+            const response = await axiosInstance.get(`/profile/teacher/students`);
             return response.data; // { classes: [...] }
         } catch (error) {
             return rejectWithValue(
@@ -26,12 +19,7 @@ export const fetchFullProfile = createAsyncThunk(
     'teacherProfile/fetchFullProfile',
     async (_, { rejectWithValue }) => {
         try {
-            const token = localStorage.getItem('token');
-            const response = await axios.get(`${API_URL}/profile`, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
+            const response = await axiosInstance.get(`/profile`);
             return response.data.user; 
         } catch (error) {
             return rejectWithValue(

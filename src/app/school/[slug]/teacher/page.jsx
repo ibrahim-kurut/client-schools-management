@@ -1,7 +1,7 @@
 "use client";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchTeacherStudents } from "@/redux/slices/teacherProfileSlice";
+import { fetchTeacherStudents, fetchFullProfile } from "@/redux/slices/teacherProfileSlice";
 import TeacherStatsGrid from "@/components/teacher/TeacherStatsGrid";
 import TeacherScheduleCard from "@/components/teacher/TeacherScheduleCard";
 import TeacherRecentActivity from "@/components/teacher/TeacherRecentActivity";
@@ -14,23 +14,36 @@ export default function TeacherDashboard() {
   const params = useParams();
   const slug = params?.slug || '';
   
-  const { classes, loading } = useSelector((state) => state.teacherProfile);
+  const { classes, profileData, loading } = useSelector((state) => state.teacherProfile);
 
   useEffect(() => {
     dispatch(fetchTeacherStudents());
+    dispatch(fetchFullProfile());
   }, [dispatch]);
 
   const totalStudents = classes.reduce((sum, c) => sum + (c.students?.length || 0), 0);
   const totalSubjects = classes.reduce((sum, c) => sum + (c.subjects?.length || 0), 0);
 
+  // Combine and map data for dashboard stats
   const dashboardStats = {
       totalClasses: classes.length,
       totalStudents: totalStudents,
-      totalSubjects: totalSubjects
+      totalSubjects: totalSubjects,
+      attendanceRate: profileData?.stats?.attendanceRate,
+      gradesEnteredCount: profileData?.stats?.gradesEnteredCount,
+      latestSalary: profileData?.stats?.latestSalary
   };
 
-  if (loading && classes.length === 0) {
-      return <div className="flex items-center justify-center p-10"><div className="animate-spin rounded-full h-12 w-12 border-4 border-indigo-500 border-t-transparent"></div></div>;
+  const latestActivities = profileData?.latestActivities || [];
+
+  // Strict loading state to avoid showing mock data fallbacks during initial fetch
+  if (loading && !profileData && classes.length === 0) {
+      return (
+        <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-indigo-500 border-t-transparent shadow-lg"></div>
+            <p className="text-sm font-bold text-slate-400 animate-pulse">جاري تحميل بياناتك الإحصائية...</p>
+        </div>
+      );
   }
 
   return (
@@ -46,11 +59,11 @@ export default function TeacherDashboard() {
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left: Schedule + Quick Access Cards */}
+        {/* Left: Recent Activity + Quick Access Cards */}
         <div className="lg:col-span-2 space-y-6">
           {/* Quick Access Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {classes.length === 0 ? (
+            {classes.length === 0 && !loading ? (
                 <div className="col-span-full bg-white rounded-2xl p-10 border border-slate-100 text-center font-bold text-slate-400">
                     لم يتم العثور على فصول مرتبطة بك حالياً
                 </div>
@@ -67,7 +80,7 @@ export default function TeacherDashboard() {
                     <Link
                       key={cls.id}
                       href={`/school/${slug}/teacher/my-classes`}
-                      className="group bg-white rounded-2xl p-5 border border-slate-100 hover:border-transparent hover:shadow-xl transition-all duration-300 cursor-pointer"
+                      className="group bg-white rounded-2xl p-5 border border-slate-100 hover:border-transparent hover:shadow-xl transition-all duration-300 cursor-pointer shadow-sm"
                     >
                       <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${color.gradient} flex items-center justify-center mb-4 shadow-lg ${color.shadow} group-hover:scale-110 transition-transform duration-300`}>
                         <Layers className="w-6 h-6 text-white" />
@@ -92,12 +105,12 @@ export default function TeacherDashboard() {
           </div>
 
           {/* Recent Activity */}
-          <TeacherRecentActivity />
+          <TeacherRecentActivity activities={latestActivities} />
         </div>
 
-        {/* Right: Schedule Card */}
+        {/* Right: My Subjects Card */}
         <div className="space-y-6">
-          <TeacherScheduleCard />
+          <TeacherScheduleCard subjects={profileData?.subjects} />
         </div>
       </div>
     </div>

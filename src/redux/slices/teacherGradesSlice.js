@@ -1,17 +1,13 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+import axiosInstance from '../../lib/axios';
 
 // Fetch all grades for a specific class
 export const fetchClassGrades = createAsyncThunk(
     'teacherGrades/fetchClassGrades',
     async ({ classId, academicYearId }, { rejectWithValue }) => {
         try {
-            const token = localStorage.getItem('token');
             const params = academicYearId ? { academicYearId } : {};
-            const response = await axios.get(`${API_URL}/grades/teacher-class/${classId}`, {
-                headers: { Authorization: `Bearer ${token}` },
+            const response = await axiosInstance.get(`/grades/teacher-class/${classId}`, {
                 params
             });
             return response.data.grades;
@@ -25,10 +21,7 @@ export const addGrade = createAsyncThunk(
     'teacherGrades/addGrade',
     async (gradeData, { rejectWithValue }) => {
         try {
-            const token = localStorage.getItem('token');
-            const response = await axios.post(`${API_URL}/grades`, gradeData, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const response = await axiosInstance.post(`/grades`, gradeData);
             return response.data.grade;
         } catch (error) {
             return rejectWithValue(error.response?.data?.message || 'فشل في إضافة الدرجة');
@@ -40,10 +33,10 @@ export const updateGrade = createAsyncThunk(
     'teacherGrades/updateGrade',
     async ({ studentId, gradeData }, { rejectWithValue }) => {
         try {
-            const token = localStorage.getItem('token');
-            const response = await axios.put(`${API_URL}/grades/${studentId}`, gradeData, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            // Note: In our current backend, update is likely PUT /api/grades/:id 
+            // where :id is the record id, or studentId if it's a unique relation.
+            // Let's assume studentId as passed from UI for now, but usually it's grade ID.
+            const response = await axiosInstance.put(`/grades/${studentId}`, gradeData);
             return response.data.grade;
         } catch (error) {
             return rejectWithValue(error.response?.data?.message || 'فشل في تعديل الدرجة');
@@ -55,10 +48,7 @@ export const deleteGrade = createAsyncThunk(
     'teacherGrades/deleteGrade',
     async (gradeId, { rejectWithValue }) => {
         try {
-            const token = localStorage.getItem('token');
-            await axios.delete(`${API_URL}/grades/${gradeId}`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            await axiosInstance.delete(`/grades/${gradeId}`);
             return gradeId;
         } catch (error) {
             return rejectWithValue(error.response?.data?.message || 'فشل في حذف الدرجة');
