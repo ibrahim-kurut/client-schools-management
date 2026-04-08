@@ -4,11 +4,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import { 
   Users, UserPlus, Search, Filter, MoreVertical, Edit, Trash2, 
   Eye, GraduationCap, Mail, Phone, MapPin, Activity, CheckCircle2, XCircle,
-  BookOpen, Calendar, Award, Loader2
+  BookOpen, Calendar, Award, Loader2, UserCog
 } from 'lucide-react';
 import { fetchMembers, deleteMember, resetMembersStatus, createMember, updateMember } from '../../../redux/slices/membersSlice';
 import { fetchClasses } from '../../../redux/slices/classesSlice';
 import MembersModal from './MembersModal';
+import RoleChangeModal from './RoleChangeModal';
 import Pagination from '../../ui/Pagination';
 import SearchInput from '../../ui/SearchInput';
 import Swal from 'sweetalert2';
@@ -27,6 +28,7 @@ export default function MembersManagement({ slug }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState(''); // Empty means all staff
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isRoleModalOpen, setIsRoleModalOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
@@ -103,6 +105,41 @@ export default function MembersManagement({ slug }) {
     } catch (err) {
       // Error is handled in the form normally, but we can log here
       console.error("Save Error:", err);
+    }
+  };
+
+  const handleChangeRole = (member) => {
+    setSelectedMember(member);
+    setIsRoleModalOpen(true);
+  };
+
+  const handleConfirmRoleChange = async (newRole) => {
+    if (!selectedMember) return;
+
+    const formData = new FormData();
+    formData.append('role', newRole);
+    
+    try {
+      await dispatch(updateMember({ id: selectedMember.id, formData })).unwrap();
+      Swal.fire({
+        title: 'تم التحديث!',
+        text: `تم تغيير دور ${selectedMember.firstName} إلى ${getRoleLabel(newRole)} بنجاح.`,
+        icon: 'success',
+        confirmButtonColor: '#2563eb',
+        customClass: { popup: 'rounded-[1.5rem] font-sans rtl' }
+      });
+      setIsRoleModalOpen(false);
+      setSelectedMember(null);
+      // Refresh list
+      dispatch(fetchMembers({ page: currentPage, limit: itemsPerPage, search: searchTerm, role: roleFilter }));
+    } catch (err) {
+      Swal.fire({
+        title: 'خطأ!',
+        text: 'فشل تحديث الدور، يرجى المحاولة لاحقاً.',
+        icon: 'error',
+        confirmButtonColor: '#2563eb',
+        customClass: { popup: 'rounded-[1.5rem] font-sans rtl' }
+      });
     }
   };
 
@@ -258,6 +295,15 @@ export default function MembersManagement({ slug }) {
                   
                   <td className="p-8">
                     <div className="flex items-center justify-center gap-3">
+                      {userData?.role === 'SCHOOL_ADMIN' && (
+                        <button 
+                          onClick={() => handleChangeRole(member)}
+                          className="p-3 bg-amber-50 text-amber-500 hover:bg-amber-600 hover:text-white rounded-2xl transition-all cursor-pointer shadow-sm"
+                          title="تغيير الدور الوظيفي"
+                        >
+                          <UserCog className="w-4 h-4" />
+                        </button>
+                      )}
                       {(userData?.role === 'SCHOOL_ADMIN' || userData?.role === 'ASSISTANT') && (
                         <button 
                           onClick={() => handleEdit(member)}
@@ -313,6 +359,18 @@ export default function MembersManagement({ slug }) {
           createStatus={createStatus}
           createError={createError}
           currentUserRole={userData?.role}
+        />
+      )}
+
+      {isRoleModalOpen && (
+        <RoleChangeModal 
+          isOpen={isRoleModalOpen}
+          onClose={() => {
+            setIsRoleModalOpen(false);
+            setSelectedMember(null);
+          }}
+          onConfirm={handleConfirmRoleChange}
+          member={selectedMember}
         />
       )}
     </div>
