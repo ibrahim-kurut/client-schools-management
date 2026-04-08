@@ -1,12 +1,12 @@
 "use client";
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo, useCallback, memo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { X, GraduationCap } from 'lucide-react';
 import { updateStudent, resetCreateStatus } from '../../../redux/slices/studentsSlice';
 import { fetchClasses } from '../../../redux/slices/classesSlice';
 import AddStudentForm from './AddStudentForm';
 
-export default function EditStudentModal({ isOpen, onClose, student }) {
+const EditStudentModal = memo(function EditStudentModal({ isOpen, onClose, student }) {
   const dispatch = useDispatch();
   const { createStatus, createError } = useSelector((state) => state.students);
   const { classes, status: classesStatus } = useSelector((state) => state.classes);
@@ -24,7 +24,7 @@ export default function EditStudentModal({ isOpen, onClose, student }) {
     }
   }, [createStatus, dispatch, onClose]);
 
-  const handleSubmit = (formData) => {
+  const handleSubmit = useCallback((formData) => {
     if (!student?.id) return;
 
     // Prepare FormData for multipart/form-data
@@ -42,15 +42,24 @@ export default function EditStudentModal({ isOpen, onClose, student }) {
     });
 
     dispatch(updateStudent({ id: student.id, formData: data }));
-  };
+  }, [student?.id, dispatch]);
+
+  // Stable initialData object to prevent unnecessary re-renders of the form
+  const memoizedInitialData = useMemo(() => {
+    if (!student) return null;
+    return {
+      ...student,
+      image: student.image
+    };
+  }, [student]);
 
   if (!isOpen || !student) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Backdrop */}
+      {/* Backdrop - Optimized: Removed backdrop-blur for performance */}
       <div 
-        className="absolute inset-0 bg-slate-900/60 backdrop-blur-[2px] transition-opacity duration-300"
+        className="absolute inset-0 bg-slate-900/50 backdrop-blur-none transition-opacity duration-300"
         onClick={onClose}
       />
       
@@ -80,12 +89,9 @@ export default function EditStudentModal({ isOpen, onClose, student }) {
           <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 blur-2xl"></div>
         </div>
 
-        {/* Dedicated Student Form with initial data */}
+        {/* Dedicated Student Form with stabilized initial data */}
         <AddStudentForm 
-          initialData={{
-            ...student,
-            image: student.image
-          }}
+          initialData={memoizedInitialData}
           onSubmit={handleSubmit}
           onCancel={onClose}
           loading={createStatus === 'loading'}
@@ -95,4 +101,8 @@ export default function EditStudentModal({ isOpen, onClose, student }) {
       </div>
     </div>
   );
-}
+});
+
+EditStudentModal.displayName = 'EditStudentModal';
+
+export default EditStudentModal;

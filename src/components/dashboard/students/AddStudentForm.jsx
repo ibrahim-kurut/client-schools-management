@@ -137,19 +137,19 @@ const AddStudentForm = memo(function AddStudentForm({
         ))}
       </div>
 
-      <form onSubmit={handleSubmitInternal} className="p-8 max-h-[55vh] overflow-y-auto no-scrollbar scroll-smooth">
+      <form onSubmit={handleSubmitInternal} className="p-8 max-h-[55vh] overflow-y-auto no-scrollbar">
         
         {/* ═══════════════ STEP 1 ═══════════════ */}
         <div className={`space-y-6 animate-in fade-in zoom-in-95 duration-400 ${step === 1 ? 'block' : 'hidden'}`}>
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1.5 focus-within:scale-[1.01] transition-transform duration-200">
+              <div className="space-y-1.5 transition-colors duration-200">
                 <label className="text-xs font-black text-slate-500 mr-2">الاسم الأول</label>
                 <div className="relative">
                    <User className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                    <input ref={firstNameRef} defaultValue={initialData?.firstName} type="text" placeholder="مثال: يوسف" className="w-full bg-slate-50/50 border border-slate-200 rounded-2xl py-3.5 pr-11 pl-4 focus:bg-white focus:ring-4 focus:ring-emerald-500/5 focus:border-emerald-500 font-bold transition-colors outline-none" />
                 </div>
               </div>
-              <div className="space-y-1.5 focus-within:scale-[1.01] transition-transform duration-200">
+              <div className="space-y-1.5 transition-colors duration-200">
                 <label className="text-xs font-black text-slate-500 mr-2">اسم العائلة</label>
                 <div className="relative">
                    <User className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
