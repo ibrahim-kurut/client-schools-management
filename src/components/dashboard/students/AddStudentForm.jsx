@@ -27,6 +27,8 @@ const AddStudentForm = memo(function AddStudentForm({
   const customTuitionFeeRef = useRef(null);
   const discountAmountRef = useRef(null);
   const discountNotesRef = useRef(null);
+  const motherNameRef = useRef(null);
+  const guardianMaritalStatusRef = useRef(null);
 
   // --- UI State ---
   const [step, setStep] = useState(1);
@@ -62,8 +64,9 @@ const AddStudentForm = memo(function AddStudentForm({
 
   // --- Step 2 Validation ---
   const handleNextToFinancial = useCallback(() => {
-    if (!phoneRef.current?.value.trim()) return setValidationError('رقم الهاتف مطلوب');
+    if (!phoneRef.current?.value.trim()) return setValidationError('رقم هاتف ولي الأمر مطلوب');
     if (!classNameRef.current?.value) return setValidationError('الصف الدراسي مطلوب للطالب');
+    if (!motherNameRef.current?.value.trim()) return setValidationError('اسم الأم مطلوب');
     
     setValidationError('');
     setStep(3);
@@ -83,6 +86,8 @@ const AddStudentForm = memo(function AddStudentForm({
       role: 'STUDENT',
       phone: phoneRef.current.value,
       className: classNameRef.current.value,
+      motherName: motherNameRef.current.value,
+      guardianMaritalStatus: guardianMaritalStatusRef.current.value,
       customTuitionFee: customTuitionFeeRef.current?.value || '',
       discountAmount: discountAmountRef.current?.value || '',
       discountNotes: discountNotesRef.current?.value || '',
@@ -228,12 +233,33 @@ const AddStudentForm = memo(function AddStudentForm({
               </div>
             </div>
 
-            <div className="space-y-1.5">
-              <label className="text-xs font-black text-slate-500 mr-2">رقم هاتف ولي الأمر</label>
-              <div className="relative">
-                <Phone className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                <input ref={phoneRef} defaultValue={initialData?.phone} type="tel" dir="ltr" placeholder="07XXXXXXXX" className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3.5 pr-11 pl-4 focus:border-emerald-500 font-bold outline-none shadow-sm" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-black text-slate-500 mr-2">اسم الأم <span className="text-red-400">(إجباري)</span></label>
+                <div className="relative">
+                  <User className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <input ref={motherNameRef} defaultValue={initialData?.studentProfile?.motherName} type="text" placeholder="اسم الأم الكامل" className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3.5 pr-11 pl-4 focus:border-emerald-500 font-bold outline-none shadow-sm" />
+                </div>
               </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-black text-slate-500 mr-2">رقم هاتف ولي الأمر</label>
+                <div className="relative">
+                  <Phone className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <input ref={phoneRef} defaultValue={initialData?.phone} type="tel" dir="ltr" placeholder="07XXXXXXXX" className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3.5 pr-11 pl-4 focus:border-emerald-500 font-bold outline-none shadow-sm" />
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-black text-slate-500 mr-2">الحالة الاجتماعية لولي الأمر</label>
+              <select ref={guardianMaritalStatusRef} defaultValue={initialData?.studentProfile?.guardianMaritalStatus || ''} className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3.5 px-5 focus:border-emerald-500 font-bold appearance-none cursor-pointer outline-none shadow-sm">
+                 <option value="">اختر الحالة الاجتماعية...</option>
+                 <option value="متزوج">متزوج</option>
+                 <option value="أعزب">أعزب</option>
+                 <option value="مطلق">مطلق</option>
+                 <option value="أرمل">أرمل</option>
+                 <option value="منفصل">منفصل</option>
+              </select>
             </div>
         </div>
 
