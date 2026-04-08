@@ -8,6 +8,7 @@ import { User, Phone, Mail, Calendar, Loader2, Camera, XCircle, ShieldCheck, Boo
  */
 const AddMemberForm = memo(function AddMemberForm({ 
   role: initialRole = 'TEACHER',
+  currentUserRole = 'SCHOOL_ADMIN',
   onSubmit, 
   onCancel, 
   initialData = null, 
@@ -181,7 +182,9 @@ const AddMemberForm = memo(function AddMemberForm({
                   تحديد الدور الوظيفي
               </h3>
               <div className="grid grid-cols-3 gap-2">
-                  {['TEACHER', 'ASSISTANT', 'ACCOUNTANT'].map((r) => (
+                  {['TEACHER', 'ASSISTANT', 'ACCOUNTANT']
+                    .filter(r => currentUserRole !== 'ASSISTANT' || (r === 'TEACHER' || r === 'ACCOUNTANT'))
+                    .map((r) => (
                     <button 
                       key={r}
                       type="button"

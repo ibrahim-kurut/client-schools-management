@@ -12,7 +12,9 @@ import {
   LogOut,
   User,
   CalendarDays,
-  Archive
+  Archive,
+  PieChart,
+  ArrowLeftRight
 } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '@/redux/slices/authSlice';
@@ -82,21 +84,55 @@ export default function DashboardSidebar({ slug }) {
   };
 
   const actualUser = user?.userData || user;
+  const role = actualUser?.role || 'TEACHER';
 
+  const menuItems = [
+    { icon: LayoutDashboard, label: "لوحة التحكم", href: `/school/${slug}`, roles: ['SCHOOL_ADMIN', 'ASSISTANT', 'ACCOUNTANT', 'SUPER_ADMIN'] },
+    { icon: Users, label: "إدارة الطلاب", href: `/school/${slug}/students`, roles: ['SCHOOL_ADMIN', 'ASSISTANT', 'ACCOUNTANT', 'SUPER_ADMIN'] },
+    { icon: Layers, label: "المراحل والصفوف", href: `/school/${slug}/classes`, roles: ['SCHOOL_ADMIN', 'ASSISTANT', 'SUPER_ADMIN'] },
+    { icon: BookOpen, label: "إدارة المواد الدراسية", href: `/school/${slug}/subjects`, roles: ['SCHOOL_ADMIN', 'ASSISTANT', 'SUPER_ADMIN'] },
+    { icon: GraduationCap, label: "إدارة الأعضاء", href: `/school/${slug}/members`, roles: ['SCHOOL_ADMIN', 'ASSISTANT', 'SUPER_ADMIN'] },
+    
+    // Financial Links - Conditional for Accountant vs Others
+    ...(role === 'ACCOUNTANT' ? [
+      { icon: PieChart, label: "لوحة التحكم المالية", href: `/school/${slug}/financial/dashboard`, roles: ['ACCOUNTANT'] },
+      { icon: Wallet, label: "رسوم الطلاب", href: `/school/${slug}/financial/fees`, roles: ['ACCOUNTANT'] },
+      { icon: ArrowLeftRight, label: "المصاريف", href: `/school/${slug}/financial/expenses`, roles: ['ACCOUNTANT'] },
+    ] : [
+      { icon: Wallet, label: "الشؤون المالية", href: `/school/${slug}/financial`, roles: ['SCHOOL_ADMIN', 'SUPER_ADMIN'] }
+    ]),
+
+    { icon: CalendarDays, label: "إدارة السنوات الدراسية", href: `/school/${slug}/academic-years`, roles: ['SCHOOL_ADMIN', 'ASSISTANT', 'SUPER_ADMIN'] },
+    { icon: TrendingUp, label: "التقارير والإحصائيات", href: `/school/${slug}/reports`, roles: ['SCHOOL_ADMIN', 'ASSISTANT', 'ACCOUNTANT', 'SUPER_ADMIN'] },
+    { icon: Archive, label: "الأرشيف", href: `/school/${slug}/archive`, roles: ['SCHOOL_ADMIN', 'ASSISTANT', 'SUPER_ADMIN'] },
+    { icon: Settings, label: "الإعدادات العامة", href: `/school/${slug}/settings`, roles: ['SCHOOL_ADMIN', 'SUPER_ADMIN'] },
+  ];
+
+  const filteredItems = menuItems.filter(item => item.roles.includes(role));
+
+  const roleLabels = {
+    SCHOOL_ADMIN: "مدير المدرسة",
+    ASSISTANT: "معاون المدرسة",
+    ACCOUNTANT: "المحاسب",
+    TEACHER: "معلم",
+    SUPER_ADMIN: "مدير عام"
+  };
 
   // Use default mockup if not mounted to match server state and avoid hydration mismatch
   const displayUser = mounted ? {
-    name: actualUser?.firstName ? `${actualUser.firstName} ${actualUser.lastName || ''}`.trim() : "مدير المدرسة",
-    email: actualUser?.email || "admin@school.com",
-    schoolLogo: actualUser?.schoolLogo || null
+    name: actualUser?.firstName ? `${actualUser.firstName} ${actualUser.lastName || ''}`.trim() : "المستخدم",
+    email: actualUser?.email || "user@school.com",
+    schoolLogo: actualUser?.schoolLogo || null,
+    roleLabel: roleLabels[role] || "موظف"
   } : {
-    name: "مدير المدرسة",
-    email: "admin@school.com",
-    schoolLogo: null
+    name: "جاري التحميل...",
+    email: "...",
+    schoolLogo: null,
+    roleLabel: "..."
   };
 
   return (
-    <aside className="w-72 bg-[#1e293b] flex flex-col h-full lg:rounded-l-none overflow-hidden p-8 border-l border-slate-700 hidden lg:flex">
+    <aside className="w-72 bg-[#1e293b] flex flex-col h-full lg:rounded-l-none overflow-hidden p-8 border-l border-slate-700 hidden lg:flex shadow-2xl z-20">
       {/* Profile Section */}
       <div className="flex flex-col items-center mb-10 text-center">
         <div className="w-20 h-20 rounded-full bg-slate-700 p-1 mb-4 shadow-xl border-2 border-slate-600">
@@ -109,21 +145,20 @@ export default function DashboardSidebar({ slug }) {
           </div>
         </div>
         <h3 className="text-white font-black text-lg leading-tight mb-1">{displayUser.name}</h3>
-        <p className="text-slate-500 font-semibold">مدير المدرسة</p>
+        <p className="text-blue-400 font-bold text-xs bg-blue-500/10 px-3 py-1 rounded-full">{displayUser.roleLabel}</p>
       </div>
 
       {/* Navigation Menu */}
-      <nav className="flex-1 space-y-2">
-        <SidebarItem icon={LayoutDashboard} label="لوحة التحكم" href={`/school/${slug}`} isActive={pathname === `/school/${slug}`} />
-        <SidebarItem icon={Users} label="إدارة الطلاب" href={`/school/${slug}/students`} isActive={pathname === `/school/${slug}/students`} />
-        <SidebarItem icon={Layers} label="المراحل والصفوف" href={`/school/${slug}/classes`} isActive={pathname === `/school/${slug}/classes`} />
-        <SidebarItem icon={BookOpen} label="إدارة المواد الدراسية" href={`/school/${slug}/subjects`} isActive={pathname === `/school/${slug}/subjects`} />
-        <SidebarItem icon={GraduationCap} label="إدارة الأعضاء" href={`/school/${slug}/members`} isActive={pathname === `/school/${slug}/members`} />
-        <SidebarItem icon={Wallet} label="الشؤون المالية" href={`/school/${slug}/financial`} isActive={pathname.startsWith(`/school/${slug}/financial`)} />
-        <SidebarItem icon={CalendarDays} label="إدارة السنوات الدراسية" href={`/school/${slug}/academic-years`} isActive={pathname === `/school/${slug}/academic-years`} />
-        <SidebarItem icon={TrendingUp} label="التقارير والإحصائيات" href={`/school/${slug}/reports`} isActive={pathname === `/school/${slug}/reports`} />
-        <SidebarItem icon={Archive} label="الأرشيف" href={`/school/${slug}/archive`} isActive={pathname === `/school/${slug}/archive`} />
-        <SidebarItem icon={Settings} label="الإعدادات العامة" href={`/school/${slug}/settings`} isActive={pathname === `/school/${slug}/settings`} />
+      <nav className="flex-1 space-y-2 overflow-y-auto pr-2 custom-scrollbar">
+        {filteredItems.map((item, index) => (
+          <SidebarItem 
+            key={index}
+            icon={item.icon} 
+            label={item.label} 
+            href={item.href} 
+            isActive={pathname === item.href || (item.href !== `/school/${slug}` && pathname.startsWith(item.href))} 
+          />
+        ))}
       </nav>
 
       {/* Logout */}

@@ -233,13 +233,15 @@ export default function StudentsManagement({ slug }) {
             </select>
           </div>
 
-          <button 
-            onClick={handleAddStudentClick}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-2xl font-bold transition-all shadow-lg shadow-blue-600/30 hover:shadow-blue-600/50 hover:-translate-y-0.5"
-          >
-            <UserPlus className="w-5 h-5" />
-            إضافة طالب
-          </button>
+          {(userData?.role === 'SCHOOL_ADMIN' || userData?.role === 'ASSISTANT') && (
+            <button 
+              onClick={handleAddStudentClick}
+              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-2xl font-bold transition-all shadow-lg shadow-blue-600/30 hover:shadow-blue-600/50 hover:-translate-y-0.5"
+            >
+              <UserPlus className="w-5 h-5" />
+              إضافة طالب
+            </button>
+          )}
         </div>
       </div>
 

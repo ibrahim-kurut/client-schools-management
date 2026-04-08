@@ -28,12 +28,30 @@ export default function WelcomePage() {
     setMounted(true);
   }, []);
 
-  // Redirect if not logged in
+  // Redirect if not logged in or if the user should go to the dashboard
   useEffect(() => {
-    if (mounted && !isLoggedIn) {
-      router.replace(`/school/${slug}/login`);
+    if (mounted) {
+      if (!isLoggedIn) {
+        router.replace(`/school/${slug}/login`);
+        return;
+      }
+
+      const userData = user?.userData || user;
+      const role = userData?.role;
+
+      // New Roles (ASSISTANT, ACCOUNTANT) should go to the dashboard
+      // SCHOOL_ADMIN also goes to dashboard
+      if (['ASSISTANT', 'ACCOUNTANT', 'SCHOOL_ADMIN'].includes(role)) {
+        router.replace(`/school/${slug}`);
+      }
+      
+      // Teacher has their own route handled by guard usually, 
+      // but we can redirect them to /teacher if they land here
+      if (role === 'TEACHER') {
+        router.replace(`/school/${slug}/teacher`);
+      }
     }
-  }, [mounted, isLoggedIn, router, slug]);
+  }, [mounted, isLoggedIn, router, slug, user]);
 
   const handleLogout = async () => {
     const result = await Swal.fire({

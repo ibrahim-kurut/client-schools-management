@@ -48,15 +48,15 @@ export default function SchoolLoginPage() {
           setIsLoading(false);
           const userData = res.userData;
 
-          // School Admin → Dashboard
-          if (userData?.role === 'SCHOOL_ADMIN') {
+          // School Admin, Accountant, or Assistant → Dashboard
+          if (['SCHOOL_ADMIN', 'ACCOUNTANT', 'ASSISTANT'].includes(userData?.role)) {
             router.push(`/school/${slug}`);
           }
           // Teacher → Teacher Dashboard
           else if (userData?.role === 'TEACHER') {
             router.push(`/school/${slug}/teacher`);
           }
-          // Other Staff → Welcome page (temporary)
+          // Others (e.g. Student) → Welcome page
           else {
             router.push(`/school/${slug}/welcome`);
           }

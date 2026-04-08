@@ -46,29 +46,70 @@ export default function SchoolGuard({ children }) {
     const userSchoolSlug = userData?.schoolSlug ? decodeURIComponent(userData.schoolSlug) : null;
 
     if (userSchoolSlug && decodedCurrentSlug === userSchoolSlug) {
-      // Staff members (non SCHOOL_ADMIN) have restricted access
-      const staffRoles = ['TEACHER', 'ACCOUNTANT', 'ASSISTANT', 'STUDENT'];
-      if (staffRoles.includes(userData.role)) {
-        // Teacher can access /teacher/* routes
-        const isTeacherRoute = pathname?.includes(`/school/${currentSlug}/teacher`);
-        if (userData.role === 'TEACHER' && isTeacherRoute) {
-          setIsAuthorized(true);
-          return;
-        }
+      const role = userData.role;
 
-        if (isWelcomePage) {
+      // 1. Super Admin: full access
+      if (role === 'SUPER_ADMIN') {
+        setIsAuthorized(true);
+        return;
+      }
+
+      // 2. Teacher: specialized access
+      if (role === 'TEACHER') {
+        const isTeacherRoute = pathname?.includes(`/school/${currentSlug}/teacher`);
+        if (isTeacherRoute || isWelcomePage) {
           setIsAuthorized(true);
-        } else if (userData.role === 'TEACHER') {
-          // Redirect teacher to their dashboard
-          router.replace(`/school/${currentSlug}/teacher`);
         } else {
-          // Redirect other staff to welcome page
+          router.replace(`/school/${currentSlug}/teacher`);
+        }
+        return;
+      }
+
+      // 3. Student: very restricted
+      if (role === 'STUDENT') {
+        if (isWelcomePage) setIsAuthorized(true);
+        else router.replace(`/school/${currentSlug}/welcome`);
+        return;
+      }
+
+      // 4. Accountant: Financial + Students + Reports
+      if (role === 'ACCOUNTANT') {
+        const allowedPaths = [
+          `/school/${currentSlug}/financial`,
+          `/school/${currentSlug}/students`,
+          `/school/${currentSlug}/reports`,
+          `/school/${currentSlug}/welcome`,
+        ];
+        
+        const isExactDashboard = pathname === `/school/${currentSlug}` || pathname === `/school/${currentSlug}/`;
+        const isAllowed = allowedPaths.some(path => pathname?.startsWith(path)) || isExactDashboard;
+
+        if (isAllowed) {
+          setIsAuthorized(true);
+        } else {
           router.replace(`/school/${currentSlug}/welcome`);
         }
         return;
       }
 
-      // School Admin has full access
+      // 5. Assistant: Academic + Members (Add only) + Reports
+      if (role === 'ASSISTANT') {
+        const restrictedPaths = [
+          `/school/${currentSlug}/financial`,
+          `/school/${currentSlug}/settings`,
+        ];
+
+        const isRestricted = restrictedPaths.some(path => pathname?.startsWith(path));
+
+        if (!isRestricted) {
+          setIsAuthorized(true);
+        } else {
+          router.replace(`/school/${currentSlug}/welcome`);
+        }
+        return;
+      }
+
+      // 6. School Admin: Full Access
       setIsAuthorized(true);
     } else {
       // Unauthorized! Attempting to access another school

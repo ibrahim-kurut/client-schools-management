@@ -1,16 +1,23 @@
+"use client";
 import { UserPlus, Wallet, ArrowLeftRight, BookOpen, FileText, Calendar } from 'lucide-react';
 import Link from 'next/link';
+import { useSelector } from 'react-redux';
 
 export default function QuickActions({slug}) {
+  const { user } = useSelector((state) => state.auth);
+  const actualUser = user?.userData || user;
+  const role = actualUser?.role || 'TEACHER';
 
-  const quickActions = [
-    { title: "إضافة طالب جديد", icon: UserPlus, desc: "تسجيل طالب في النظام الأكاديمي", href: `/school/${slug}/students`, color: "text-blue-600", bg: "bg-blue-50" },
-    { title: "سداد دفعة جديدة", icon: Wallet, desc: "تسجيل قسط دراسي لطالب", href: `/school/${slug}/financial/fees`, color: "text-emerald-600", bg: "bg-emerald-50" },
-    { title: "تسجيل مصروف", icon: ArrowLeftRight, desc: "إدارة الرواتب والصيانة والمصروفات", href: `/school/${slug}/financial/expenses`, color: "text-orange-600", bg: "bg-orange-50" },
-    { title: "إدارة الصفوف", icon: BookOpen, desc: "عرض المراحل الأكاديمية والمواد", href: `/school/${slug}/classes`, color: "text-purple-600", bg: "bg-purple-50" },
-    { title: "تحديث الدرجات", icon: FileText, desc: "إدخال نتائج امتحانات الفصل الدراسي", href: `/school/${slug}/grades`, color: "text-rose-600", bg: "bg-rose-50" },
-    { title: "إدارة السنة الدراسية", icon: Calendar, desc: "إعدادات والمواسم والتقويم للطلاب", href: `/school/${slug}/academic-years`, color: "text-amber-600", bg: "bg-amber-50" },
+  const allActions = [
+    { title: "إضافة طالب جديد", icon: UserPlus, desc: "تسجيل طالب في النظام الأكاديمي", href: `/school/${slug}/students`, color: "text-blue-600", bg: "bg-blue-50", roles: ['SCHOOL_ADMIN', 'ASSISTANT', 'SUPER_ADMIN'] },
+    { title: "سداد دفعة جديدة", icon: Wallet, desc: "تسجيل قسط دراسي لطالب", href: `/school/${slug}/financial/fees`, color: "text-emerald-600", bg: "bg-emerald-50", roles: ['SCHOOL_ADMIN', 'ACCOUNTANT', 'SUPER_ADMIN'] },
+    { title: "تسجيل مصروف", icon: ArrowLeftRight, desc: "إدارة الرواتب والصيانة والمصروفات", href: `/school/${slug}/financial/expenses`, color: "text-orange-600", bg: "bg-orange-50", roles: ['SCHOOL_ADMIN', 'ACCOUNTANT', 'SUPER_ADMIN'] },
+    { title: "إدارة الصفوف", icon: BookOpen, desc: "عرض المراحل الأكاديمية والمواد", href: `/school/${slug}/classes`, color: "text-purple-600", bg: "bg-purple-50", roles: ['SCHOOL_ADMIN', 'ASSISTANT', 'SUPER_ADMIN'] },
+    { title: "تحديث الدرجات", icon: FileText, desc: "إدخال نتائج امتحانات الفصل الدراسي", href: `/school/${slug}/grades`, color: "text-rose-600", bg: "bg-rose-50", roles: ['SCHOOL_ADMIN', 'ASSISTANT', 'SUPER_ADMIN'] },
+    { title: "إدارة السنة الدراسية", icon: Calendar, desc: "إعدادات والمواسم والتقويم للطلاب", href: `/school/${slug}/academic-years`, color: "text-amber-600", bg: "bg-amber-50", roles: ['SCHOOL_ADMIN', 'ASSISTANT', 'SUPER_ADMIN'] },
   ];
+
+  const quickActions = allActions.filter(action => action.roles.includes(role));
 
   return (
     <section className="space-y-6">

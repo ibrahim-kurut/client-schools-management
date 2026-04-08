@@ -312,6 +312,7 @@ export default function MembersManagement({ slug }) {
           classes={classes}
           createStatus={createStatus}
           createError={createError}
+          currentUserRole={userData?.role}
         />
       )}
     </div>
