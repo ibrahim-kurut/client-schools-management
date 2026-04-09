@@ -252,6 +252,7 @@ export default function StudentsManagement({ slug }) {
             <thead>
               <tr className="bg-slate-50/80 border-b border-slate-100 text-slate-500 text-sm font-bold">
                 <th className="p-6 whitespace-nowrap">الطالب</th>
+                <th className="p-6 whitespace-nowrap">كود الطالب</th>
                 <th className="p-6 whitespace-nowrap">اسم الأم</th>
                 <th className="p-6 whitespace-nowrap">رقم الهاتف</th>
                 <th className="p-6 whitespace-nowrap">البريد الإلكتروني</th>
@@ -274,6 +275,10 @@ export default function StudentsManagement({ slug }) {
                         </div>
                       </div>
                     </div>
+                  </td>
+
+                  <td className="p-6">
+                    <div className="font-bold text-slate-700">{student.studentCode || '—'}</div>
                   </td>
 
                   <td className="p-6">

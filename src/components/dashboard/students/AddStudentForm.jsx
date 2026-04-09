@@ -1,6 +1,9 @@
 "use client";
 import React, { useState, useRef, useCallback, memo } from 'react';
-import { User, Phone, Mail, Calendar, Loader2, XCircle, Layers, DollarSign, FileText, GraduationCap } from 'lucide-react';
+import { User, Phone, Mail, Calendar, Loader2, XCircle, Layers, DollarSign, FileText, GraduationCap, CheckCircle2 } from 'lucide-react';
+import { useDispatch } from 'react-redux';
+import { checkStudentCode } from '../../../redux/slices/studentsSlice';
+import { toast } from 'react-toastify';
 
 /**
  * @description Dedicated Form for Adding/Editing Students
@@ -17,10 +20,9 @@ const AddStudentForm = memo(function AddStudentForm({
   classes = [] 
 }) {
   // --- Refs (For Lag-Free Input) ---
+  const studentCodeRef = useRef(null);
   const firstNameRef = useRef(null);
   const lastNameRef = useRef(null);
-  const emailRef = useRef(null);
-  const passwordRef = useRef(null);
   const birthDateRef = useRef(null);
   const phoneRef = useRef(null);
   const classNameRef = useRef(null);
@@ -31,7 +33,9 @@ const AddStudentForm = memo(function AddStudentForm({
   const guardianMaritalStatusRef = useRef(null);
 
   // --- UI State ---
+  const dispatch = useDispatch();
   const [step, setStep] = useState(1);
+  const [isVerifying, setIsVerifying] = useState(false);
   const [gender, setGender] = useState(initialData?.gender || 'MALE');
   const [validationError, setValidationError] = useState('');
   const [displayClassFee, setDisplayClassFee] = useState(null);
@@ -50,17 +54,35 @@ const AddStudentForm = memo(function AddStudentForm({
   }, [getSelectedClassFee]);
 
   // --- Step 1 Validation ---
-  const handleNext = useCallback(() => {
+  const handleNext = useCallback(async () => {
+    const code = studentCodeRef.current?.value.trim();
+    if (!code) return setValidationError('كود الطالب مطلوب');
     if (!firstNameRef.current?.value.trim()) return setValidationError('الاسم الأول مطلوب');
     if (!lastNameRef.current?.value.trim()) return setValidationError('اسم العائلة مطلوب');
-    if (!emailRef.current?.value.trim()) return setValidationError('البريد الإلكتروني مطلوب');
-    if (!initialData && !passwordRef.current?.value.trim()) return setValidationError('كلمة المرور مطلوبة');
-    if (passwordRef.current?.value && passwordRef.current.value.length < 6) return setValidationError('كلمة مرور ضعيفة (6 أحرف على الأقل)');
     if (!birthDateRef.current?.value) return setValidationError('تاريخ الميلاد مطلوب');
     
     setValidationError('');
+    
+    // Check code availability via API (only on creation)
+    if (!initialData) {
+        setIsVerifying(true);
+        try {
+            const result = await dispatch(checkStudentCode(code)).unwrap();
+            if (!result.available) {
+                setValidationError(`كود الطالب (${code}) مستخدم بالفعل في هذه المدرسة`);
+                setIsVerifying(false);
+                return;
+            }
+        } catch (err) {
+            setValidationError('فشل التحقق من الكود، حاول مرة أخرى');
+            setIsVerifying(false);
+            return;
+        }
+        setIsVerifying(false);
+    }
+
     setStep(2);
-  }, [initialData]);
+  }, [initialData, dispatch]);
 
   // --- Step 2 Validation ---
   const handleNextToFinancial = useCallback(() => {
@@ -77,10 +99,9 @@ const AddStudentForm = memo(function AddStudentForm({
     if (e && e.preventDefault) e.preventDefault();
     
     const finalData = {
+      studentCode: studentCodeRef.current.value,
       firstName: firstNameRef.current.value,
       lastName: lastNameRef.current.value,
-      email: emailRef.current.value,
-      password: passwordRef.current?.value || '',
       birthDate: birthDateRef.current.value,
       gender,
       role: 'STUDENT',
@@ -158,27 +179,21 @@ const AddStudentForm = memo(function AddStudentForm({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-               <div className="space-y-1.5 col-span-2 md:col-span-1">
-                 <label className="text-xs font-black text-slate-500 mr-2">البريد الإلكتروني</label>
-                 <div className="relative">
-                   <Mail className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                   <input ref={emailRef} defaultValue={initialData?.email} type="email" dir="ltr" placeholder="student@school.com" className="w-full bg-slate-50/50 border border-slate-200 rounded-2xl py-3.5 pr-11 pl-4 focus:bg-white focus:border-emerald-500 font-bold transition-colors outline-none" />
-                 </div>
-               </div>
-               <div className="space-y-1.5 col-span-2 md:col-span-1">
-                 <label className="text-xs font-black text-slate-500 mr-2">كلمة المرور</label>
-                 <input ref={passwordRef} type="password" dir="ltr" placeholder="••••••••" className="w-full bg-slate-50/50 border border-slate-200 rounded-2xl py-3.5 px-5 focus:bg-white focus:border-emerald-500 font-bold transition-colors outline-none" />
+            <div className="space-y-1.5 transition-colors duration-200">
+               <label className="text-xs font-black text-slate-500 mr-2">كود الطالب <span className="text-slate-400 text-[10px]">(المعرف الأساسي للدخول)</span></label>
+               <div className="relative">
+                  <Layers className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <input ref={studentCodeRef} defaultValue={initialData?.studentCode} type="text" placeholder="مثال: 100" className="w-full bg-slate-50/50 border border-slate-200 rounded-2xl py-3.5 pr-11 pl-4 focus:bg-white focus:ring-4 focus:ring-emerald-500/5 focus:border-emerald-500 font-bold transition-colors outline-none" />
                </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-               <div className="space-y-1.5">
-                  <label className="text-xs font-black text-slate-500 mr-2">تاريخ الميلاد</label>
-                  <div className="relative">
-                    <Calendar className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                    <input ref={birthDateRef} defaultValue={initialData?.birthDate ? new Date(initialData.birthDate).toISOString().split('T')[0] : ''} type="date" className="w-full bg-slate-50/50 border border-slate-200 rounded-2xl py-3.5 pr-11 pl-4 focus:border-emerald-500 font-bold outline-none" />
-                  </div>
+               <div className="space-y-1.5 ">
+                 <label className="text-xs font-black text-slate-500 mr-2">تاريخ الميلاد</label>
+                 <div className="relative">
+                   <Calendar className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                   <input ref={birthDateRef} defaultValue={initialData?.birthDate ? new Date(initialData.birthDate).toISOString().split('T')[0] : ''} type="date" className="w-full bg-slate-50/50 border border-slate-200 rounded-2xl py-3.5 pr-11 pl-4 focus:border-emerald-500 font-bold outline-none" />
+                 </div>
                </div>
                <div className="space-y-1.5">
                   <label className="text-xs font-black text-slate-500 mr-2">الجنس</label>
@@ -355,10 +370,10 @@ const AddStudentForm = memo(function AddStudentForm({
               else if (step === 2) handleNextToFinancial();
               else handleSubmitInternal();
             }} 
-            disabled={loading} 
+            disabled={loading || isVerifying} 
             className="flex-[2] py-4 bg-emerald-600 text-white rounded-2xl font-black shadow-xl shadow-emerald-600/30 hover:bg-emerald-700 hover:shadow-emerald-600/50 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 
+            {(loading || isVerifying) ? <Loader2 className="w-4 h-4 animate-spin" /> : 
              (step < totalSteps ? 'الخطوة التالية' : (initialData ? 'تحديث بيانات الطالب' : 'تسجيل الطالب الجديد'))}
           </button>
         </div>

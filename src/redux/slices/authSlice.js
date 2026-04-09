@@ -29,11 +29,17 @@ export const login = createAsyncThunk('user/login', async (loginData, { rejectWi
     }
 })
 
-// 3.5- Login with school slug (for staff members)
+// 3.5- Login with school slug (for staff and students)
 export const loginWithSchoolSlug = createAsyncThunk('user/loginWithSchoolSlug',
-    async ({ slug, email, password }, { rejectWithValue }) => {
+    async ({ slug, email, studentCode, password }, { rejectWithValue }) => {
         try {
-            const res = await axiosInstance.post(`/auth/${slug}/login`, { email, password });
+            // We send the identifier (email or studentCode) under the 'email' key 
+            // to match the backend Joi schema but the backend service will handle it intelligently.
+            const loginData = { 
+                email: email || studentCode, 
+                password 
+            };
+            const res = await axiosInstance.post(`/auth/${slug}/login`, loginData);
             return res.data;
         } catch (e) {
             const errorMessage = e.response?.data?.message || e.response?.data?.error || "Login failed";
@@ -41,6 +47,7 @@ export const loginWithSchoolSlug = createAsyncThunk('user/loginWithSchoolSlug',
         }
     }
 );
+
 
 // 4- Logout process
 export const logout = createAsyncThunk('user/logout', async (_, { rejectWithValue }) => {

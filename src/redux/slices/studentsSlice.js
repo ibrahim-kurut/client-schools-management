@@ -66,6 +66,21 @@ export const deleteStudent = createAsyncThunk(
     }
 );
 
+// Check Student Code Availability
+export const checkStudentCode = createAsyncThunk(
+    'students/checkStudentCode',
+    async (code, { rejectWithValue }) => {
+        try {
+            const res = await axiosInstance.get(`/school-user/check-code/${code}`);
+            return res.data;
+        } catch (e) {
+            const errorMessage = e.response?.data?.message || "Error checking code";
+            return rejectWithValue({ message: errorMessage });
+        }
+    }
+);
+
+
 
 const initialState = {
     students: [],

@@ -17,7 +17,7 @@ export default function SchoolLoginPage() {
   const dispatch = useDispatch();
 
   const [isLoading, setIsLoading] = useState(false);
-  const [email, setEmail] = useState('');
+  const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
@@ -27,15 +27,25 @@ export default function SchoolLoginPage() {
     e.preventDefault();
     setError('');
 
-    const validation = validateLogin({ email, password });
-    if (!validation.ok) {
-      setError(validation.error);
+    if (!identifier.trim()) {
+      setError("البريد الإلكتروني أو كود الطالب مطلوب");
+      return;
+    }
+    if (!password.trim()) {
+      setError("كلمة المرور مطلوبة");
       return;
     }
 
     setIsLoading(true);
 
-    dispatch(loginWithSchoolSlug({ slug, email: validation.data.email, password: validation.data.password }))
+    const isEmail = identifier.includes('@');
+    const loginPayload = {
+      slug,
+      password,
+      ...(isEmail ? { email: identifier } : { studentCode: identifier })
+    };
+
+    dispatch(loginWithSchoolSlug(loginPayload))
       .unwrap()
       .then((res) => {
         toast.success(
@@ -137,16 +147,16 @@ export default function SchoolLoginPage() {
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
             <AuthInput
-              id="school-login-email"
-              label="البريد الإلكتروني"
-              type="email"
+              id="school-login-id"
+              label="البريد الإلكتروني أو كود الطالب"
+              type="text"
               icon={Mail}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="example@email.com"
+              value={identifier}
+              onChange={(e) => setIdentifier(e.target.value)}
+              placeholder="البريد الإلكتروني أو كود الطالب"
               dir="ltr"
               className="text-right"
-              autoComplete="email"
+              autoComplete="username"
             />
 
             <AuthInput
