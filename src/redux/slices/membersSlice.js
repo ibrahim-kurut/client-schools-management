@@ -11,18 +11,12 @@ export const fetchMembers = createAsyncThunk(
     'members/fetchMembers',
     async ({ page = 1, limit = 10, search = '', role = '' }, { rejectWithValue }) => {
         try {
-            // If role is empty, it fetches ALL members (including students)
-            // We handle the filtering in the UI or by passing specific roles
-            const url = `/school-user?page=${page}&limit=${limit}&search=${search}${role ? `&role=${role}` : ''}`;
+            // If role is empty, we fetch staff members (exclude students)
+            // This ensures pagination works correctly by filtering on the server
+            const url = `/school-user?page=${page}&limit=${limit}&search=${search}${role ? `&role=${role}` : '&excludeRole=STUDENT'}`;
             const res = await axiosInstance.get(url);
             
-            // Filter out students if no specific role is requested, as this slice is for Staff
-            const data = res.data;
-            if (!role) {
-                data.members = data.members.filter(m => m.role !== 'STUDENT');
-            }
-            
-            return data;
+            return res.data;
         } catch (e) {
             const errorMessage = e.response?.data?.message || "حدث خطأ أثناء جلب بيانات الطاقم";
             return rejectWithValue({ message: errorMessage });

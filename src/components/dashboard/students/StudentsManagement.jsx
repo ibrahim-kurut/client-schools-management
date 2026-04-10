@@ -3,10 +3,11 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { 
   Users, UserPlus, Search, Filter, MoreVertical, Edit, Trash2, 
-  Eye, GraduationCap, Mail, Phone, MapPin, Activity, CheckCircle2, XCircle
+  Eye, GraduationCap, Mail, Phone, MapPin, Activity, CheckCircle2, XCircle, Upload
 } from 'lucide-react';
 import AddStudentModal from './AddStudentModal';
 import EditStudentModal from './EditStudentModal';
+import BulkStudentImport from './BulkStudentImport';
 import Pagination from '../../ui/Pagination';
 import SearchInput from '../../ui/SearchInput';
 import { fetchStudents, deleteStudent } from '../../../redux/slices/studentsSlice';
@@ -15,8 +16,7 @@ import { fetchAcademicYears } from '../../../redux/slices/academicYearsSlice';
 import Swal from 'sweetalert2';
 import { useRouter } from 'next/navigation';
 
-// Mock data has been removed and replaced by real API connection
-// Mock data has been removed and replaced by real API connection
+
 
 export default function StudentsManagement({ slug }) {
   const dispatch = useDispatch();
@@ -32,6 +32,7 @@ export default function StudentsManagement({ slug }) {
   const [classFilter, setClassFilter] = useState('ALL');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isBulkImportOpen, setIsBulkImportOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
@@ -234,13 +235,22 @@ export default function StudentsManagement({ slug }) {
           </div>
 
           {(userData?.role === 'SCHOOL_ADMIN' || userData?.role === 'ASSISTANT') && (
-            <button 
-              onClick={handleAddStudentClick}
-              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-2xl font-bold transition-all shadow-lg shadow-blue-600/30 hover:shadow-blue-600/50 hover:-translate-y-0.5"
-            >
-              <UserPlus className="w-5 h-5" />
-              إضافة طالب
-            </button>
+            <div className="flex flex-wrap items-center gap-3">
+              <button 
+                onClick={() => setIsBulkImportOpen(true)}
+                className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-3 rounded-2xl font-bold transition-all shadow-lg shadow-emerald-600/30 hover:shadow-emerald-600/50 hover:-translate-y-0.5 cursor-pointer"
+              >
+                <Upload className="w-5 h-5" />
+                استيراد جماعي
+              </button>
+              <button 
+                onClick={handleAddStudentClick}
+                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-2xl font-bold transition-all shadow-lg shadow-blue-600/30 hover:shadow-blue-600/50 hover:-translate-y-0.5 cursor-pointer"
+              >
+                <UserPlus className="w-5 h-5" />
+                إضافة طالب
+              </button>
+            </div>
           )}
         </div>
       </div>
@@ -375,6 +385,11 @@ export default function StudentsManagement({ slug }) {
           }} 
           student={selectedStudent} 
         />
+      )}
+
+      {/* Bulk Import Modal */}
+      {isBulkImportOpen && (
+        <BulkStudentImport isOpen={isBulkImportOpen} onClose={() => setIsBulkImportOpen(false)} />
       )}
     </div>
 

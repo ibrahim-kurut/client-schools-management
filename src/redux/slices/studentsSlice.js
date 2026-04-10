@@ -80,6 +80,30 @@ export const checkStudentCode = createAsyncThunk(
     }
 );
 
+// Bulk Import Students
+export const bulkImportStudents = createAsyncThunk(
+    'students/bulkImportStudents',
+    async ({ classId, file }, { rejectWithValue }) => {
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('classId', classId);
+
+            const res = await axiosInstance.post('/school-user/import-students', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+            return res.data;
+        } catch (e) {
+            const errorData = e.response?.data;
+            return rejectWithValue({
+                message: errorData?.message || "حدث خطأ أثناء استيراد الطلاب",
+                errors: errorData?.errors || []
+            });
+        }
+    }
+);
 
 
 const initialState = {
@@ -94,6 +118,9 @@ const initialState = {
     error: null,
     createStatus: 'idle',
     createError: null,
+    importStatus: 'idle',
+    importError: null,
+    importErrors: [],
 };
 
 const studentsSlice = createSlice({
@@ -103,6 +130,11 @@ const studentsSlice = createSlice({
         resetCreateStatus: (state) => {
             state.createStatus = 'idle';
             state.createError = null;
+        },
+        resetImportStatus: (state) => {
+            state.importStatus = 'idle';
+            state.importError = null;
+            state.importErrors = [];
         }
     },
     extraReducers: (builder) => {
@@ -160,9 +192,23 @@ const studentsSlice = createSlice({
             .addCase(deleteStudent.fulfilled, (state, action) => {
                 state.students = state.students.filter(s => s.id !== action.payload.id);
                 state.pagination.totalMembers -= 1;
+            })
+            // Bulk Import
+            .addCase(bulkImportStudents.pending, (state) => {
+                state.importStatus = 'loading';
+                state.importError = null;
+                state.importErrors = [];
+            })
+            .addCase(bulkImportStudents.fulfilled, (state) => {
+                state.importStatus = 'succeeded';
+            })
+            .addCase(bulkImportStudents.rejected, (state, action) => {
+                state.importStatus = 'failed';
+                state.importError = action.payload?.message || 'حدث خطأ';
+                state.importErrors = action.payload?.errors || [];
             });
     }
 });
 
-export const { resetCreateStatus } = studentsSlice.actions;
+export const { resetCreateStatus, resetImportStatus } = studentsSlice.actions;
 export default studentsSlice.reducer;
