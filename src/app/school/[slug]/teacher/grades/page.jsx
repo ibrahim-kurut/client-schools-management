@@ -7,12 +7,16 @@ import { examTypes } from "@/data/teacherMockData";
 import { ClipboardList, PlusCircle, Save, Trash2, Edit2, AlertCircle, BookOpen, Layers, FileText, User2, Printer, CheckCircle2, Loader2 } from "lucide-react";
 import Swal from "sweetalert2";
 import StudentResultModal from "@/components/students/StudentResultModal";
+import AllStudentsGradesModal from "@/components/students/AllStudentsGradesModal";
+import { fetchAcademicYears } from "@/redux/slices/academicYearsSlice";
+
 
 export default function GradesPage() {
   const dispatch = useDispatch();
   const { classes, loading: profileLoading } = useSelector((state) => state.teacherProfile);
   const { grades, loading: gradesLoading, actionLoading } = useSelector((state) => state.teacherGrades);
   const { user: currentUser } = useSelector((state) => state.auth);
+  const { currentYear } = useSelector((state) => state.academicYears);
 
   const [selectedClassId, setSelectedClassId] = useState("");
   const [selectedSubjectId, setSelectedSubjectId] = useState("");
@@ -20,16 +24,12 @@ export default function GradesPage() {
   const [drafts, setDrafts] = useState({}); // { [studentId]: { [examType]: score } }
   const [isBulkSaving, setIsBulkSaving] = useState(false);
   const [selectedStudentForModal, setSelectedStudentForModal] = useState(null);
+  const [showPrintAllModal, setShowPrintAllModal] = useState(false);
 
-  const MANUAL_EXAM_TYPES = [
-    { value: 'OCTOBER', label: 'تشرين الأول' },
-    { value: 'NOVEMBER', label: 'تشرين الثاني' },
-    { value: 'DECEMBER', label: 'كانون الأول' },
-    { value: 'MIDYEAR', label: 'نصف السنة' },
-    { value: 'MARCH', label: 'آذار' },
-    { value: 'APRIL', label: 'نيسان' },
-    { value: 'FINAL_EXAM', label: 'النهائي' },
-  ];
+
+
+
+  const teacherName = currentUser?.firstName + " " + currentUser?.lastName;
 
   const FULL_MATRIX_COLUMNS = [
     { value: 'OCTOBER', label: 'تشرين الأول' },
@@ -47,6 +47,7 @@ export default function GradesPage() {
 
   useEffect(() => {
     dispatch(fetchTeacherStudents());
+    dispatch(fetchAcademicYears());
   }, [dispatch]);
 
   const handleSelectionChange = useCallback((classId, subjectId) => {
@@ -268,6 +269,14 @@ export default function GradesPage() {
                 </p>
               </div>
             </div>
+
+            <button
+              onClick={() => setShowPrintAllModal(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-500 border border-slate-200 text-white hover:text-blue-600 hover:border-blue-100 hover:bg-blue-50/50 rounded-xl transition-all font-black text-sm shadow-sm cursor-pointer"
+            >
+              <Printer className="w-4 h-4" />
+              طباعة درجات جميع الطلاب
+            </button>
           </div>
 
           {gradesLoading ? (
@@ -403,6 +412,19 @@ export default function GradesPage() {
           examTypes={examTypes}
           schoolName={currentUser?.school?.name || "مدرستي"}
           onClose={() => setSelectedStudentForModal(null)}
+        />
+      )}
+
+      {/* All Students Print Modal */}
+      {showPrintAllModal && (
+        <AllStudentsGradesModal
+          students={students}
+          grades={grades}
+          selectedClass={selectedClass}
+          selectedSubject={availableSubjects.find((s) => s.id === selectedSubjectId)}
+          academicYear={currentYear?.name || "2024 - 2025"}
+          teacherName={teacherName}
+          onClose={() => setShowPrintAllModal(false)}
         />
       )}
     </div>
