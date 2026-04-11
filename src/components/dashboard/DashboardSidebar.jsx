@@ -14,7 +14,8 @@ import {
   CalendarDays,
   Archive,
   PieChart,
-  ArrowLeftRight
+  ArrowLeftRight,
+  FileText
 } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '@/redux/slices/authSlice';
@@ -92,6 +93,7 @@ export default function DashboardSidebar({ slug }) {
     { icon: Layers, label: "المراحل والصفوف", href: `/school/${slug}/classes`, roles: ['SCHOOL_ADMIN', 'ASSISTANT', 'SUPER_ADMIN'] },
     { icon: BookOpen, label: "إدارة المواد الدراسية", href: `/school/${slug}/subjects`, roles: ['SCHOOL_ADMIN', 'ASSISTANT', 'SUPER_ADMIN'] },
     { icon: GraduationCap, label: "إدارة الأعضاء", href: `/school/${slug}/members`, roles: ['SCHOOL_ADMIN', 'ASSISTANT', 'SUPER_ADMIN'] },
+    // { icon: FileText, label: "نتائج الطلاب", href: `/school/${slug}/grades`, roles: ['SCHOOL_ADMIN', 'ASSISTANT', 'SUPER_ADMIN'] },
     
     // Financial Links - Conditional for Accountant vs Others
     ...(role === 'ACCOUNTANT' ? [
