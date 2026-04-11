@@ -65,10 +65,14 @@ export default function SchoolGuard({ children }) {
         return;
       }
 
-      // 3. Student: very restricted
+      // 3. Student: restricted to student dashboard
       if (role === 'STUDENT') {
-        if (isWelcomePage) setIsAuthorized(true);
-        else router.replace(`/school/${currentSlug}/welcome`);
+        const isStudentRoute = pathname?.includes(`/school/${currentSlug}/student`);
+        if (isStudentRoute) {
+          setIsAuthorized(true);
+        } else {
+          router.replace(`/school/${currentSlug}/student`);
+        }
         return;
       }
 
@@ -78,7 +82,6 @@ export default function SchoolGuard({ children }) {
           `/school/${currentSlug}/financial`,
           `/school/${currentSlug}/students`,
           `/school/${currentSlug}/reports`,
-          `/school/${currentSlug}/welcome`,
         ];
         
         const isExactDashboard = pathname === `/school/${currentSlug}` || pathname === `/school/${currentSlug}/`;
@@ -87,7 +90,7 @@ export default function SchoolGuard({ children }) {
         if (isAllowed) {
           setIsAuthorized(true);
         } else {
-          router.replace(`/school/${currentSlug}/welcome`);
+          router.replace(`/school/${currentSlug}`);
         }
         return;
       }
@@ -104,7 +107,7 @@ export default function SchoolGuard({ children }) {
         if (!isRestricted) {
           setIsAuthorized(true);
         } else {
-          router.replace(`/school/${currentSlug}/welcome`);
+          router.replace(`/school/${currentSlug}`);
         }
         return;
       }

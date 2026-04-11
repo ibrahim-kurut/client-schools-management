@@ -66,9 +66,9 @@ export default function SchoolLoginPage() {
           else if (userData?.role === 'TEACHER') {
             router.push(`/school/${slug}/teacher`);
           }
-          // Others (e.g. Student) → Welcome page
+          // Others (e.g. Student) → Student Dashboard
           else {
-            router.push(`/school/${slug}/welcome`);
+            router.push(`/school/${slug}/student`);
           }
         }, 1500);
       })

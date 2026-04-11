@@ -50,6 +50,11 @@ export default function WelcomePage() {
       if (role === 'TEACHER') {
         router.replace(`/school/${slug}/teacher`);
       }
+
+      // Student has their own route
+      if (role === 'STUDENT') {
+        router.replace(`/school/${slug}/student`);
+      }
     }
   }, [mounted, isLoggedIn, router, slug, user]);
 
