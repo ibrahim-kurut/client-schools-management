@@ -25,7 +25,7 @@ import Swal from 'sweetalert2';
 import Link from 'next/link';
 import Image from 'next/image';
 
-const SidebarItem = ({ icon: Icon, label, isActive = false, href = "/" }) => (
+const SidebarItem = ({ icon: Icon, label, isActive = false, href = "/", iconColor = "text-blue-500" }) => (
   <Link 
     href={href}
     className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 ${
@@ -34,7 +34,9 @@ const SidebarItem = ({ icon: Icon, label, isActive = false, href = "/" }) => (
         : 'text-slate-400 hover:bg-slate-800 hover:text-white'
     }`}
   >
-    <Icon className="w-5 h-5" />
+    <div className={`p-2 rounded-xl transition-colors ${isActive ? 'bg-white/20' : 'bg-slate-800/50 group-hover:bg-slate-700'}`}>
+      <Icon className={`w-5 h-5 ${isActive ? 'text-white' : iconColor}`} />
+    </div>
     <span className="font-bold text-sm tracking-wide">{label}</span>
   </Link>
 );
@@ -88,26 +90,25 @@ export default function DashboardSidebar({ slug }) {
   const role = actualUser?.role || 'TEACHER';
 
   const menuItems = [
-    { icon: LayoutDashboard, label: "لوحة التحكم", href: `/school/${slug}`, roles: ['SCHOOL_ADMIN', 'ASSISTANT', 'ACCOUNTANT', 'SUPER_ADMIN'] },
-    { icon: Users, label: "إدارة الطلاب", href: `/school/${slug}/students`, roles: ['SCHOOL_ADMIN', 'ASSISTANT', 'ACCOUNTANT', 'SUPER_ADMIN'] },
-    { icon: Layers, label: "المراحل والصفوف", href: `/school/${slug}/classes`, roles: ['SCHOOL_ADMIN', 'ASSISTANT', 'SUPER_ADMIN'] },
-    { icon: BookOpen, label: "إدارة المواد الدراسية", href: `/school/${slug}/subjects`, roles: ['SCHOOL_ADMIN', 'ASSISTANT', 'SUPER_ADMIN'] },
-    { icon: GraduationCap, label: "إدارة الأعضاء", href: `/school/${slug}/members`, roles: ['SCHOOL_ADMIN', 'ASSISTANT', 'SUPER_ADMIN'] },
-    // { icon: FileText, label: "نتائج الطلاب", href: `/school/${slug}/grades`, roles: ['SCHOOL_ADMIN', 'ASSISTANT', 'SUPER_ADMIN'] },
+    { icon: LayoutDashboard, label: "لوحة التحكم", href: `/school/${slug}`, roles: ['SCHOOL_ADMIN', 'ASSISTANT', 'ACCOUNTANT', 'SUPER_ADMIN'], color: 'text-blue-400' },
+    { icon: GraduationCap, label: "إدارة الأعضاء", href: `/school/${slug}/members`, roles: ['SCHOOL_ADMIN', 'ASSISTANT', 'SUPER_ADMIN'], color: 'text-violet-400' },
+    { icon: Users, label: "إدارة الطلاب", href: `/school/${slug}/students`, roles: ['SCHOOL_ADMIN', 'ASSISTANT', 'ACCOUNTANT', 'SUPER_ADMIN'], color: 'text-emerald-400' },
+    { icon: Layers, label: "المراحل والصفوف", href: `/school/${slug}/classes`, roles: ['SCHOOL_ADMIN', 'ASSISTANT', 'SUPER_ADMIN'], color: 'text-indigo-400' },
+    { icon: BookOpen, label: "إدارة المواد الدراسية", href: `/school/${slug}/subjects`, roles: ['SCHOOL_ADMIN', 'ASSISTANT', 'SUPER_ADMIN'], color: 'text-amber-400' },
+    { icon: CalendarDays, label: "جداول الحصص", href: `/school/${slug}/schedules`, roles: ['SCHOOL_ADMIN', 'ASSISTANT', 'SUPER_ADMIN'], color: 'text-rose-400' },
     
-    // Financial Links - Conditional for Accountant vs Others
+    // Financial Links
     ...(role === 'ACCOUNTANT' ? [
-      { icon: PieChart, label: "لوحة التحكم المالية", href: `/school/${slug}/financial/dashboard`, roles: ['ACCOUNTANT'] },
-      { icon: Wallet, label: "رسوم الطلاب", href: `/school/${slug}/financial/fees`, roles: ['ACCOUNTANT'] },
-      { icon: ArrowLeftRight, label: "المصاريف", href: `/school/${slug}/financial/expenses`, roles: ['ACCOUNTANT'] },
+      { icon: PieChart, label: "لوحة التحكم المالية", href: `/school/${slug}/financial/dashboard`, roles: ['ACCOUNTANT'], color: 'text-cyan-400' },
+      { icon: Wallet, label: "رسوم الطلاب", href: `/school/${slug}/financial/fees`, roles: ['ACCOUNTANT'], color: 'text-orange-400' },
+      { icon: ArrowLeftRight, label: "المصاريف", href: `/school/${slug}/financial/expenses`, roles: ['ACCOUNTANT'], color: 'text-red-400' },
     ] : [
-      { icon: Wallet, label: "الشؤون المالية", href: `/school/${slug}/financial`, roles: ['SCHOOL_ADMIN', 'SUPER_ADMIN'] }
+      { icon: Wallet, label: "الشؤون المالية", href: `/school/${slug}/financial`, roles: ['SCHOOL_ADMIN', 'SUPER_ADMIN'], color: 'text-yellow-400' }
     ]),
 
-    { icon: CalendarDays, label: "إدارة السنوات الدراسية", href: `/school/${slug}/academic-years`, roles: ['SCHOOL_ADMIN', 'ASSISTANT', 'SUPER_ADMIN'] },
-    // { icon: TrendingUp, label: "التقارير والإحصائيات", href: `/school/${slug}/reports`, roles: ['SCHOOL_ADMIN', 'ASSISTANT', 'ACCOUNTANT', 'SUPER_ADMIN'] },
-    { icon: Archive, label: "الأرشيف", href: `/school/${slug}/archive`, roles: ['SCHOOL_ADMIN', 'ASSISTANT', 'SUPER_ADMIN'] },
-    { icon: Settings, label: "الإعدادات العامة", href: `/school/${slug}/settings`, roles: ['SCHOOL_ADMIN', 'SUPER_ADMIN'] },
+    { icon: CalendarDays, label: "إدارة السنوات الدراسية", href: `/school/${slug}/academic-years`, roles: ['SCHOOL_ADMIN', 'ASSISTANT', 'SUPER_ADMIN'], color: 'text-teal-400' },
+    { icon: Archive, label: "الأرشيف", href: `/school/${slug}/archive`, roles: ['SCHOOL_ADMIN', 'ASSISTANT', 'SUPER_ADMIN'], color: 'text-slate-400' },
+    { icon: Settings, label: "الإعدادات العامة", href: `/school/${slug}/settings`, roles: ['SCHOOL_ADMIN', 'SUPER_ADMIN'], color: 'text-pink-400' },
   ];
 
   const filteredItems = menuItems.filter(item => item.roles.includes(role));
@@ -159,6 +160,7 @@ export default function DashboardSidebar({ slug }) {
             label={item.label} 
             href={item.href} 
             isActive={pathname === item.href || (item.href !== `/school/${slug}` && pathname.startsWith(item.href))} 
+            iconColor={item.color}
           />
         ))}
       </nav>
