@@ -34,7 +34,7 @@ export default function SubscriptionPage() {
   useEffect(() => {
     const fetchSubscription = async () => {
       try {
-        const response = await axiosInstance.get('/api/subscriptions/my-subscription');
+        const response = await axiosInstance.get('/subscriptions/my-subscription');
         if (response.data.success) {
           setData(response.data.data);
         }

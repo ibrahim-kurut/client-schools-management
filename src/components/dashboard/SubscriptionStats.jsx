@@ -9,7 +9,7 @@ export default function SubscriptionStats() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await axiosInstance.get('/api/subscriptions/my-subscription');
+        const response = await axiosInstance.get('/subscriptions/my-subscription');
         if (response.data.success) {
           setStats(response.data.data);
         }
