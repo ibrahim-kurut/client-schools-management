@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { Bell, Search, User, ChevronDown, HelpCircle, Globe, Settings } from "lucide-react";
+import { Search, User, ChevronDown, HelpCircle, Globe, Settings } from "lucide-react";
+import NotificationsDropdown from "./NotificationsDropdown";
 import { useSelector } from "react-redux";
 
 export default function SuperAdminHeader({ onMenuClick }) {
@@ -49,12 +50,7 @@ export default function SuperAdminHeader({ onMenuClick }) {
         </button>
 
         {/* Notifications */}
-        <div className="relative">
-          <button className="p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition-all active:scale-95 border border-transparent hover:border-slate-200 dark:hover:border-slate-700">
-            <Bell className="w-5 h-5" />
-            <span className="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-rose-500 rounded-full border-2 border-white dark:border-slate-900 shadow-sm animate-pulse" />
-          </button>
-        </div>
+        <NotificationsDropdown />
 
         <div className="w-px h-8 bg-slate-200 dark:bg-slate-800 mx-2" />
 

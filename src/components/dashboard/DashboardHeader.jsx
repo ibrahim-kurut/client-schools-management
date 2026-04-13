@@ -1,5 +1,6 @@
 "use client";
-import { Bell, Search, Settings, Sun, Moon } from "lucide-react";
+import { Search, Settings, Sun, Moon } from "lucide-react";
+import NotificationsDropdown from "./NotificationsDropdown";
 
 export default function DashboardHeader({ slug }) {
   return (
@@ -19,10 +20,7 @@ export default function DashboardHeader({ slug }) {
         <button className="p-3 rounded-2xl bg-white text-slate-600 hover:bg-slate-50 transition-all border border-slate-200 shadow-sm">
           <Moon className="w-5 h-5" />
         </button>
-        <button className="relative p-3 rounded-2xl bg-white text-slate-600 hover:bg-slate-50 transition-all border border-slate-200 shadow-sm">
-          <Bell className="w-5 h-5" />
-          <span className="absolute top-2 left-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
-        </button>
+        <NotificationsDropdown />
         <button className="p-3 rounded-2xl bg-white text-slate-600 hover:bg-slate-50 transition-all border border-slate-200 shadow-sm">
           <Settings className="w-5 h-5" />
         </button>

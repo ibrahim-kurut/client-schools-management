@@ -1,53 +1,57 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { 
-  AlertCircle
+  AlertCircle,
+  Loader2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchSubscriptionRequests, approveSubscriptionRequest, rejectSubscriptionRequest, clearMessages } from "@/redux/slices/subscriptionRequestsSlice";
 import DashboardPageHeader from "@/components/dashboard/super-admin/DashboardPageHeader";
 import RequestCard from "@/components/dashboard/super-admin/RequestCard";
-
-const mockRequests = [
-  {
-    id: "REQ-2024-001",
-    school: "مدرسة الأمل النموذجية",
-    plan: "الباقة المتقدمة",
-    amount: 299,
-    status: "PENDING",
-    date: "2024-03-31 08:30",
-    phone: "0123456789",
-    receipt: "https://via.placeholder.com/600x800",
-    notes: "تم تحويل المبلغ عبر فودافون كاش."
-  },
-  {
-    id: "REQ-2024-002",
-    school: "مدارس النور الأهلية",
-    plan: "الباقة المتوسطة",
-    amount: 149,
-    status: "APPROVED",
-    date: "2024-03-30 14:15",
-    phone: "0987654321",
-    receipt: "https://via.placeholder.com/600x800",
-    notes: "الدفع النقدي في المقر."
-  },
-  {
-    id: "REQ-2024-003",
-    school: "أكاديمية المستقبل",
-    plan: "الباقة المتقدمة",
-    amount: 299,
-    status: "REJECTED",
-    date: "2024-03-29 11:00",
-    phone: "0554433221",
-    receipt: "https://via.placeholder.com/600x800",
-    notes: "إيصال دفع قديم."
-  }
-];
+import ApproveRejectModal from "@/components/dashboard/super-admin/ApproveRejectModal";
+import { toast } from "react-toastify";
 
 export default function SubscriptionRequests() {
   const [activeStatus, setActiveStatus] = useState("PENDING");
+  const [selectedRequest, setSelectedRequest] = useState(null);
+  const [modalType, setModalType] = useState(null); // 'APPROVE' or 'REJECT'
 
-  const filteredRequests = mockRequests.filter(req => req.status === activeStatus);
+  const dispatch = useDispatch();
+  const { requests, status, error, successMessage } = useSelector((state) => state.subscriptionRequests);
+
+  useEffect(() => {
+    dispatch(fetchSubscriptionRequests(activeStatus));
+  }, [dispatch, activeStatus]);
+
+  useEffect(() => {
+    if (successMessage) {
+      toast.success(successMessage);
+      dispatch(clearMessages());
+    }
+    if (error) {
+      toast.error(error);
+      dispatch(clearMessages());
+    }
+  }, [successMessage, error, dispatch]);
+
+  const handleOpenModal = (request, type) => {
+    setSelectedRequest(request);
+    setModalType(type);
+  };
+
+  const handleConfirmAction = async (adminNotes) => {
+    if (!selectedRequest || !selectedRequest.id) return;
+    
+    if (modalType === 'APPROVE') {
+      await dispatch(approveSubscriptionRequest({ id: selectedRequest.id, adminNotes }));
+    } else {
+      await dispatch(rejectSubscriptionRequest({ id: selectedRequest.id, adminNotes }));
+    }
+    setSelectedRequest(null);
+    setModalType(null);
+  };
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -80,7 +84,12 @@ export default function SubscriptionRequests() {
         
         {/* Requests List */}
         <div className="lg:col-span-12 space-y-4">
-           {filteredRequests.length === 0 ? (
+           {status === 'loading' ? (
+             <div className="flex flex-col items-center justify-center p-20 space-y-4">
+                <Loader2 className="w-10 h-10 text-indigo-500 animate-spin" />
+                <p className="text-sm font-bold text-slate-500">جاري تحميل الطلبات...</p>
+             </div>
+            ) : (!requests || requests.length === 0) ? (
              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[2.5rem] p-20 flex flex-col items-center justify-center text-center opacity-50 space-y-6">
                 <div className="w-24 h-24 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center p-6 text-slate-300">
                    <AlertCircle className="w-full h-full" />
@@ -92,14 +101,37 @@ export default function SubscriptionRequests() {
              </div>
            ) : (
              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-               {filteredRequests.map((req) => (
-                 <RequestCard key={req.id} request={req} />
-               ))}
+               {Array.isArray(requests) && requests.map((req) => {
+                 if (!req || !req.id) return null;
+                 return (
+                  <RequestCard 
+                    key={req.id} 
+                    request={req} 
+                    onApprove={() => handleOpenModal(req, 'APPROVE')}
+                    onReject={() => handleOpenModal(req, 'REJECT')}
+                  />
+                 );
+               })}
              </div>
            )}
         </div>
 
       </div>
+
+
+      {/* Modals */}
+      {selectedRequest && (
+        <ApproveRejectModal 
+          isOpen={!!selectedRequest}
+          onClose={() => {
+            setSelectedRequest(null);
+            setModalType(null);
+          }}
+          onConfirm={handleConfirmAction}
+          type={modalType}
+          schoolName={selectedRequest?.school?.name || "مدرسة غير معروفة"}
+        />
+      )}
     </div>
   );
 }

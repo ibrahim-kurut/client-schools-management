@@ -14,14 +14,22 @@ import {
   XCircle,
   Calendar,
   ChevronRight,
-  Sparkles
+  Sparkles,
+  ZapOff
 } from 'lucide-react';
 import { toast } from 'react-toastify';
+import { useDispatch, useSelector } from "react-redux";
+import { fetchMyPendingRequest } from "@/redux/slices/subscriptionRequestsSlice";
+import NewSubscriptionRequestModal from "@/components/dashboard/NewSubscriptionRequestModal";
 
 export default function SubscriptionPage() {
   const { slug } = useParams();
+  const dispatch = useDispatch();
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const { pendingRequest } = useSelector((state) => state.subscriptionRequests);
 
   useEffect(() => {
     const fetchSubscription = async () => {
@@ -39,7 +47,8 @@ export default function SubscriptionPage() {
     };
 
     fetchSubscription();
-  }, [slug]);
+    dispatch(fetchMyPendingRequest());
+  }, [slug, dispatch]);
 
   if (loading) {
     return (
@@ -89,6 +98,24 @@ export default function SubscriptionPage() {
                     <span className="font-black text-sm">{status === 'ACTIVE' ? 'نشط' : 'قيد الانتظار'}</span>
                 </div>
             </div>
+
+            {/* Pending Request Banner */}
+            {pendingRequest && (
+              <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-[2.5rem] p-8 flex flex-col md:flex-row items-center justify-between gap-6 animate-in slide-in-from-top-4 duration-500">
+                  <div className="flex items-center gap-6 text-center md:text-right">
+                      <div className="w-16 h-16 bg-amber-100 dark:bg-amber-500/20 rounded-2xl flex items-center justify-center text-amber-600 shrink-0">
+                         <Clock className="w-8 h-8 animate-pulse" />
+                      </div>
+                      <div>
+                         <h4 className="text-lg font-black text-amber-900 dark:text-amber-400">طلبك قيد المراجعة</h4>
+                         <p className="text-xs font-bold text-amber-600/70">لقد أرسلت طلباً للاشتراك في باقة <span className="underline">{pendingRequest.plan.name}</span>. سيتم إخطارك بمجرد الموافقة.</p>
+                      </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                     <span className="text-[10px] font-black text-amber-500 uppercase tracking-widest border border-amber-200 rounded-lg px-2 py-1">قيد الانتظار</span>
+                  </div>
+              </div>
+            )}
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 
@@ -231,12 +258,33 @@ export default function SubscriptionPage() {
                         )}
                     </div>
 
+                    {/* Manage Subscription / Upgrade Button */}
+                    <div className="bg-indigo-600 rounded-[32px] p-8 text-white relative overflow-hidden shadow-2xl shadow-indigo-600/30 group cursor-pointer" onClick={() => !pendingRequest && setIsModalOpen(true)}>
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 blur-3xl rounded-full" />
+                        <div className="relative z-10">
+                            <h3 className="text-lg font-black mb-1">تطوير أو تجديد الاشتراك</h3>
+                            <p className="text-indigo-100 text-[10px] font-bold uppercase tracking-widest mb-6Opacity-70">اختر باقة جديدة للحصول على ميزات أكثر</p>
+                            <button 
+                              disabled={!!pendingRequest}
+                              className="w-full py-4 bg-white text-indigo-600 rounded-2xl font-black text-xs hover:bg-indigo-50 transition-all flex items-center justify-center gap-2 group-hover:gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {pendingRequest ? 'لديك طلب معلق بالفعل' : 'ابدأ الترقية الآن'}
+                                <ChevronRight className="w-4 h-4" />
+                            </button>
+                        </div>
+                    </div>
+
                 </div>
             </div>
 
           </div>
         </main>
       </div>
+
+      <NewSubscriptionRequestModal 
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      />
     </div>
   );
 }

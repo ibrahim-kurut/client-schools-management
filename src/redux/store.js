@@ -12,6 +12,8 @@ import academicYearsReducer from "./slices/academicYearsSlice";
 import archiveReducer from "./slices/archiveSlice";
 import teacherProfileReducer from "./slices/teacherProfileSlice";
 import teacherGradesReducer from "./slices/teacherGradesSlice";
+import subscriptionRequestsReducer from "./slices/subscriptionRequestsSlice";
+import notificationsReducer from "./slices/notificationsSlice";
 export const store = configureStore({
     reducer: {
         auth: authReducer,
@@ -27,6 +29,8 @@ export const store = configureStore({
         archive: archiveReducer,
         teacherProfile: teacherProfileReducer,
         teacherGrades: teacherGradesReducer,
+        subscriptionRequests: subscriptionRequestsReducer,
+        notifications: notificationsReducer,
     },
 });
 
