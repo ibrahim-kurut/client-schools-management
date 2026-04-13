@@ -122,8 +122,8 @@ export default function PlansManagement() {
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {plans.map((plan) => (
-              <PlanCard key={plan.id} plan={plan} onEdit={handleOpenEdit} />
+            {plans.map((plan, index) => (
+              <PlanCard key={plan.id} plan={plan} index={index} onEdit={handleOpenEdit} />
             ))}
 
           </div>

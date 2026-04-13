@@ -108,6 +108,7 @@ export default function DashboardSidebar({ slug }) {
 
     { icon: CalendarDays, label: "إدارة السنوات الدراسية", href: `/school/${slug}/academic-years`, roles: ['SCHOOL_ADMIN', 'ASSISTANT', 'SUPER_ADMIN'], color: 'text-teal-400' },
     { icon: Archive, label: "الأرشيف", href: `/school/${slug}/archive`, roles: ['SCHOOL_ADMIN', 'ASSISTANT', 'SUPER_ADMIN'], color: 'text-slate-400' },
+    { icon: FileText, label: "الاشتراك والفوترة", href: `/school/${slug}/subscription`, roles: ['SCHOOL_ADMIN', 'SUPER_ADMIN'], color: 'text-orange-400' },
     { icon: Settings, label: "الإعدادات العامة", href: `/school/${slug}/settings`, roles: ['SCHOOL_ADMIN', 'SUPER_ADMIN'], color: 'text-pink-400' },
   ];
 
