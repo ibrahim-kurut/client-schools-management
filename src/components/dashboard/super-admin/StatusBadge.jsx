@@ -33,6 +33,11 @@ const statusConfig = {
     label: "غير نشط",
     color: "bg-slate-100 dark:bg-slate-800 text-slate-500 border-slate-200 dark:border-slate-700 shadow-slate-500/10",
     indicator: "bg-slate-400"
+  },
+  EXPIRED: {
+    label: "منتهي",
+    color: "bg-red-50 dark:bg-red-500/10 text-red-600 border-red-200 dark:border-red-500/20 shadow-red-500/20",
+    indicator: "bg-red-500"
   }
 };
 

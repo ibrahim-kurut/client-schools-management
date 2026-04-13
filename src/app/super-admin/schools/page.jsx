@@ -1,76 +1,92 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { 
   Search, 
   Filter, 
   Edit2, 
   Trash2, 
-  ShieldCheck, 
+  ArchiveX,
   Plus,
-  Crown
+  Crown,
+  ChevronRight,
+  ChevronLeft,
+  Loader2,
+  Wallet
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import axios from "axios";
+import { toast } from "react-toastify";
+import Link from "next/link";
+import { DOMAIN } from "@/lib/domain";
 import DashboardPageHeader from "@/components/dashboard/super-admin/DashboardPageHeader";
 import StatusBadge from "@/components/dashboard/super-admin/StatusBadge";
-
-const mockSchools = [
-  {
-    id: "1",
-    name: "مدرسة الأمل النموذجية",
-    slug: "hope-model-school",
-    owner: "أحمد محمد علي",
-    email: "ahmed@hope.edu",
-    phone: "0123456789",
-    plan: "الباقة المتقدمة",
-    status: "ACTIVE",
-    students: 450,
-    joinedDate: "2024-01-15",
-    logo: "https://ui-avatars.com/api/?name=مدرسة+الأمل&background=4f46e5&color=fff"
-  },
-  {
-    id: "2",
-    name: "مدارس النور الأهلية",
-    slug: "al-noor-schools",
-    owner: "سارة محمود الرشيدي",
-    email: "sara@alnoor.edu",
-    phone: "0987654321",
-    plan: "الباقة المتوسطة",
-    status: "ACTIVE",
-    students: 210,
-    joinedDate: "2024-02-10",
-    logo: "https://ui-avatars.com/api/?name=مدارس+النور&background=0284c7&color=fff"
-  },
-  {
-    id: "3",
-    name: "أكاديمية المستقبل الدولية",
-    slug: "future-academy",
-    owner: "خالد بن وليد",
-    email: "khaled@future.edu",
-    phone: "0554433221",
-    plan: "الباقة المتقدمة",
-    status: "PENDING",
-    students: 0,
-    joinedDate: "2024-03-20",
-    logo: "https://ui-avatars.com/api/?name=أكاديمية+المستقبل&background=7c3aed&color=fff"
-  },
-  {
-    id: "4",
-    name: "مبتدئ المعرفة الابتدائية",
-    slug: "knowledge-beginners",
-    owner: "ليلى حسن",
-    email: "layla@knowledge.edu",
-    phone: "0112233445",
-    plan: "الباقة الأساسية",
-    status: "SUSPENDED",
-    students: 125,
-    joinedDate: "2023-11-05",
-    logo: "https://ui-avatars.com/api/?name=مبتدئ+المعرفة&background=ea580c&color=fff"
-  }
-];
+import SchoolEditModal from "@/components/dashboard/super-admin/SchoolEditModal";
+import ArchiveConfirmationModal from "@/components/dashboard/super-admin/ArchiveConfirmationModal";
 
 export default function SchoolsManagement() {
+  const [schools, setSchools] = useState([]);
+  const [plans, setPlans] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+    totleSchools: 0
+  });
+
+  // Modal States
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isArchiveModalOpen, setIsArchiveModalOpen] = useState(false);
+  const [selectedSchool, setSelectedSchool] = useState(null);
+  const [schoolToArchive, setSchoolToArchive] = useState(null);
+
+  const fetchData = useCallback(async (page = 1, search = "") => {
+    setLoading(true);
+    try {
+      const [schoolsRes, plansRes] = await Promise.all([
+        axios.get(`${DOMAIN}/schools?page=${page}&limit=10&search=${search}`, { withCredentials: true }),
+        axios.get(`${DOMAIN}/admin/plans`, { withCredentials: true })
+      ]);
+
+      setSchools(schoolsRes.data.schools);
+      setPagination(schoolsRes.data.pagination);
+      setPlans(plansRes.data);
+    } catch (error) {
+      console.error("Error fetching schools data:", error);
+      toast.error("فشل في تحميل بيانات المدارس");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchData(pagination.currentPage, searchTerm);
+  }, [fetchData, pagination.currentPage, searchTerm]);
+
+  const confirmArchive = async () => {
+    if (!schoolToArchive) return;
+    try {
+      await axios.delete(`${DOMAIN}/schools/${schoolToArchive.id}`, { withCredentials: true });
+      toast.success("تم أرشفة المدرسة بنجاح");
+      fetchData(pagination.currentPage, searchTerm);
+      setIsArchiveModalOpen(false);
+      setSchoolToArchive(null);
+    } catch (error) {
+      console.error("Error archiving school:", error);
+      toast.error("فشل في أرشفة المدرسة");
+    }
+  };
+
+  const handleDeleteClick = (school) => {
+    setSchoolToArchive(school);
+    setIsArchiveModalOpen(true);
+  };
+
+  const openEditModal = (school) => {
+    setSelectedSchool(school);
+    setIsEditModalOpen(true);
+  };
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -78,13 +94,7 @@ export default function SchoolsManagement() {
       {/* Header Section */}
       <DashboardPageHeader 
         title="إدارة المدارس"
-        description="عرض وإدارة جميع المدارس المسجلة في المنصة."
-        primaryAction={{
-          label: "إضافة مدرسة جديدة",
-          icon: Plus,
-          variant: "indigo",
-          onClick: () => console.log("Add School")
-        }}
+        description="عرض وإدارة جميع المدارس المسجلة في المنصة بنظام SaaS."
       />
 
       {/* Filters & Search */}
@@ -93,7 +103,7 @@ export default function SchoolsManagement() {
             <Search className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within/search:text-indigo-500 transition-colors" />
             <input 
               type="text" 
-              placeholder="البحث بالاسم، المالك، أو البريد..." 
+              placeholder="البحث باسم المدرسة..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 focus:border-indigo-500 rounded-xl py-3 pr-11 pl-4 text-sm outline-none transition-all duration-200 focus:ring-4 focus:ring-indigo-500/10"
@@ -105,12 +115,18 @@ export default function SchoolsManagement() {
                تصفية
             </button>
             <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 hidden md:block" />
-            <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest hidden md:block whitespace-nowrap">إجمالي المدارس: {mockSchools.length}</span>
+            <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest hidden md:block whitespace-nowrap">إجمالي المدارس: {pagination.totleSchools}</span>
          </div>
       </div>
 
       {/* Schools Table */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-500">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-500 relative">
+        {loading && (
+          <div className="absolute inset-0 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm z-10 flex items-center justify-center">
+             <Loader2 className="w-10 h-10 text-indigo-500 animate-spin" />
+          </div>
+        )}
+
         <div className="overflow-x-auto">
           <table className="w-full text-right">
             <thead>
@@ -125,67 +141,151 @@ export default function SchoolsManagement() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50 dark:divide-slate-800/50">
-              {mockSchools.map((school) => (
-                <tr 
-                  key={school.id} 
-                  className="group hover:bg-slate-50/80 dark:hover:bg-slate-800/20 transition-all duration-300"
-                >
-                  <td className="px-6 py-6">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center p-0.5 overflow-hidden ring-1 ring-slate-100 dark:ring-slate-800 group-hover:scale-110 transition-transform duration-500">
-                        <img src={school.logo} alt={school.name} className="w-full h-full object-cover rounded-xl" />
+              {schools.length > 0 ? (
+                schools.map((school) => (
+                  <tr 
+                    key={school.id} 
+                    className="group hover:bg-slate-50/80 dark:hover:bg-slate-800/20 transition-all duration-300"
+                  >
+                    <td className="px-6 py-6 font-arabic">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center p-0.5 overflow-hidden ring-1 ring-slate-100 dark:ring-slate-800 group-hover:scale-110 transition-transform duration-500">
+                          {school.logo ? (
+                            <img src={school.logo} alt={school.name} className="w-full h-full object-cover rounded-xl" />
+                          ) : (
+                            <div className="w-full h-full bg-indigo-500/10 flex items-center justify-center text-indigo-500 font-black text-lg">
+                              {school.name[0]}
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex flex-col min-w-0">
+                          <span className="font-extrabold text-sm text-slate-900 dark:text-white truncate tracking-tight">{school.name}</span>
+                          <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider lowercase mt-0.5">{school.slug}</span>
+                        </div>
                       </div>
-                      <div className="flex flex-col min-w-0">
-                        <span className="font-extrabold text-sm text-slate-900 dark:text-white truncate tracking-tight">{school.name}</span>
-                        <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider lowercase mt-0.5">eduflow.app/{school.slug}</span>
+                    </td>
+                    <td className="px-6 py-6">
+                      <div className="flex flex-col">
+                        <span className="font-bold text-xs text-slate-700 dark:text-slate-300">
+                          {school.owner ? `${school.owner.firstName} ${school.owner.lastName}` : "غير محدد"}
+                        </span>
+                        <span className="text-[10px] font-medium text-slate-400 dark:text-slate-500 mt-1">{school.owner?.email}</span>
                       </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-6">
-                    <div className="flex flex-col">
-                      <span className="font-bold text-xs text-slate-700 dark:text-slate-300">{school.owner}</span>
-                      <span className="text-[10px] font-medium text-slate-400 dark:text-slate-500 mt-1">{school.email}</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-6">
-                    <div className="flex items-center gap-2">
-                       <Crown className={cn("w-3.5 h-3.5", 
-                          school.plan.includes("متقدمة") ? "text-amber-500" : 
-                          school.plan.includes("متوسطة") ? "text-indigo-500" : "text-slate-400"
-                       )} />
-                       <span className="text-xs font-black text-slate-600 dark:text-slate-400 uppercase tracking-tight">{school.plan}</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-6">
-                    <span className="text-xs font-black text-slate-900 dark:text-white bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm">{school.students}</span>
-                  </td>
-                  <td className="px-6 py-6 font-bold">
-                    <StatusBadge status={school.status} />
-                  </td>
-                  <td className="px-6 py-6">
-                    <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">{school.joinedDate}</span>
-                  </td>
-                  <td className="px-6 py-6">
-                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <button className="p-2.5 rounded-xl hover:bg-white dark:hover:bg-slate-700 text-indigo-500 shadow-sm border border-transparent hover:border-indigo-100 dark:hover:border-indigo-500/30 transition-all active:scale-90">
-                        <Edit2 className="w-4 h-4" />
-                      </button>
-                      <button className="p-2.5 rounded-xl hover:bg-white dark:hover:bg-slate-700 text-slate-400 hover:text-slate-600 transition-all active:scale-90 border border-transparent hover:border-slate-100">
-                        <ShieldCheck className="w-4 h-4" />
-                      </button>
-                      <button className="p-2.5 rounded-xl hover:bg-white dark:hover:bg-slate-700 text-rose-500 shadow-sm border border-transparent hover:border-rose-100 dark:hover:border-rose-500/30 transition-all active:scale-90">
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                    </td>
+                    <td className="px-6 py-6">
+                      <div className="flex items-center gap-2">
+                         <Crown className={cn("w-3.5 h-3.5", 
+                            school.subscription?.plan?.price > 0 ? "text-amber-500" : "text-slate-400"
+                         )} />
+                         <span className="text-xs font-black text-slate-600 dark:text-slate-400 uppercase tracking-tight">
+                           {school.subscription?.plan?.name || "بدون باقة"}
+                         </span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-6">
+                      <span className="text-xs font-black text-slate-900 dark:text-white bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm">
+                        {school._count?.members || 0}
+                      </span>
+                    </td>
+                    <td className="px-6 py-6 font-bold">
+                      <StatusBadge status={school.subscription?.status || "INACTIVE"} />
+                    </td>
+                    <td className="px-6 py-6">
+                      <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+                        {new Date(school.createdAt).toLocaleDateString('ar-EG')}
+                      </span>
+                    </td>
+                    <td className="px-6 py-6 text-left">
+                      <div className="flex items-center justify-end gap-2 transition-all duration-300">
+                        <button 
+                          onClick={() => openEditModal(school)}
+                          title="تعديل الاشتراك"
+                          className="p-2.5 rounded-xl hover:bg-white dark:hover:bg-slate-700 text-indigo-500 shadow-sm border border-transparent hover:border-indigo-100 dark:hover:border-indigo-500/30 transition-all active:scale-90 cursor-pointer"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </button>
+                        <Link 
+                          href={`/super-admin/debts?schoolId=${school.id}`}
+                          title="إدارة الديون"
+                          className="p-2.5 rounded-xl hover:bg-white dark:hover:bg-slate-700 text-amber-500 transition-all active:scale-90 border border-transparent hover:border-amber-100"
+                        >
+                          <Wallet className="w-4 h-4" />
+                        </Link>
+                        <button 
+                          onClick={() => handleDeleteClick(school)}
+                          title="أرشفة المدرسة"
+                          className="p-2.5 rounded-xl hover:bg-white dark:hover:bg-slate-700 text-red-400 shadow-sm border border-transparent hover:border-red-100 dark:hover:border-red-500/30 transition-all active:scale-90 cursor-pointer"
+                        >
+                          <ArchiveX className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={7} className="px-6 py-20 text-center">
+                    <div className="flex flex-col items-center gap-4">
+                       <div className="w-20 h-20 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-300">
+                          <Search className="w-10 h-10" />
+                       </div>
+                       <div className="space-y-1">
+                          <p className="font-extrabold text-slate-900 dark:text-white">لا توجد مدارس حالياً</p>
+                          <p className="text-xs text-slate-500">لم يتم العثور على أي مدارس مسجلة في النظام.</p>
+                       </div>
                     </div>
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>
         
-        {/* Pagination omitted for brevity, keeping same logic as before */}
+        {/* Pagination */}
+        {pagination.totalPages > 1 && (
+          <div className="p-6 bg-slate-50/50 dark:bg-slate-800/30 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between font-arabic">
+            <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+              الصفحة {pagination.currentPage} من {pagination.totalPages}
+            </span>
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={() => setPagination(prev => ({ ...prev, currentPage: prev.currentPage - 1 }))}
+                disabled={!pagination.hasPreviousPage}
+                className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 disabled:opacity-30 transition-all active:scale-90"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+              <button 
+                onClick={() => setPagination(prev => ({ ...prev, currentPage: prev.currentPage + 1 }))}
+                disabled={!pagination.hasNextPage}
+                className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 disabled:opacity-30 transition-all active:scale-90"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
+
+      {/* Edit Modal */}
+      <SchoolEditModal 
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        school={selectedSchool}
+        plans={plans}
+        onUpdate={() => fetchData(pagination.currentPage, searchTerm)}
+      />
+
+      {/* Archive Modal */}
+      <ArchiveConfirmationModal 
+        isOpen={isArchiveModalOpen}
+        onClose={() => {
+          setIsArchiveModalOpen(false);
+          setSchoolToArchive(null);
+        }}
+        onConfirm={confirmArchive}
+        schoolName={schoolToArchive?.name}
+      />
     </div>
   );
 }
