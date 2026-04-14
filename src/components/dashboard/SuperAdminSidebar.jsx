@@ -86,7 +86,7 @@ export default function SuperAdminSidebar({ isOpen, onClose }) {
   return (
     <aside 
       className={cn(
-        "bg-slate-900 text-slate-300 h-screen fixed inset-y-0 right-0 z-50 w-64 flex flex-col border-l border-slate-800 shadow-xl overflow-y-auto shrink-0 transition-transform duration-300 ease-in-out lg:sticky lg:translate-x-0",
+        "bg-slate-900 text-slate-300 h-screen fixed inset-y-0 right-0 z-50 w-64 flex flex-col border-l border-slate-800 shadow-xl overflow-y-auto shrink-0 transition-transform duration-300 ease-in-out",
         isOpen ? "translate-x-0" : "translate-x-full lg:translate-x-0"
       )}
     >
