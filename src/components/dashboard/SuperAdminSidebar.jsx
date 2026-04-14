@@ -12,7 +12,8 @@ import {
   Settings, 
   LogOut,
   ChevronLeft,
-  Wallet
+  Wallet,
+  ShieldAlert
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useDispatch, useSelector } from "react-redux";
@@ -26,6 +27,7 @@ const menuItems = [
   { icon: CreditCard, label: "باقات الاشتراك", href: "/super-admin/plans" },
   { icon: ClipboardList, label: "طلبات الاشتراك", href: "/super-admin/requests" },
   { icon: Wallet, label: "ديون المدارس", href: "/super-admin/debts" },
+  { icon:  ShieldAlert, label: "الاشتراكات المنتهية", href: "/super-admin/subscription-expired" },
   { icon: Users, label: "المستخدمين", href: "/super-admin/users" },
   { icon: Settings, label: "الإعدادات العامة", href: "/super-admin/settings" },
 ];
