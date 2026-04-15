@@ -116,12 +116,12 @@ export default function PlanSelection({ selectedPlanId, onSelectPlan }) {
                 <div className={`w-14 h-14 ${style.bgColor} rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-500 shadow-sm`}>
                   <Icon className={`w-7 h-7 ${style.color}`} />
                 </div>
-                <h4 className="font-black text-xl text-slate-900 dark:text-white capitalize">{plan.name}</h4>
+                <h4 className="font-black text-xl text-slate-900 text-black capitalize">{plan.name}</h4>
                 <div className="mt-2 flex items-baseline gap-1">
-                  <span className="text-4xl font-black text-slate-900 dark:text-white">${plan.price}</span>
+                  <span className="text-4xl font-black text-slate-900 text-black">${plan.price}</span>
                   <span className="text-slate-500 text-sm font-bold">/ سنوي</span>
                 </div>
-                <p className="text-slate-400 text-xs mt-3 font-medium line-clamp-2">{plan.description}</p>
+                <p className="text-slate-600 bg-red-100 p-2 rounded-lg text-xs mt-3 font-medium ">{plan.description}</p>
               </div>
 
               <div className="h-px bg-slate-100 w-full mb-6" />

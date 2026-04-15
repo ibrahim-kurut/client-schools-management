@@ -1,12 +1,22 @@
 "use client";
 import { useState, useEffect } from 'react';
 import { Link2, Copy, Check, ExternalLink } from 'lucide-react';
+import { useSelector } from 'react-redux';
 
 export default function SchoolLinkCard({ slug }) {
   const [copied, setCopied] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [schoolLoginUrl, setSchoolLoginUrl] = useState('');
+  const { user } = useSelector((state) => state.auth);
 
+  // Determine user role safely
+  const userData = user?.userData || user;
+  const userRole = userData?.role;
+
+  // Only SCHOOL_ADMIN and ASSISTANT can see this card
+  if (userRole && !['SCHOOL_ADMIN', 'ASSISTANT'].includes(userRole)) {
+    return null;
+  }
   useEffect(() => {
     setMounted(true);
     if (typeof window !== 'undefined') {

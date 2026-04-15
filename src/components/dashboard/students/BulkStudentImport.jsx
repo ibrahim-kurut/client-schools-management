@@ -306,7 +306,7 @@ export default function BulkStudentImport({ isOpen, onClose }) {
               <ul className="space-y-1 list-disc list-inside text-blue-600">
                 <li>الأعمدة الإجبارية: <span className="font-mono font-bold">firstName</span>, <span className="font-mono font-bold">lastName</span>, <span className="font-mono font-bold">parentPhone</span>, <span className="font-mono font-bold">birthDate</span>, <span className="font-mono font-bold">gender</span></li>
                 <li>الأعمدة الاختيارية: <span className="font-mono font-bold">studentCode</span>, <span className="font-mono font-bold">motherName</span>, <span className="font-mono font-bold">guardianMaritalStatus</span></li>
-                <li>رقم الهاتف يجب أن يتكون من 10 أرقام (مثال: 0770936701)</li>
+                <li>رقم الهاتف يجب أن يتكون من 10 أو 11 رقماً (مثال: 0770936701)</li>
                 <li>الجنس: اكتب <span className="font-mono font-bold">ذكر</span> أو <span className="font-mono font-bold">أنثى</span> (أو MALE / FEMALE)</li>
                 <li>تاريخ الميلاد بصيغة: <span className="font-mono font-bold">YYYY-MM-DD</span> (مثال: 2012-05-15)</li>
                 <li>كلمة مرور الطالب ستكون رقم هاتف ولي الأمر</li>

@@ -3,9 +3,9 @@
 import React, { useEffect, useState } from "react";
 import { Loader2, Zap, ShieldCheck, AlertCircle, LogOut } from "lucide-react";
 import axiosInstance from "@/lib/axios";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { logout } from "@/redux/slices/authSlice";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
 export default function SubscriptionPendingOverlay() {
   const [status, setStatus] = useState(null); // 'ACTIVE', 'PENDING', etc.
@@ -13,8 +13,25 @@ export default function SubscriptionPendingOverlay() {
   const [error, setError] = useState(false);
   const dispatch = useDispatch();
   const router = useRouter();
+  const pathname = usePathname();
+  const { user } = useSelector((state) => state.auth);
+
+  // Determine user role safely
+  const userData = user?.userData || user;
+  const userRole = userData?.role;
+
+  // Check if current page is the login page
+  const isLoginPage = pathname?.endsWith('/login');
+
+  // Only SCHOOL_ADMIN should see this overlay
+  const shouldCheck = !isLoginPage && userRole === 'SCHOOL_ADMIN';
 
   useEffect(() => {
+    if (!shouldCheck) {
+      setLoading(false);
+      return;
+    }
+
     const checkSubscription = async () => {
       try {
         const response = await axiosInstance.get("/subscriptions/my-subscription");
@@ -34,16 +51,18 @@ export default function SubscriptionPendingOverlay() {
     // Polling every 30 seconds to check if approved
     const interval = setInterval(checkSubscription, 30000);
     return () => clearInterval(interval);
-  }, []);
+  }, [shouldCheck]);
 
   const handleLogout = () => {
     dispatch(logout());
     router.push("/login");
   };
 
-  // If loading or active, we don't show the overlay (or show a small loader for loading)
+  // Don't show overlay if: login page, non-SCHOOL_ADMIN, loading, active status, or API error
+  if (!shouldCheck) return null;
   if (loading) return null; 
   if (status === "ACTIVE") return null;
+  if (error) return null; // Fail open: if API fails, don't block the user
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
