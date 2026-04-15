@@ -177,7 +177,10 @@ export default function UsersManagement() {
                 className="fixed inset-0 z-10" 
                 onClick={() => setActiveMenu(null)}
               />
-              <div className="absolute left-0 top-full mt-2 w-48 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl shadow-2xl z-20 py-2 animate-in fade-in zoom-in-95 duration-200">
+              <div className="absolute left-0 top-full mt-2 w-56 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl shadow-2xl z-[100] py-3 animate-in fade-in zoom-in-95 duration-200">
+                <div className="px-4 py-2 mb-1 border-b border-slate-50 dark:border-slate-800/50">
+                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">إجراءات المستخدم</p>
+                </div>
                 <button 
                   onClick={() => {
                     setSelectedUser(user);
@@ -252,7 +255,7 @@ export default function UsersManagement() {
       {/* The Table */}
       <SuperAdminDashboardTable 
         columns={columns}
-        data={users}
+        data={users || []}
         loading={loading}
         emptyMessage="لم يتم العثور على مستخدمين بهذا البحث"
       />
