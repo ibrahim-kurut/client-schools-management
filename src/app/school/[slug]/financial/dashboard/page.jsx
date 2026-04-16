@@ -1,10 +1,203 @@
 "use client";
-import React from 'react';
-import { Wallet, TrendingUp, TrendingDown, Download, Calendar } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Wallet, TrendingUp, TrendingDown, Download, Loader2, Printer } from 'lucide-react';
 import FinancialStats from '@/components/dashboard/financial/FinancialStats';
 import FinancialChart from '@/components/dashboard/financial/FinancialChart';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchFinanceStats } from '@/redux/slices/financeStatsSlice';
+import axiosInstance from '@/lib/axios';
+
+const paymentTypeLabels = {
+  TUITION: 'أقساط دراسية',
+  TRANSPORT: 'أجور نقل',
+  BOOKS: 'كتب وملازم',
+  UNIFORM: 'زي مدرسي',
+  ACTIVITIES: 'أنشطة لاصفية',
+  OTHER: 'أخرى'
+};
+
+const paymentStatusLabels = {
+  PENDING: 'معلقة',
+  COMPLETED: 'مكتملة',
+  CANCELLED: 'ملغاة',
+  REFUNDED: 'مسترجعة'
+};
+
+const expenseTypeLabels = {
+  SALARY: 'رواتب',
+  MAINTENANCE: 'صيانة',
+  SUPPLIES: 'معدات وتوريدات',
+  RENT: 'إيجار',
+  UTILITIES: 'خدمات عامة',
+  MARKETING: 'تسويق',
+  OTHER: 'أخرى'
+};
 
 export default function FinancialDashboard() {
+  const dispatch = useDispatch();
+  const { user } = useSelector((state) => state.auth);
+  const [selectedMonth, setSelectedMonth] = useState(() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  });
+  const [reportLoading, setReportLoading] = useState(false);
+  const [exportLoading, setExportLoading] = useState(false);
+
+  const actualUser = user?.userData || user;
+  const schoolId = actualUser?.schoolId;
+
+  useEffect(() => {
+    if (schoolId) {
+      dispatch(fetchFinanceStats(schoolId));
+    }
+  }, [dispatch, schoolId]);
+
+  const openPrintWindow = (reportData) => {
+    const getArabicPaymentType = (type) => {
+      const normalized = String(type || '').toUpperCase();
+      return paymentTypeLabels[normalized] || type || '-';
+    };
+
+    const getArabicPaymentStatus = (status) => {
+      const normalized = String(status || '').toUpperCase();
+      return paymentStatusLabels[normalized] || status || '-';
+    };
+
+    const getArabicExpenseType = (type) => {
+      const normalized = String(type || '').toUpperCase();
+      return expenseTypeLabels[normalized] || type || '-';
+    };
+
+    const paymentsRows = reportData.payments.length
+      ? reportData.payments.map((payment) => `
+        <tr>
+          <td>${new Date(payment.date).toLocaleDateString("en-GB")}</td>
+          <td>${payment.student ? `${payment.student.firstName} ${payment.student.lastName}` : "-"}</td>
+          <td>${getArabicPaymentType(payment.paymentType)}</td>
+          <td>${getArabicPaymentStatus(payment.status)}</td>
+          <td>${Number(payment.amount || 0).toLocaleString()} $</td>
+        </tr>
+      `).join("")
+      : `<tr><td colspan="5">لا توجد دفعات لهذا الشهر</td></tr>`;
+
+    const expensesRows = reportData.expenses.length
+      ? reportData.expenses.map((expense) => `
+        <tr>
+          <td>${new Date(expense.date).toLocaleDateString("en-GB")}</td>
+          <td>${expense.title || "-"}</td>
+          <td>${getArabicExpenseType(expense.type)}</td>
+          <td>${expense.recipient ? `${expense.recipient.firstName} ${expense.recipient.lastName}` : (expense.recipientName || "-")}</td>
+          <td>${Number(expense.amount || 0).toLocaleString()} $</td>
+        </tr>
+      `).join("")
+      : `<tr><td colspan="5">لا توجد مصاريف لهذا الشهر</td></tr>`;
+
+    const html = `
+      <html dir="rtl">
+        <head>
+          <title>تقرير مالي شهري - ${reportData.month}</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 24px; color: #1f2937; }
+            h1, h2 { margin: 0 0 12px; }
+            .meta { margin-bottom: 16px; color: #4b5563; }
+            .summary { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; margin-bottom: 20px; }
+            .card { border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; }
+            table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
+            th, td { border: 1px solid #e5e7eb; padding: 8px; text-align: right; font-size: 12px; }
+            th { background: #f9fafb; }
+          </style>
+        </head>
+        <body>
+          <h1>تقرير مالي شهري</h1>
+          <div class="meta">المدرسة: ${reportData.school.name} | الشهر: ${reportData.month}</div>
+
+          <div class="summary">
+            <div class="card"><strong>إجمالي الإيرادات:</strong> ${Number(reportData.summary.totalRevenue).toLocaleString()} $</div>
+            <div class="card"><strong>إجمالي المصاريف:</strong> ${Number(reportData.summary.totalExpenses).toLocaleString()} $</div>
+            <div class="card"><strong>صافي الرصيد:</strong> ${Number(reportData.summary.netBalance).toLocaleString()} $</div>
+            <div class="card"><strong>عدد العمليات:</strong> دفعات ${reportData.summary.paymentsCount} | مصاريف ${reportData.summary.expensesCount}</div>
+          </div>
+
+          <h2>الدفعات</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>التاريخ</th>
+                <th>الطالب</th>
+                <th>نوع الدفعة</th>
+                <th>الحالة</th>
+                <th>المبلغ</th>
+              </tr>
+            </thead>
+            <tbody>${paymentsRows}</tbody>
+          </table>
+
+          <h2>المصاريف</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>التاريخ</th>
+                <th>العنوان</th>
+                <th>النوع</th>
+                <th>المستلم</th>
+                <th>المبلغ</th>
+              </tr>
+            </thead>
+            <tbody>${expensesRows}</tbody>
+          </table>
+        </body>
+      </html>
+    `;
+
+    const printWindow = window.open("", "_blank", "width=1000,height=800");
+    if (!printWindow) return;
+    printWindow.document.open();
+    printWindow.document.write(html);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+  };
+
+  const handleDownloadMonthlyReport = async () => {
+    if (!schoolId) return;
+    setReportLoading(true);
+    try {
+      const res = await axiosInstance.get(`/finance/report/monthly/${schoolId}?month=${selectedMonth}`);
+      if (res.data?.data) {
+        openPrintWindow(res.data.data);
+      }
+    } catch (error) {
+      alert(error.response?.data?.message || "تعذر تحميل التقرير الشهري");
+    } finally {
+      setReportLoading(false);
+    }
+  };
+
+  const handleExportMonthlyData = async () => {
+    if (!schoolId) return;
+    setExportLoading(true);
+    try {
+      const res = await axiosInstance.get(`/finance/export/monthly/${schoolId}?month=${selectedMonth}`, {
+        responseType: "blob"
+      });
+      const blob = new Blob([res.data], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `finance-report-${selectedMonth}.xlsx`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      alert(error.response?.data?.message || "تعذر تصدير البيانات");
+    } finally {
+      setExportLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-8 pb-10">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -21,13 +214,27 @@ export default function FinancialDashboard() {
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-3">
-            <button className="flex items-center gap-2 bg-white text-slate-700 px-6 py-3 rounded-2xl font-bold transition-all shadow-sm border border-slate-100 hover:bg-slate-50">
-                <Calendar className="w-5 h-5 text-purple-600" />
+        <div className="flex flex-wrap gap-3 items-center">
+            <input
+              type="month"
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(e.target.value)}
+              className="bg-white text-slate-700 px-4 py-3 rounded-2xl font-bold border border-slate-100 shadow-sm"
+            />
+            <button
+                onClick={handleDownloadMonthlyReport}
+                disabled={reportLoading}
+                className="flex items-center gap-2 bg-white text-slate-700 px-6 py-3 rounded-2xl font-bold transition-all shadow-sm border border-slate-100 hover:bg-slate-50 disabled:opacity-60"
+            >
+                {reportLoading ? <Loader2 className="w-5 h-5 animate-spin text-purple-600" /> : <Printer className="w-5 h-5 text-purple-600" />}
                 تحميل تقرير شهري
             </button>
-            <button className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-2xl font-bold transition-all shadow-lg shadow-purple-600/30 hover:-translate-y-0.5">
-                <Download className="w-5 h-5" />
+            <button
+                onClick={handleExportMonthlyData}
+                disabled={exportLoading}
+                className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-2xl font-bold transition-all shadow-lg shadow-purple-600/30 hover:-translate-y-0.5 disabled:opacity-60"
+            >
+                {exportLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Download className="w-5 h-5" />}
                 تصدير البيانات
             </button>
         </div>

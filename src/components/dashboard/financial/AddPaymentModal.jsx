@@ -14,6 +14,13 @@ const paymentTypeLabels = {
   OTHER: 'أخرى (متفرقة)'
 };
 
+const paymentStatusLabels = {
+  COMPLETED: 'مكتملة',
+  PENDING: 'معلقة',
+  CANCELLED: 'ملغاة',
+  REFUNDED: 'مسترجعة'
+};
+
 const AddPaymentModal = memo(function AddPaymentModal({ isOpen, onClose }) {
   const dispatch = useDispatch();
   const { students, status: feesStatus, createStatus, createError, createdRecord } = useSelector((state) => state.fees);
@@ -39,6 +46,16 @@ const AddPaymentModal = memo(function AddPaymentModal({ isOpen, onClose }) {
   // Receipt View State
   const [isReceiptView, setIsReceiptView] = useState(false);
   const [receiptData, setReceiptData] = useState(null);
+
+  const getArabicPaymentType = useCallback((type) => {
+    const normalizedType = String(type || '').toUpperCase();
+    return paymentTypeLabels[normalizedType] || type || 'غير محدد';
+  }, []);
+
+  const getArabicPaymentStatus = useCallback((status) => {
+    const normalizedStatus = String(status || '').toUpperCase();
+    return paymentStatusLabels[normalizedStatus] || status || 'غير محدد';
+  }, []);
 
   
   // Focus modal after successful creation
@@ -196,7 +213,7 @@ const AddPaymentModal = memo(function AddPaymentModal({ isOpen, onClose }) {
                   <div className="text-left">
                     <div className="text-sm font-bold text-slate-400 mb-1 border-l-4 border-slate-200 pl-2">تاريخ تسجيل الدفعة</div>
                     <div className="text-lg font-black text-slate-800 dir-ltr">{new Date(receiptData.date).toLocaleDateString('en-GB')}</div>
-                    <div className="text-sm text-slate-500">حالة الدفع: {receiptData.status === 'COMPLETED' ? 'مكتملة' : 'معلقة'}</div>
+                    <div className="text-sm text-slate-500">حالة الدفع: {getArabicPaymentStatus(receiptData.status)}</div>
                   </div>
                 </div>
 
@@ -208,7 +225,7 @@ const AddPaymentModal = memo(function AddPaymentModal({ isOpen, onClose }) {
                   </div>
                   <div className="flex justify-between items-center">
                     <div>
-                      <div className="font-black text-lg text-slate-800">{paymentTypeLabels[receiptData.paymentType] || receiptData.paymentType}</div>
+                      <div className="font-black text-lg text-slate-800">{getArabicPaymentType(receiptData.paymentType)}</div>
                       <div className="text-sm text-slate-500 mt-1 max-w-[200px] break-words">{receiptData.note || 'بدون ملاحظات'}</div>
                     </div>
                     <div className="text-3xl font-black text-emerald-600 tracking-tight print:text-black">

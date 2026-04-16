@@ -1,44 +1,74 @@
-import { Wallet, TrendingUp, TrendingDown, Clock } from 'lucide-react';
+import { useMemo } from 'react';
+import { useSelector } from 'react-redux';
+import { Wallet, TrendingUp, TrendingDown, Clock, Loader2, AlertCircle } from 'lucide-react';
 
 export default function FinancialStats() {
-  const stats = [
+  const { stats: financeStats, status, error } = useSelector((state) => state.financeStats);
+
+  const formatCurrency = (value) => {
+    return `${Number(value || 0).toLocaleString()} $`;
+  };
+
+  const stats = useMemo(() => [
     { 
       label: "إجمالي الإيرادات", 
-      value: "45,200 $", 
+      value: formatCurrency(financeStats.totalRevenue), 
       icon: TrendingUp, 
       color: "text-emerald-600", 
       bgLight: "bg-emerald-50",
-      change: "+15% من الشهر الماضي",
-      changeColor: "text-emerald-500"
+      change: "إجمالي المقبوضات المسجلة",
+      changeColor: "text-slate-500"
     },
     { 
       label: "إجمالي المصاريف", 
-      value: "12,800 $", 
+      value: formatCurrency(financeStats.totalExpenses), 
       icon: TrendingDown, 
       color: "text-rose-600", 
       bgLight: "bg-rose-50",
-      change: "+5% من الشهر الماضي",
-      changeColor: "text-rose-500"
+      change: "إجمالي المصروفات المسجلة",
+      changeColor: "text-slate-500"
     },
     { 
       label: "صافي الرصيد", 
-      value: "32,400 $", 
+      value: formatCurrency(financeStats.netBalance), 
       icon: Wallet, 
       color: "text-blue-600", 
       bgLight: "bg-blue-50",
-      change: "+12% من الشهر الماضي",
-      changeColor: "text-emerald-500"
+      change: "الإيرادات - المصاريف",
+      changeColor: "text-slate-500"
     },
     { 
       label: "مدفوعات معلقة", 
-      value: "8,500 $", 
+      value: formatCurrency(financeStats.pendingPayments), 
       icon: Clock, 
       color: "text-amber-600", 
       bgLight: "bg-amber-50",
-      change: "-2% من الشهر الماضي",
-      changeColor: "text-rose-500"
+      change: "المبالغ المستحقة غير المحصلة",
+      changeColor: "text-slate-500"
     },
-  ];
+  ], [financeStats.totalRevenue, financeStats.totalExpenses, financeStats.netBalance, financeStats.pendingPayments]);
+
+  if (status === "loading") {
+    return (
+      <div className="bg-white p-8 rounded-[24px] shadow-sm border border-slate-100">
+        <div className="flex items-center justify-center gap-3 text-slate-500 font-bold">
+          <Loader2 className="w-5 h-5 animate-spin text-purple-600" />
+          جاري تحميل الإحصائيات المالية...
+        </div>
+      </div>
+    );
+  }
+
+  if (status === "failed") {
+    return (
+      <div className="bg-white p-8 rounded-[24px] shadow-sm border border-rose-100">
+        <div className="flex items-center justify-center gap-2 text-rose-600 font-bold">
+          <AlertCircle className="w-5 h-5" />
+          {error || "تعذر تحميل الإحصائيات المالية"}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
