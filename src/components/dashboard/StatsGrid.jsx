@@ -42,7 +42,7 @@ export default function StatsGrid() {
       color: "from-blue-500 to-indigo-600", 
       bgLight: "bg-blue-50", 
       text: "text-blue-600", 
-      roles: ['SCHOOL_ADMIN', 'ASSISTANT', 'ACCOUNTANT', 'SUPER_ADMIN'] 
+      roles: ['SCHOOL_ADMIN', 'ASSISTANT', 'SUPER_ADMIN'] 
     },
     { 
       label: "أعضاء كادر تدريسي", 

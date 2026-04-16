@@ -92,7 +92,7 @@ export default function DashboardSidebar({ slug }) {
   const menuItems = [
     { icon: LayoutDashboard, label: "لوحة التحكم", href: `/school/${slug}`, roles: ['SCHOOL_ADMIN', 'ASSISTANT', 'ACCOUNTANT', 'SUPER_ADMIN'], color: 'text-blue-400' },
     { icon: GraduationCap, label: "إدارة الأعضاء", href: `/school/${slug}/members`, roles: ['SCHOOL_ADMIN', 'ASSISTANT', 'SUPER_ADMIN'], color: 'text-violet-400' },
-    { icon: Users, label: "إدارة الطلاب", href: `/school/${slug}/students`, roles: ['SCHOOL_ADMIN', 'ASSISTANT', 'ACCOUNTANT', 'SUPER_ADMIN'], color: 'text-emerald-400' },
+    { icon: Users, label: "إدارة الطلاب", href: `/school/${slug}/students`, roles: ['SCHOOL_ADMIN', 'ASSISTANT', 'SUPER_ADMIN'], color: 'text-emerald-400' },
     { icon: Layers, label: "المراحل والصفوف", href: `/school/${slug}/classes`, roles: ['SCHOOL_ADMIN', 'ASSISTANT', 'SUPER_ADMIN'], color: 'text-indigo-400' },
     { icon: BookOpen, label: "إدارة المواد الدراسية", href: `/school/${slug}/subjects`, roles: ['SCHOOL_ADMIN', 'ASSISTANT', 'SUPER_ADMIN'], color: 'text-amber-400' },
     { icon: CalendarDays, label: "جداول الحصص", href: `/school/${slug}/schedules`, roles: ['SCHOOL_ADMIN', 'ASSISTANT', 'SUPER_ADMIN'], color: 'text-rose-400' },
