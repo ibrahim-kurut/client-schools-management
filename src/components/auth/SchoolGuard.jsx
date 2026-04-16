@@ -42,8 +42,9 @@ export default function SchoolGuard({ children }) {
     }
 
     // Check slug match
-    const decodedCurrentSlug = currentSlug ? decodeURIComponent(currentSlug) : null;
-    const userSchoolSlug = userData?.schoolSlug ? decodeURIComponent(userData.schoolSlug) : null;
+    const normalizeSlug = (s) => decodeURIComponent(s || '').replace(/\s+/g, '-');
+    const decodedCurrentSlug = normalizeSlug(currentSlug);
+    const userSchoolSlug = normalizeSlug(userData?.schoolSlug);
 
     if (userSchoolSlug && decodedCurrentSlug === userSchoolSlug) {
       const role = userData.role;

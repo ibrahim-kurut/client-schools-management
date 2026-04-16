@@ -86,30 +86,31 @@ export default function DashboardSidebar({ slug }) {
     }
   };
 
+  const normalizedSlug = slug ? slug.toString().replace(/\s+/g, '-') : '';
   const actualUser = user?.userData || user;
   const role = actualUser?.role || 'TEACHER';
 
   const menuItems = [
-    { icon: LayoutDashboard, label: "لوحة التحكم", href: `/school/${slug}`, roles: ['SCHOOL_ADMIN', 'ASSISTANT', 'ACCOUNTANT', 'SUPER_ADMIN'], color: 'text-blue-400' },
-    { icon: GraduationCap, label: "إدارة الأعضاء", href: `/school/${slug}/members`, roles: ['SCHOOL_ADMIN', 'ASSISTANT', 'SUPER_ADMIN'], color: 'text-violet-400' },
-    { icon: Users, label: "إدارة الطلاب", href: `/school/${slug}/students`, roles: ['SCHOOL_ADMIN', 'ASSISTANT', 'SUPER_ADMIN'], color: 'text-emerald-400' },
-    { icon: Layers, label: "المراحل والصفوف", href: `/school/${slug}/classes`, roles: ['SCHOOL_ADMIN', 'ASSISTANT', 'SUPER_ADMIN'], color: 'text-indigo-400' },
-    { icon: BookOpen, label: "إدارة المواد الدراسية", href: `/school/${slug}/subjects`, roles: ['SCHOOL_ADMIN', 'ASSISTANT', 'SUPER_ADMIN'], color: 'text-amber-400' },
-    { icon: CalendarDays, label: "جداول الحصص", href: `/school/${slug}/schedules`, roles: ['SCHOOL_ADMIN', 'ASSISTANT', 'SUPER_ADMIN'], color: 'text-rose-400' },
+    { icon: LayoutDashboard, label: "لوحة التحكم", href: `/school/${normalizedSlug}`, roles: ['SCHOOL_ADMIN', 'ASSISTANT', 'ACCOUNTANT', 'SUPER_ADMIN'], color: 'text-blue-400' },
+    { icon: GraduationCap, label: "إدارة الأعضاء", href: `/school/${normalizedSlug}/members`, roles: ['SCHOOL_ADMIN', 'ASSISTANT', 'SUPER_ADMIN'], color: 'text-violet-400' },
+    { icon: Users, label: "إدارة الطلاب", href: `/school/${normalizedSlug}/students`, roles: ['SCHOOL_ADMIN', 'ASSISTANT', 'SUPER_ADMIN'], color: 'text-emerald-400' },
+    { icon: Layers, label: "المراحل والصفوف", href: `/school/${normalizedSlug}/classes`, roles: ['SCHOOL_ADMIN', 'ASSISTANT', 'SUPER_ADMIN'], color: 'text-indigo-400' },
+    { icon: BookOpen, label: "إدارة المواد الدراسية", href: `/school/${normalizedSlug}/subjects`, roles: ['SCHOOL_ADMIN', 'ASSISTANT', 'SUPER_ADMIN'], color: 'text-amber-400' },
+    { icon: CalendarDays, label: "جداول الحصص", href: `/school/${normalizedSlug}/schedules`, roles: ['SCHOOL_ADMIN', 'ASSISTANT', 'SUPER_ADMIN'], color: 'text-rose-400' },
     
     // Financial Links
     ...(role === 'ACCOUNTANT' ? [
-      { icon: PieChart, label: "لوحة التحكم المالية", href: `/school/${slug}/financial/dashboard`, roles: ['ACCOUNTANT'], color: 'text-cyan-400' },
-      { icon: Wallet, label: "رسوم الطلاب", href: `/school/${slug}/financial/fees`, roles: ['ACCOUNTANT'], color: 'text-orange-400' },
-      { icon: ArrowLeftRight, label: "المصاريف", href: `/school/${slug}/financial/expenses`, roles: ['ACCOUNTANT'], color: 'text-red-400' },
+      { icon: PieChart, label: "لوحة التحكم المالية", href: `/school/${normalizedSlug}/financial/dashboard`, roles: ['ACCOUNTANT'], color: 'text-cyan-400' },
+      { icon: Wallet, label: "رسوم الطلاب", href: `/school/${normalizedSlug}/financial/fees`, roles: ['ACCOUNTANT'], color: 'text-orange-400' },
+      { icon: ArrowLeftRight, label: "المصاريف", href: `/school/${normalizedSlug}/financial/expenses`, roles: ['ACCOUNTANT'], color: 'text-red-400' },
     ] : [
-      { icon: Wallet, label: "الشؤون المالية", href: `/school/${slug}/financial`, roles: ['SCHOOL_ADMIN', 'SUPER_ADMIN'], color: 'text-yellow-400' }
+      { icon: Wallet, label: "الشؤون المالية", href: `/school/${normalizedSlug}/financial`, roles: ['SCHOOL_ADMIN', 'SUPER_ADMIN'], color: 'text-yellow-400' }
     ]),
 
-    { icon: CalendarDays, label: "إدارة السنوات الدراسية", href: `/school/${slug}/academic-years`, roles: ['SCHOOL_ADMIN', 'ASSISTANT', 'SUPER_ADMIN'], color: 'text-teal-400' },
-    { icon: Archive, label: "الأرشيف", href: `/school/${slug}/archive`, roles: ['SCHOOL_ADMIN', 'ASSISTANT', 'SUPER_ADMIN'], color: 'text-slate-400' },
-    { icon: FileText, label: "الاشتراك والفوترة", href: `/school/${slug}/subscription`, roles: ['SCHOOL_ADMIN', 'SUPER_ADMIN'], color: 'text-orange-400' },
-    { icon: Settings, label: "الإعدادات العامة", href: `/school/${slug}/settings`, roles: ['SCHOOL_ADMIN', 'SUPER_ADMIN'], color: 'text-pink-400' },
+    { icon: CalendarDays, label: "إدارة السنوات الدراسية", href: `/school/${normalizedSlug}/academic-years`, roles: ['SCHOOL_ADMIN', 'ASSISTANT', 'SUPER_ADMIN'], color: 'text-teal-400' },
+    { icon: Archive, label: "الأرشيف", href: `/school/${normalizedSlug}/archive`, roles: ['SCHOOL_ADMIN', 'ASSISTANT', 'SUPER_ADMIN'], color: 'text-slate-400' },
+    { icon: FileText, label: "الاشتراك والفوترة", href: `/school/${normalizedSlug}/subscription`, roles: ['SCHOOL_ADMIN', 'SUPER_ADMIN'], color: 'text-orange-400' },
+    { icon: Settings, label: "الإعدادات العامة", href: `/school/${normalizedSlug}/settings`, roles: ['SCHOOL_ADMIN', 'SUPER_ADMIN'], color: 'text-pink-400' },
   ];
 
   const filteredItems = menuItems.filter(item => item.roles.includes(role));

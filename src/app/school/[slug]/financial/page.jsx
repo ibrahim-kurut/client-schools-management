@@ -7,7 +7,8 @@ export default function FinancialPage() {
   const { slug } = useParams();
 
   useEffect(() => {
-    router.push(`/school/${slug}/financial/dashboard`);
+    const normalizedSlug = slug ? slug.toString().replace(/\s+/g, '-') : '';
+    router.push(`/school/${normalizedSlug}/financial/dashboard`);
   }, [router, slug]);
 
   return (
