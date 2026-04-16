@@ -1,16 +1,18 @@
 import React from 'react';
 
-export default function FinancialChart() {
-  const data = [
-    { month: "يناير", income: 4000, expense: 2400 },
-    { month: "فبراير", income: 3000, expense: 1398 },
-    { month: "مارس", income: 9800, expense: 2000 },
-    { month: "أبريل", income: 3908, expense: 2780 },
-    { month: "مايو", income: 4800, expense: 1890 },
-    { month: "يونيو", income: 3800, expense: 2390 },
-  ];
+export default function FinancialChart({ data = [] }) {
+  const chartData = data.length
+    ? data
+    : [
+      { month: "يناير", income: 0, expense: 0 },
+      { month: "فبراير", income: 0, expense: 0 },
+      { month: "مارس", income: 0, expense: 0 },
+      { month: "أبريل", income: 0, expense: 0 },
+      { month: "مايو", income: 0, expense: 0 },
+      { month: "يونيو", income: 0, expense: 0 },
+    ];
 
-  const maxVal = Math.max(...data.map(d => Math.max(d.income, d.expense)));
+  const maxVal = Math.max(1, ...chartData.map(d => Math.max(d.income, d.expense)));
 
   return (
     <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100 flex flex-col items-center">
@@ -41,7 +43,7 @@ export default function FinancialChart() {
           ></div>
         ))}
         
-        {data.map((item, idx) => (
+        {chartData.map((item, idx) => (
           <div key={idx} className="flex-1 flex flex-col items-center gap-3 group relative z-10">
             <div className="flex items-end gap-1.5 w-full justify-center h-48">
               {/* Income Bar */}

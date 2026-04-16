@@ -21,6 +21,9 @@ const geistMono = Geist_Mono({
 export const metadata = {
   title: "EduFlow — نظام إدارة مدارس",
   description: "منصة إدارية مدرسية متكاملة",
+  icons: {
+    icon: "/icon.svg",
+  },
 };
 
 export default function RootLayout({ children }) {

@@ -42,6 +42,9 @@ export default function FinancialDashboard() {
   });
   const [reportLoading, setReportLoading] = useState(false);
   const [exportLoading, setExportLoading] = useState(false);
+  const [dashboardLoading, setDashboardLoading] = useState(false);
+  const [chartData, setChartData] = useState([]);
+  const [recentOperations, setRecentOperations] = useState([]);
 
   const actualUser = user?.userData || user;
   const schoolId = actualUser?.schoolId;
@@ -51,6 +54,25 @@ export default function FinancialDashboard() {
       dispatch(fetchFinanceStats(schoolId));
     }
   }, [dispatch, schoolId]);
+
+  useEffect(() => {
+    const fetchDashboardDetails = async () => {
+      if (!schoolId) return;
+      setDashboardLoading(true);
+      try {
+        const res = await axiosInstance.get(`/finance/dashboard/${schoolId}?months=6`);
+        setChartData(res.data?.data?.chartData || []);
+        setRecentOperations(res.data?.data?.recentOperations || []);
+      } catch (error) {
+        setChartData([]);
+        setRecentOperations([]);
+      } finally {
+        setDashboardLoading(false);
+      }
+    };
+
+    fetchDashboardDetails();
+  }, [schoolId]);
 
   const openPrintWindow = (reportData) => {
     const getArabicPaymentType = (type) => {
@@ -244,27 +266,36 @@ export default function FinancialDashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
-          <FinancialChart />
+          <FinancialChart data={chartData} />
         </div>
 
         <div className="bg-white rounded-[2rem] shadow-sm border border-slate-100 p-8 text-right">
           <h3 className="text-xl font-black text-slate-800 mb-6">آخر العمليات</h3>
           <div className="space-y-6">
-            {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="flex items-center justify-between group">
+            {dashboardLoading ? (
+              <div className="flex items-center justify-center py-10 text-slate-500 font-bold">
+                <Loader2 className="w-5 h-5 animate-spin ml-2" />
+                جاري تحميل آخر العمليات...
+              </div>
+            ) : recentOperations.length === 0 ? (
+              <div className="text-slate-400 text-sm font-bold py-8 text-center">
+                لا توجد عمليات حديثة
+              </div>
+            ) : recentOperations.map((op, idx) => (
+              <div key={`${op.type}-${idx}-${op.date}`} className="flex items-center justify-between group">
                 <div className="flex items-center gap-4">
-                  <div className={`w-12 h-12 rounded-2xl ${i % 2 === 0 ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'} flex items-center justify-center transition-transform group-hover:scale-110`}>
-                    {i % 2 === 0 ? <TrendingUp className="w-6 h-6" /> : <TrendingDown className="w-6 h-6" />}
+                  <div className={`w-12 h-12 rounded-2xl ${op.type === 'PAYMENT' ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'} flex items-center justify-center transition-transform group-hover:scale-110`}>
+                    {op.type === 'PAYMENT' ? <TrendingUp className="w-6 h-6" /> : <TrendingDown className="w-6 h-6" />}
                   </div>
                   <div>
                     <h4 className="font-bold text-slate-800 group-hover:text-purple-700 transition-colors">
-                      {i % 2 === 0 ? "دفعة رسوم طالب" : "فاتورة صيانة"}
+                      {op.title}
                     </h4>
-                    <p className="text-slate-400 text-xs font-medium">قبل {i * 2} ساعات</p>
+                    <p className="text-slate-400 text-xs font-medium">{new Date(op.date).toLocaleDateString('en-GB')}</p>
                   </div>
                 </div>
-                <div className={`font-black ${i % 2 === 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
-                  {i % 2 === 0 ? "+" : "-"}{i * 150} $
+                <div className={`font-black ${op.type === 'PAYMENT' ? 'text-emerald-600' : 'text-rose-600'}`}>
+                  {op.type === 'PAYMENT' ? '+' : '-'}{Number(op.amount || 0).toLocaleString()} $
                 </div>
               </div>
             ))}
