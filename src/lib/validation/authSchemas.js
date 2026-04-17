@@ -14,7 +14,7 @@ const loginSchema = z.object({
 const signupStep1Schema = z.object({
   firstName: requiredTrim("يرجى إدخال الاسم الأول"),
   lastName: requiredTrim("يرجى إدخال الاسم الأخير"),
-  phone: requiredTrim("يرجى إدخال رقم الهاتف"),
+  phone: z.string().trim().regex(/^\d{10,11}$/, { message: "يجب أن يكون رقم الهاتف 10 أو 11 رقماً" }),
   gender: requiredTrim("يرجى اختيار الجنس").refine(
     (v) => v === "MALE" || v === "FEMALE",
     { message: "يرجى اختيار الجنس" }

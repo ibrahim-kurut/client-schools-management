@@ -86,7 +86,10 @@ const AddStudentForm = memo(function AddStudentForm({
 
   // --- Step 2 Validation ---
   const handleNextToFinancial = useCallback(() => {
-    if (!phoneRef.current?.value.trim()) return setValidationError('رقم هاتف ولي الأمر مطلوب');
+    const phoneVal = phoneRef.current?.value.trim();
+    if (!phoneVal) return setValidationError('رقم هاتف ولي الأمر مطلوب');
+    if (!/^\d{10,11}$/.test(phoneVal)) return setValidationError('يجب أن يكون رقم الهاتف 10 أو 11 رقماً');
+    
     if (!classNameRef.current?.value) return setValidationError('الصف الدراسي مطلوب للطالب');
     if (!motherNameRef.current?.value.trim()) return setValidationError('اسم الأم مطلوب');
     

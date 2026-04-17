@@ -65,7 +65,7 @@ export default function StudentHeader({ slug }) {
       {/* User Actions */}
       <div className="flex items-center gap-3 lg:gap-5">
         {/* Notifications */}
-        <button className="relative p-2.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all duration-300">
+        <button className="hidden sm:block relative p-2.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all duration-300">
           <Bell className="w-5 h-5" />
           <span className="absolute top-2 right-2 w-2 h-2 bg-rose-500 border-2 border-white rounded-full"></span>
         </button>
@@ -74,13 +74,13 @@ export default function StudentHeader({ slug }) {
 
         {/* User Profile */}
         <div className="flex items-center gap-3">
-          <div className="hidden sm:flex flex-col items-end">
+          <div className="flex flex-col items-end">
             <span className="text-sm font-black text-slate-800">{fullName}</span>
-            <span className="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md mt-0.5">
+            <span className="hidden sm:block text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md mt-0.5">
               طالب
             </span>
           </div>
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-100 to-teal-100 border border-emerald-200 flex items-center justify-center shadow-inner overflow-hidden">
+          <div className="hidden sm:flex w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-100 to-teal-100 border border-emerald-200 items-center justify-center shadow-inner overflow-hidden">
             {userData?.image ? (
               <img src={userData.image} alt="Profile" className="w-full h-full object-cover" />
             ) : (

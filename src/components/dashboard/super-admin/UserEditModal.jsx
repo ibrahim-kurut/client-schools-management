@@ -117,6 +117,8 @@ export default function UserEditModal({ isOpen, onClose, onSave, user }) {
               <Phone className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <input 
                 type="text"
+                pattern="^\d{10,11}$"
+                title="يجب أن يكون رقم الهاتف 10 أو 11 رقماً"
                 value={formData.phone}
                 onChange={(e) => setFormData({...formData, phone: e.target.value})}
                 className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 focus:border-indigo-500 rounded-2xl py-3 pr-11 pl-4 text-sm outline-none transition-all text-left text-slate-900 dark:text-white"

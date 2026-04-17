@@ -71,7 +71,9 @@ const AddMemberForm = memo(function AddMemberForm({
     if (e && e.preventDefault) e.preventDefault();
     
     // Final Validation Step 2
-    if (!phoneRef.current?.value.trim()) return setValidationError('رقم الهاتف مطلوب');
+    const phoneVal = phoneRef.current?.value.trim();
+    if (!phoneVal) return setValidationError('رقم الهاتف مطلوب');
+    if (!/^\d{10,11}$/.test(phoneVal)) return setValidationError('يجب أن يكون رقم الهاتف 10 أو 11 رقماً');
 
     const finalData = {
       firstName: firstNameRef.current.value,

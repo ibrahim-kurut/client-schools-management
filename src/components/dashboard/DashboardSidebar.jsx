@@ -86,7 +86,7 @@ export default function DashboardSidebar({ slug }) {
     }
   };
 
-  const normalizedSlug = slug ? slug.toString().replace(/\s+/g, '-') : '';
+  const normalizedSlug = slug ? decodeURIComponent(slug.toString()).replace(/\s+/g, '-') : '';
   const actualUser = user?.userData || user;
   const role = actualUser?.role || 'TEACHER';
 

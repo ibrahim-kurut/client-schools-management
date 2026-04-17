@@ -25,6 +25,8 @@ export default function SchoolContact({ formData, setFormData, errors }) {
           onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
           error={errors.phone}
           className="text-left"
+          pattern="^\d{10,11}$"
+          title="يجب أن يكون رقم الهاتف 10 أو 11 رقماً"
         />
       </div>
     </div>
