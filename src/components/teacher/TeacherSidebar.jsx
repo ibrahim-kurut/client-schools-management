@@ -13,6 +13,7 @@ import {
   GraduationCap,
   Menu,
   X,
+  Megaphone,
 } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useDispatch, useSelector } from 'react-redux';
@@ -26,6 +27,7 @@ const navItems = (slug) => [
   { icon: Users, label: "فصولي وطلابي", href: `/school/${slug}/teacher/my-classes` },
   { icon: ClipboardList, label: "رصد الدرجات", href: `/school/${slug}/teacher/grades` },
   { icon: CalendarCheck, label: "الحضور والغياب", href: `/school/${slug}/teacher/attendance` },
+  { icon: Megaphone, label: "إعلانات الصفوف", href: `/school/${slug}/teacher/notes` },
   { icon: UserCircle, label: "الملف الشخصي", href: `/school/${slug}/teacher/profile` },
 ];
 

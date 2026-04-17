@@ -15,6 +15,8 @@ import teacherGradesReducer from "./slices/teacherGradesSlice";
 import subscriptionRequestsReducer from "./slices/subscriptionRequestsSlice";
 import notificationsReducer from "./slices/notificationsSlice";
 import financeStatsReducer from "./slices/financeStatsSlice";
+import notesReducer from "./slices/notesSlice";
+import profileReducer from "./slices/profileSlice";
 export const store = configureStore({
     reducer: {
         auth: authReducer,
@@ -33,6 +35,8 @@ export const store = configureStore({
         subscriptionRequests: subscriptionRequestsReducer,
         notifications: notificationsReducer,
         financeStats: financeStatsReducer,
+        notes: notesReducer,
+        profile: profileReducer,
     },
 });
 

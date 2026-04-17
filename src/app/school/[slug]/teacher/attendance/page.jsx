@@ -73,7 +73,7 @@ export default function AttendancePage() {
             <div className="flex-1 text-center md:text-right">
                <h2 className="text-xl font-black text-amber-900 mb-1">قسم الحضور والغياب</h2>
                <p className="text-sm font-bold text-amber-700 leading-relaxed">
-                  نحن نعمل حالياً على ربط هذا القسم بالباك اند وتوفير تجربة سلسة لتسجيل حضور الطلاب.
+                  نحن نعمل حالياً على تطوير هذا القسم وتوفير تجربة سلسة لتسجيل حضور الطلاب.
                </p>
                <div className="flex items-center justify-center md:justify-start gap-2 mt-3">
                   <span className="inline-block w-2 h-2 rounded-full bg-amber-500 animate-ping" />

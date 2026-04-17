@@ -1,4 +1,10 @@
 "use client";
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchClassNotes } from "@/redux/slices/notesSlice";
+import { fetchProfile } from "@/redux/slices/profileSlice";
+import { formatDistanceToNow } from "date-fns";
+import { ar } from "date-fns/locale";
 
 import {
   TrendingUp,
@@ -12,11 +18,37 @@ import {
   Wallet,
   Megaphone,
   ChevronLeft,
-  GraduationCap
+  GraduationCap,
+  Loader2
 } from "lucide-react";
 
 export default function StudentDashboardPage() {
-  // Mock Data
+  const dispatch = useDispatch();
+  const { user } = useSelector((state) => state.auth);
+  const { profileData, loading: profileLoading } = useSelector((state) => state.profile);
+  const { notes, loading: notesLoading } = useSelector((state) => state.notes);
+
+  useEffect(() => {
+    dispatch(fetchProfile());
+  }, [dispatch]);
+
+  // Use classId from profileData
+  const classId = profileData?.classId;
+
+  useEffect(() => {
+    if (classId) {
+      dispatch(fetchClassNotes(classId));
+    }
+  }, [dispatch, classId]);
+
+  // Financial summary from profile
+  const financial = profileData?.financialSummary || {
+    totalPaid: 0,
+    remainingBalance: 0,
+    netRequired: 0
+  };
+
+  // Mock Data for other sections
   const stats = [
     {
       label: "النسبة العامة",
@@ -35,10 +67,10 @@ export default function StudentDashboardPage() {
       color: "blue"
     },
     {
-      label: "مجموع الرسوم",
-      value: "8,500",
+      label: "الرسوم المتبقية",
+      value: financial.remainingBalance.toLocaleString(),
       currency: "د.ع",
-      status: "مدفوع بالكامل",
+      status: financial.remainingBalance <= 0 ? "تم التسديد بالكامل" : "يوجد مبالغ مستحقة",
       icon: Wallet,
       color: "indigo"
     }
@@ -50,17 +82,6 @@ export default function StudentDashboardPage() {
     { time: "10:00 ص", subject: "استراحة", teacher: "", type: "break", status: "قادم" },
     { time: "10:30 ص", subject: "اللغة العربية", teacher: "أ. خالد النجار", type: "class", status: "قادم" },
     { time: "11:30 ص", subject: "التاريخ", teacher: "أ. سعد علي", type: "class", status: "قادم" }
-  ];
-
-  const recentGrades = [
-    { subject: "العلوم", exam: "امتحان نصف الفصل", score: 45, total: 50, date: "10 أبريل 2026" },
-    { subject: "الرياضيات", exam: "اختبار قصير", score: 18, total: 20, date: "08 أبريل 2026" },
-    { subject: "اللغة الإنجليزية", exam: "تعبير كتابي", score: 28, total: 30, date: "05 أبريل 2026" }
-  ];
-
-  const announcements = [
-    { title: "رحلة مدرسية", content: "سجل الآن في رحلة معرض الكتاب القادمة يوم الخميس.", date: "11 أبريل", type: "info" },
-    { title: "تأجيل اختبار التاريخ", content: "تم تأجيل اختبار التاريخ إلى الأسبوع القادم بسبب ضيق الوقت.", date: "09 أبريل", type: "warning" }
   ];
 
   const attendanceData = {
@@ -196,18 +217,35 @@ export default function StudentDashboardPage() {
             </div>
 
             <div className="flex flex-col gap-4">
-              {announcements.map((ann, idx) => (
-                <div key={idx} className="p-4 rounded-2xl bg-slate-50 border border-slate-100 group hover:border-slate-200 transition-colors cursor-pointer">
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className={`w-2 h-2 rounded-full ${ann.type === 'warning' ? 'bg-amber-500' : 'bg-blue-500'}`} />
-                    <h3 className="font-bold text-sm text-slate-800">{ann.title}</h3>
-                    <span className="text-[10px] font-bold text-slate-400 mr-auto">{ann.date}</span>
-                  </div>
-                  <p className="text-xs text-slate-500 leading-relaxed font-medium pl-4 border-r-2 border-transparent group-hover:border-slate-200 transition-colors">
-                    {ann.content}
-                  </p>
+              {notesLoading ? (
+                <div className="flex flex-col items-center justify-center py-10 gap-3">
+                  <Loader2 className="w-8 h-8 text-emerald-500 animate-spin" />
+                  <p className="text-xs font-bold text-slate-400">جاري تحميل الإعلانات...</p>
                 </div>
-              ))}
+              ) : notes.length === 0 ? (
+                <div className="text-center py-10 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                  <Megaphone className="w-8 h-8 text-slate-200 mx-auto mb-2" />
+                  <p className="text-xs font-bold text-slate-400">لا توجد إعلانات حالياً</p>
+                </div>
+              ) : (
+                notes.slice(0, 5).map((note, idx) => (
+                  <div key={idx} className="p-4 rounded-2xl bg-slate-50 border border-slate-100 group hover:border-slate-200 transition-colors cursor-pointer relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-1 h-full bg-emerald-500/30" />
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                      <h3 className="font-bold text-sm text-slate-800">
+                        {note.teacher ? `أ. ${note.teacher.firstName} ${note.teacher.lastName}` : "ملاحظة من المعلم"}
+                      </h3>
+                      <span className="text-[10px] font-bold text-slate-400 mr-auto">
+                        {formatDistanceToNow(new Date(note.createdAt), { addSuffix: true, locale: ar })}
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-500 leading-relaxed font-medium">
+                      {note.content}
+                    </p>
+                  </div>
+                ))
+              )}
             </div>
             
             <button className="w-full mt-4 p-3 rounded-xl border border-slate-200 border-dashed text-slate-500 text-sm font-bold hover:bg-slate-50 hover:text-slate-700 transition-colors">
