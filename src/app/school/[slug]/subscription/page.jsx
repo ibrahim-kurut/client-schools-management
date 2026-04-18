@@ -231,8 +231,8 @@ export default function SubscriptionPage() {
                                 <CreditCard className="w-6 h-6" />
                             </div>
                             <div>
-                                <h3 className="text-lg font-black text-slate-800">الديون المستحقة</h3>
-                                <p className="text-slate-400 font-bold text-xs uppercase tracking-tighter">بسبب الطلاب الإضافيين للمنصة</p>
+                                <h3 className="text-lg font-black text-slate-800">المستحقات المالية</h3>
+                                <p className="text-slate-400 font-bold text-xs uppercase tracking-tighter">إجمالي الرصيد المطلوب سداده</p>
                             </div>
                         </div>
 
@@ -242,10 +242,6 @@ export default function SubscriptionPage() {
 
                         {currentDebt > 0 ? (
                            <div className="space-y-4">
-                                <div className="p-4 bg-rose-50 rounded-2xl border border-rose-100 flex items-start gap-3">
-                                    <AlertCircle className="w-5 h-5 text-rose-600 mt-1 shrink-0" />
-                                    <p className="text-xs font-bold text-rose-800 leading-relaxed">يرجى ملاحظة أن هذه الديون تم احتسابها تلقائياً بناءً على عدد الطلاب الذي تجاوز سعة الخطة (max + buffer).</p>
-                                </div>
                                 <button className="w-full py-4 bg-slate-900 text-white rounded-2xl font-black text-sm hover:bg-slate-800 transition-all flex items-center justify-center gap-2">
                                     دفع المبالغ المستحقة الآن <ChevronRight className="w-4 h-4 mr-1" />
                                 </button>
@@ -263,7 +259,7 @@ export default function SubscriptionPage() {
                         <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 blur-3xl rounded-full" />
                         <div className="relative z-10">
                             <h3 className="text-lg font-black mb-1">تطوير أو تجديد الاشتراك</h3>
-                            <p className="text-indigo-100 text-[10px] font-bold uppercase tracking-widest mb-6Opacity-70">اختر باقة جديدة للحصول على ميزات أكثر</p>
+                            <p className="text-indigo-100 text-[10px] font-bold uppercase mb-2 tracking-widest mb-6Opacity-70">اختر باقة جديدة للحصول على ميزات أكثر</p>
                             <button 
                               disabled={!!pendingRequest}
                               className="w-full py-4 bg-white text-indigo-600 rounded-2xl font-black text-xs hover:bg-indigo-50 transition-all flex items-center justify-center gap-2 group-hover:gap-3 disabled:opacity-50 disabled:cursor-not-allowed"

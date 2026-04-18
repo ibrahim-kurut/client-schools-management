@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, memo } from "react";
 import { 
   X, 
   ChevronRight, 
@@ -13,7 +13,67 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { fetchPlans } from "@/redux/slices/planSlice";
 import { createSubscriptionRequest } from "@/redux/slices/subscriptionRequestsSlice";
-import { cn } from "@/lib/utils";
+
+// Memoized Plan Card - uses only GPU-friendly properties (opacity, border-color)
+const PlanCard = memo(({ plan, isSelected, onSelect }) => {
+  return (
+    <div 
+      onClick={() => onSelect(plan.id)}
+      style={{ 
+        borderColor: isSelected ? '#4548ffff' : '#acadffff',
+        backgroundColor: isSelected ? 'rgba(238, 242, 255, 0.3)' : 'transparent'
+      }}
+      className="relative p-8 rounded-[2.5rem] border-2 cursor-pointer group"
+    >
+      {isSelected && (
+        <div className="absolute top-6 left-6 w-6 h-6 bg-indigo-500 text-white rounded-full flex items-center justify-center">
+          <Check className="w-4 h-4 font-black" />
+        </div>
+      )}
+
+      <div className="mb-6">
+          <h4 className="text-lg font-black text-slate-900 dark:text-white mb-2">{plan.name}</h4>
+          <div className="flex items-baseline gap-1">
+            <span className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter">${plan.price}</span>
+            <span className="text-xs font-bold text-slate-400">/سنوياً</span>
+          </div>
+      </div>
+
+      <div className="space-y-4 mb-8">
+          <div className="flex items-center gap-3">
+            <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" />
+            <span className="text-xs font-bold text-slate-600 dark:text-slate-400">{plan.maxStudents} طالب كحد أقصى</span>
+          </div>
+          <div className="flex items-center gap-3 text-emerald-500">
+            <Check className="w-4 h-4 shrink-0" />
+            <span className="text-xs font-bold text-slate-600 dark:text-slate-400">دعم {plan.supportLevel}</span>
+          </div>
+          {plan.hasFinancials && (
+            <div className="flex items-center gap-3">
+              <Database className="w-4 h-4 text-indigo-500 shrink-0" />
+              <span className="text-xs font-bold text-slate-600 dark:text-slate-400">نظام مالي متكامل</span>
+            </div>
+          )}
+          <div className="h-px bg-slate-100 dark:bg-slate-800 my-2" />
+          <p className="text-[10px] leading-relaxed text-slate-400 font-medium italic">
+            {plan.description || "باقة تضمن لك السيطرة الكاملة على إدارة مدرستك."}
+          </p>
+      </div>
+
+      <div 
+        style={{
+          backgroundColor: isSelected ? '#4f46e5' : '#f1f5f9',
+          color: isSelected ? '#fff' : '#94a3b8'
+        }}
+        className="py-3 w-full rounded-2xl font-black text-[14px] uppercase tracking-widest text-center"
+      >
+          {isSelected ? 'تم الاختيار' : 'اختر الباقة'}
+      </div>
+    </div>
+  );
+});
+
+PlanCard.displayName = 'PlanCard';
 
 export default function NewSubscriptionRequestModal({ isOpen, onClose }) {
   const [selectedPlanId, setSelectedPlanId] = useState(null);
@@ -28,6 +88,10 @@ export default function NewSubscriptionRequestModal({ isOpen, onClose }) {
     }
   }, [isOpen, dispatch]);
 
+  const handleSelect = useCallback((planId) => {
+    setSelectedPlanId(planId);
+  }, []);
+
   if (!isOpen) return null;
 
   const handleSubmit = async () => {
@@ -39,8 +103,11 @@ export default function NewSubscriptionRequestModal({ isOpen, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300">
-      <div className="bg-white dark:bg-slate-900 w-full max-w-4xl rounded-[3rem] shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col max-h-[90vh]">
+    <div 
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+      style={{ backgroundColor: 'rgba(15, 23, 42, 0.4)' }}
+    >
+      <div className="bg-white dark:bg-slate-900 w-full max-w-4xl rounded-[3rem] shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col max-h-[90vh]">
         
         {/* Header */}
         <div className="p-8 pb-4 flex items-center justify-between shrink-0">
@@ -61,58 +128,12 @@ export default function NewSubscriptionRequestModal({ isOpen, onClose }) {
         {/* Content - Scrollable Plans */}
         <div className="p-8 pt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 overflow-y-auto custom-scrollbar">
            {plans.map((plan) => (
-             <div 
+             <PlanCard 
                key={plan.id}
-               onClick={() => setSelectedPlanId(plan.id)}
-               className={cn(
-                 "relative p-8 rounded-[2.5rem] border-2 cursor-pointer transition-all duration-500 group",
-                 selectedPlanId === plan.id 
-                  ? "border-indigo-500 bg-indigo-50/30 dark:bg-indigo-500/5 shadow-2xl shadow-indigo-500/10 scale-[1.02]" 
-                  : "border-slate-100 dark:border-slate-800 hover:border-indigo-200 dark:hover:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/50"
-               )}
-             >
-                {selectedPlanId === plan.id && (
-                  <div className="absolute top-6 left-6 w-6 h-6 bg-indigo-500 text-white rounded-full flex items-center justify-center shadow-lg shadow-indigo-500/40">
-                    <Check className="w-4 h-4 font-black" />
-                  </div>
-                )}
-
-                <div className="mb-6">
-                   <h4 className="text-lg font-black text-slate-900 dark:text-white mb-2">{plan.name}</h4>
-                   <div className="flex items-baseline gap-1">
-                      <span className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter">${plan.price}</span>
-                      <span className="text-xs font-bold text-slate-400">/سنوياً</span>
-                   </div>
-                </div>
-
-                <div className="space-y-4 mb-8">
-                   <div className="flex items-center gap-3">
-                      <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" />
-                      <span className="text-xs font-bold text-slate-600 dark:text-slate-400">{plan.maxStudents} طالب كحد أقصى</span>
-                   </div>
-                   <div className="flex items-center gap-3 text-emerald-500">
-                      <Check className="w-4 h-4 shrink-0" />
-                      <span className="text-xs font-bold text-slate-600 dark:text-slate-400">دعم {plan.supportLevel}</span>
-                   </div>
-                   {plan.hasFinancials && (
-                     <div className="flex items-center gap-3">
-                        <Database className="w-4 h-4 text-indigo-500 shrink-0" />
-                        <span className="text-xs font-bold text-slate-600 dark:text-slate-400">نظام مالي متكامل</span>
-                     </div>
-                   )}
-                   <div className="h-px bg-slate-100 dark:bg-slate-800 my-2" />
-                   <p className="text-[10px] leading-relaxed text-slate-400 font-medium italic">
-                      {plan.description || "باقة تضمن لك السيطرة الكاملة على إدارة مدرستك."}
-                   </p>
-                </div>
-
-                <div className={cn(
-                  "py-3 w-full rounded-2xl font-black text-[10px] uppercase tracking-widest text-center transition-all",
-                  selectedPlanId === plan.id ? "bg-indigo-600 text-white shadow-lg" : "bg-slate-100 dark:bg-slate-800 text-slate-400"
-                )}>
-                   اختر الباقة
-                </div>
-             </div>
+               plan={plan}
+               isSelected={selectedPlanId === plan.id}
+               onSelect={handleSelect}
+             />
            ))}
         </div>
 
@@ -120,19 +141,19 @@ export default function NewSubscriptionRequestModal({ isOpen, onClose }) {
         <div className="p-8 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800 shrink-0 flex items-center justify-between">
            <div className="flex items-center gap-3">
               <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-              <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400">بمجرد الإرسال، سيتم مراجعة طلبك من قبل السوبر أدمن</p>
+              <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400">بمجرد الإرسال، سيتم مراجعة طلبك من قبل ادارة المنصة</p>
            </div>
            <div className="flex items-center gap-3">
               <button 
                 onClick={onClose}
-                className="px-8 py-3.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-500 rounded-2xl font-black text-xs hover:bg-slate-50 transition-all"
+                className="px-8 py-3.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-500 rounded-2xl font-black text-xs hover:bg-slate-50 transition-colors"
               >
                 تجاهل
               </button>
               <button 
                 onClick={handleSubmit}
                 disabled={!selectedPlanId || loading}
-                className="px-10 py-3.5 bg-indigo-600 text-white rounded-2xl font-black text-xs shadow-xl shadow-indigo-600/20 hover:bg-indigo-700 transition-all active:scale-95 disabled:opacity-50 flex items-center gap-2"
+                className="px-10 py-3.5 bg-indigo-600 text-white rounded-2xl font-black text-xs hover:bg-indigo-700 transition-colors active:scale-95 disabled:opacity-50 flex items-center gap-2"
               >
                 {loading ? "جاري الإرسال..." : "إرسال الطلب"}
                 <ChevronRight className="w-4 h-4" />

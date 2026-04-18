@@ -193,7 +193,7 @@ export default function DebtsManagement() {
               placeholder="البحث باسم المدرسة..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 focus:border-indigo-500 rounded-xl py-3 pr-11 pl-4 text-sm outline-none transition-all duration-200"
+              className="w-full bg-slate-50 dark:bg-white border border-slate-100 dark:border-slate-700 focus:border-indigo-500 rounded-xl py-3 pr-11 pl-4 text-sm outline-none transition-all duration-200"
             />
          </div>
          <div className="flex items-center gap-3 w-full md:w-auto">
@@ -234,12 +234,12 @@ export default function DebtsManagement() {
             <table className="w-full text-right">
               <thead>
                 <tr className="bg-slate-50/50 dark:bg-slate-800/30 border-b border-slate-100 dark:border-slate-800">
-                  <th className="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">المدرسة</th>
-                  <th className="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">الباقة الحالية</th>
-                  <th className="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">استهلاك الطلاب</th>
-                  <th className="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">الديون المتراكمة</th>
-                  <th className="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">نهاية الاشتراك</th>
-                  <th className="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">الإجراءات</th>
+                  <th className="px-6 py-5 text-[14px] font-black text-slate-400 uppercase tracking-[0.2em]">المدرسة</th>
+                  <th className="px-6 py-5 text-[14px] font-black text-slate-400 uppercase tracking-[0.2em]">الباقة الحالية</th>
+                  <th className="px-6 py-5 text-[14px] font-black text-slate-400 uppercase tracking-[0.2em]">استهلاك الطلاب</th>
+                  <th className="px-6 py-5 text-[14px] font-black text-slate-400 uppercase tracking-[0.2em]">الديون المتراكمة</th>
+                  <th className="px-6 py-5 text-[14px] font-black text-slate-400 uppercase tracking-[0.2em]">نهاية الاشتراك</th>
+                  <th className="px-6 py-5 text-[14px] font-black text-slate-400 uppercase tracking-[0.2em]">الإجراءات</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50 dark:divide-slate-800/50">
@@ -263,8 +263,7 @@ export default function DebtsManagement() {
                             )}
                           </div>
                           <div className="flex flex-col min-w-0">
-                            <span className="font-extrabold text-sm text-slate-900 dark:text-white truncate tracking-tight">{school.name}</span>
-                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider lowercase mt-0.5">eduflow.app/{school.slug}</span>
+                            <span className="font-extrabold text-[16px] text-slate-900 dark:text-white truncate tracking-tight">{school.name}</span>
                           </div>
                         </div>
                       </td>
@@ -273,7 +272,7 @@ export default function DebtsManagement() {
                            <div className="p-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-500/10 text-indigo-500">
                               <Layers className="w-3.5 h-3.5" />
                            </div>
-                           <span className="text-xs font-black text-slate-600 dark:text-slate-300">{plan?.name || "بدون خطة"}</span>
+                           <span className="text-[16px] font-black text-slate-600 dark:text-slate-300">{plan?.name || "بدون خطة"}</span>
                         </div>
                       </td>
                       <td className="px-6 py-6 font-bold">
@@ -304,7 +303,7 @@ export default function DebtsManagement() {
                             <button 
                               onClick={() => handleAddDebt(school.id, school.name)}
                               title="إضافة دين جديد (اشتراك وغيرها)"
-                              className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-xl text-[10px] font-black transition-all border border-blue-200"
+                              className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-xl text-[12px] font-black transition-all border border-blue-200"
                             >
                               <Wallet className="w-3.5 h-3.5" />
                               إضافة دين
@@ -312,14 +311,14 @@ export default function DebtsManagement() {
                             {debt > 0 && (
                               <button 
                                 onClick={() => handleSettleDebt(school.id, school.name, debt)}
-                                className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-[10px] font-black transition-all shadow-md shadow-emerald-500/20 active:scale-95"
+                                className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-[12px] font-black transition-all shadow-md shadow-emerald-500/20 active:scale-95"
                               >
                                 <HandCoins className="w-3.5 h-3.5" />
                                 تسديد دفعة
                               </button>
                             )}
                             {debt <= 0 && (
-                              <div className="flex items-center gap-1.5 text-emerald-500 font-bold text-[10px] uppercase tracking-widest px-3 py-1.5 bg-emerald-50 dark:bg-emerald-500/10 rounded-xl border border-emerald-100 dark:border-emerald-500/20">
+                              <div className="flex items-center gap-1.5 text-emerald-500 font-bold text-[12px] uppercase tracking-widest px-3 py-1.5 bg-emerald-50 dark:bg-emerald-500/10 rounded-xl border border-emerald-100 dark:border-emerald-500/20">
                                  <CheckCircle2 className="w-3.5 h-3.5" />
                                  خالص
                               </div>

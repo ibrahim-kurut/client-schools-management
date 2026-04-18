@@ -43,6 +43,9 @@ const AddPaymentModal = memo(function AddPaymentModal({ isOpen, onClose }) {
   const [selectedStudent, setSelectedStudent] = useState(null);
   const dropdownRef = useRef(null);
 
+  // Validation Error State
+  const [validationError, setValidationError] = useState(null);
+
   // Receipt View State
   const [isReceiptView, setIsReceiptView] = useState(false);
   const [receiptData, setReceiptData] = useState(null);
@@ -82,6 +85,7 @@ const AddPaymentModal = memo(function AddPaymentModal({ isOpen, onClose }) {
       setIsDropdownOpen(false);
       setIsReceiptView(false);
       setReceiptData(null);
+      setValidationError(null);
       dispatch(resetCreateStatus());
       setFormData({
         studentId: '',
@@ -133,18 +137,34 @@ const AddPaymentModal = memo(function AddPaymentModal({ isOpen, onClose }) {
 
   const handleSubmit = useCallback((e) => {
     e.preventDefault();
+    setValidationError(null);
+
     if (!formData.studentId) {
-       alert("الرجاء اختيار طالب أولاً");
+       setValidationError("الرجاء اختيار طالب أولاً");
        return;
+    }
+
+    const parsedAmount = parseFloat(formData.amount);
+
+    // Validate: payment must not exceed remaining balance (TUITION only)
+    if (formData.paymentType === 'TUITION' && selectedStudent) {
+      if (selectedStudent.balance <= 0) {
+        setValidationError("لا يوجد رصيد متبقي على هذا الطالب، تم تسديد كامل الأقساط الدراسية");
+        return;
+      }
+      if (parsedAmount > selectedStudent.balance) {
+        setValidationError(`لا يمكن تسجيل دفعة بقيمة ${parsedAmount.toLocaleString()} د.ع لأنها تتجاوز المبلغ المتبقي على الطالب وهو ${selectedStudent.balance.toLocaleString()} د.ع`);
+        return;
+      }
     }
     
     // Dispatch createPayment
     dispatch(createPayment({
       ...formData,
-      amount: parseFloat(formData.amount)
+      amount: parsedAmount
     }));
 
-  }, [formData, dispatch]);
+  }, [formData, dispatch, selectedStudent]);
 
   const handlePrint = () => {
     window.print();
@@ -517,33 +537,50 @@ const AddPaymentModal = memo(function AddPaymentModal({ isOpen, onClose }) {
             </div>
 
             {/* Footer Actions (Hidden on print) */}
-            <div className="p-6 bg-white border-t border-slate-100 shrink-0 flex items-center justify-end gap-3 z-20 print:hidden">
-              <button 
-                type="button" 
-                onClick={onClose}
-                className="px-6 py-3 rounded-2xl text-slate-600 font-bold hover:bg-slate-100 transition-colors"
-                disabled={createStatus === 'loading'}
-              >
-                إلغاء
-              </button>
-              <button 
-                form="add-payment-form"
-                type="submit" 
-                disabled={!formData.studentId || createStatus === 'loading'}
-                className={`flex items-center gap-2 px-8 py-3 rounded-2xl font-bold transition-all shadow-lg ${!formData.studentId || createStatus === 'loading' ? 'bg-slate-300 text-slate-500 cursor-not-allowed shadow-none' : 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-600/30 hover:-translate-y-0.5'}`}
-              >
-                {createStatus === 'loading' ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    جاري التسجيل...
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle2 className="w-5 h-5" />
-                    تأكيد التسجيل
-                  </>
-                )}
-              </button>
+            <div className="p-6 bg-white border-t border-slate-100 shrink-0 flex flex-col gap-4 z-20 print:hidden">
+              {validationError && (
+                <div className="flex items-center gap-3 p-3 bg-amber-50 border border-amber-100 rounded-xl animate-in fade-in slide-in-from-bottom-2 duration-300">
+                  <div className="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center shrink-0">
+                    <svg className="w-4 h-4 text-amber-600" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                    </svg>
+                  </div>
+                  <p className="text-[14px] font-black text-amber-800 flex-1 leading-snug">
+                    {validationError}
+                  </p>
+                  <button onClick={() => setValidationError(null)} className="p-1 hover:bg-amber-100 rounded-md transition-colors">
+                    <X className="w-3.5 h-3.5 text-amber-400" />
+                  </button>
+                </div>
+              )}
+              <div className="flex items-center justify-end gap-3">
+                <button 
+                  type="button" 
+                  onClick={onClose}
+                  className="px-6 py-3 rounded-2xl text-slate-600 font-bold hover:bg-slate-100 transition-colors"
+                  disabled={createStatus === 'loading'}
+                >
+                  إلغاء
+                </button>
+                <button 
+                  form="add-payment-form"
+                  type="submit" 
+                  disabled={!formData.studentId || createStatus === 'loading'}
+                  className={`flex items-center gap-2 px-8 py-3 rounded-2xl font-bold transition-all shadow-lg ${!formData.studentId || createStatus === 'loading' ? 'bg-slate-300 text-slate-500 cursor-not-allowed shadow-none' : 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-600/30 hover:-translate-y-0.5'}`}
+                >
+                  {createStatus === 'loading' ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      جاري التسجيل...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="w-5 h-5" />
+                      تأكيد التسجيل
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
           </>
         )}
