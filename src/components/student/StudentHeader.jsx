@@ -1,6 +1,7 @@
 "use client";
 
 import { Bell, Search, User as UserIcon, LogOut } from "lucide-react";
+import Image from "next/image";
 import { useSelector, useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
 import { logout } from "@/redux/slices/authSlice";
@@ -80,9 +81,9 @@ export default function StudentHeader({ slug }) {
               طالب
             </span>
           </div>
-          <div className="hidden sm:flex w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-100 to-teal-100 border border-emerald-200 items-center justify-center shadow-inner overflow-hidden">
+          <div className="hidden sm:flex w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-100 to-teal-100 border border-emerald-200 items-center justify-center shadow-inner overflow-hidden relative">
             {userData?.image ? (
-              <img src={userData.image} alt="Profile" className="w-full h-full object-cover" />
+              <Image src={userData.image} alt="Profile" fill className="object-cover" />
             ) : (
               <UserIcon className="w-5 h-5 text-emerald-600" />
             )}

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import {
   GraduationCap, User, Phone, Mail, Lock,
   ArrowLeft, Loader2, CheckCircle2, Users, Camera, X
@@ -273,9 +274,9 @@ export default function SignupPage() {
                 <div className="flex flex-col items-center justify-center p-4 bg-white border-2 border-dashed border-slate-200 rounded-2xl gap-3 group hover:border-blue-400 transition-all">
                   <span className="text-sm font-semibold text-slate-700 w-full text-right">الصورة الشخصية (اختياري)</span>
                   <div className="relative">
-                    <div className={`w-24 h-24 rounded-full flex items-center justify-center overflow-hidden bg-slate-100 border-2 ${formData.imagePreview ? 'border-blue-500' : 'border-slate-200'}`}>
+                    <div className={`w-24 h-24 rounded-full relative flex items-center justify-center overflow-hidden bg-slate-100 border-2 ${formData.imagePreview ? 'border-blue-500' : 'border-slate-200'}`}>
                       {formData.imagePreview ? (
-                        <img src={formData.imagePreview} alt="Avatar" className="w-full h-full object-cover" />
+                        <Image src={formData.imagePreview} alt="Avatar" fill className="object-cover" />
                       ) : (
                         <User className="w-12 h-12 text-slate-300" />
                       )}

@@ -1,5 +1,5 @@
-"use client";
 import React from "react";
+import Image from "next/image";
 import { X, Printer, Layers, Calendar } from "lucide-react";
 
 /**
@@ -102,7 +102,13 @@ const StudentReportCard = ({
         <div className="flex-1 flex justify-center">
           {schoolLogo ? (
             <div className="bg-white p-1 rounded-full border-2 border-slate-200 shadow-sm print:shadow-none">
-                <img src={schoolLogo} alt="شعار المدرسة" className="w-20 h-20 rounded-full object-cover" />
+                <Image 
+                  src={schoolLogo} 
+                  alt="شعار المدرسة" 
+                  width={80} 
+                  height={80} 
+                  className="rounded-full object-cover" 
+                />
             </div>
           ) : (
             <div className="w-20 h-20 rounded-full border-2 border-slate-200 bg-slate-50 flex items-center justify-center">

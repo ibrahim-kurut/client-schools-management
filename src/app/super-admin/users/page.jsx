@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Image from "next/image";
 import { 
   Search, 
   UserPlus, 
@@ -98,11 +99,12 @@ export default function UsersManagement() {
       header: "المستخدم",
       render: (user) => (
         <div className="flex items-center gap-4">
-          <div className="relative">
-            <img 
+          <div className="relative w-12 h-12">
+            <Image 
               src={user.image || `https://ui-avatars.com/api/?name=${user.firstName}+${user.lastName}&background=6366f1&color=fff`} 
-              className="w-12 h-12 rounded-2xl shadow-sm object-cover transition-transform duration-300 group-hover:scale-110" 
-              alt="" 
+              className="rounded-2xl shadow-sm object-cover transition-transform duration-300 group-hover:scale-110" 
+              alt={user.firstName}
+              fill
             />
           </div>
           <div className="flex flex-col">

@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 import { 
   Building2, 
   Users, 
@@ -189,8 +190,13 @@ export default function SuperAdminDashboard() {
               <div className="space-y-2">
                 {recentRequests.map((req, i) => (
                   <div key={i} className="flex items-center gap-4 p-4 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all cursor-pointer group/card border border-transparent hover:border-slate-100 dark:hover:border-slate-700/50 active:scale-[0.98]">
-                    <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-bold text-slate-400 overflow-hidden relative overflow-hidden group-hover/card:scale-105 transition-transform duration-300">
-                      <img src={req.image} alt={req.school} className="w-full h-full object-cover group-hover/card:scale-110 transition-transform duration-500 opacity-80 group-hover/card:opacity-100" />
+                    <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-bold text-slate-400 overflow-hidden relative group-hover/card:scale-105 transition-transform duration-300">
+                      <Image 
+                        src={req.image} 
+                        alt={req.school} 
+                        fill 
+                        className="object-cover group-hover/card:scale-110 transition-transform duration-500 opacity-80 group-hover/card:opacity-100" 
+                      />
                       <div className="absolute inset-0 bg-indigo-500/10 group-hover/card:bg-transparent transition-colors" />
                     </div>
                     <div className="flex-1 min-w-0">

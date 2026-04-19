@@ -25,7 +25,11 @@ export const login = createAsyncThunk('user/login', async (loginData, { rejectWi
         return res.data
     } catch (e) {
         const errorMessage = e.response?.data?.message || e.response?.data?.error || "Login failed";
-        return rejectWithValue({ message: errorMessage });
+        return rejectWithValue({ 
+            message: errorMessage, 
+            status: e.response?.status,
+            retryAfter: e.response?.headers['retry-after'] 
+        });
     }
 })
 
@@ -43,7 +47,11 @@ export const loginWithSchoolSlug = createAsyncThunk('user/loginWithSchoolSlug',
             return res.data;
         } catch (e) {
             const errorMessage = e.response?.data?.message || e.response?.data?.error || "Login failed";
-            return rejectWithValue({ message: errorMessage });
+            return rejectWithValue({ 
+                message: errorMessage, 
+                status: e.response?.status,
+                retryAfter: e.response?.headers['retry-after'] 
+            });
         }
     }
 );
@@ -56,7 +64,11 @@ export const logout = createAsyncThunk('user/logout', async (_, { rejectWithValu
         return res.data;
     } catch (e) {
         const errorMessage = e.response?.data?.message || e.response?.data?.error || "Logout failed";
-        return rejectWithValue({ message: errorMessage });
+        return rejectWithValue({ 
+            message: errorMessage, 
+            status: e.response?.status,
+            retryAfter: e.response?.headers['retry-after'] 
+        });
     }
 });
 

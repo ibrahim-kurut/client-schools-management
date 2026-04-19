@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Image from "next/image";
 import { 
   Search, 
   Filter, 
@@ -255,9 +256,9 @@ export default function DebtsManagement() {
                     >
                       <td className="px-6 py-6">
                         <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center p-0.5 overflow-hidden ring-1 ring-slate-100 dark:ring-slate-800">
+                          <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center p-0.5 overflow-hidden ring-1 ring-slate-100 dark:ring-slate-800 relative">
                             {school.logo ? (
-                              <img src={school.logo} alt={school.name} className="w-full h-full object-cover rounded-lg" />
+                              <Image src={school.logo} alt={school.name} fill className="object-cover rounded-lg" />
                             ) : (
                                 <Users className="w-5 h-5 text-indigo-500" />
                             )}

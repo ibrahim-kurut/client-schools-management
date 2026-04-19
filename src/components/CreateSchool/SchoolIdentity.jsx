@@ -1,6 +1,7 @@
 'use client';
 
 import { School, Link2, Image as ImageIcon, X } from 'lucide-react';
+import Image from 'next/image';
 import { useRef } from 'react';
 import AuthInput from '../AuthInput';
 
@@ -98,10 +99,11 @@ export default function SchoolIdentity({ formData, setFormData, errors }) {
         >
           {formData.logo ? (
             <div className="relative w-full h-full group/image">
-              <img 
+              <Image 
                 src={formData.logo} 
                 alt="Logo Preview" 
-                className="w-full h-full object-contain p-2" 
+                fill
+                className="object-contain p-2" 
               />
               <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/image:opacity-100 transition-opacity">
                 <button 

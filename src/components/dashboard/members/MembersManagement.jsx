@@ -6,6 +6,7 @@ import {
   Eye, GraduationCap, Mail, Phone, MapPin, Activity, CheckCircle2, XCircle,
   BookOpen, Calendar, Award, Loader2, UserCog
 } from 'lucide-react';
+import Image from 'next/image';
 import { fetchMembers, deleteMember, resetMembersStatus, createMember, updateMember } from '../../../redux/slices/membersSlice';
 import { fetchClasses } from '../../../redux/slices/classesSlice';
 import MembersModal from './MembersModal';
@@ -257,9 +258,9 @@ export default function MembersManagement({ slug }) {
                 <tr key={member.id} className="hover:bg-slate-100 transition-all group">
                   <td className="p-8">
                     <div className="flex items-center gap-4">
-                      {/* <div className="w-11 h-11 rounded-2xl bg-blue-100 flex items-center justify-center font-black text-blue-600 text-lg overflow-hidden">
-                         {member.image ? <img src={member.image} className="w-full h-full object-cover" /> : member.firstName[0]}
-                      </div> */}
+                      <div className="w-11 h-11 rounded-2xl bg-blue-100 flex items-center justify-center font-black text-blue-600 text-lg overflow-hidden relative">
+                         {member.image ? <Image src={member.image} alt={member.firstName} fill className="object-cover" /> : member.firstName[0]}
+                      </div>
                       <div>
                         <div className="font-black text-slate-800 text-lg group-hover:text-blue-700 transition-colors">
                           {member.firstName} {member.lastName}

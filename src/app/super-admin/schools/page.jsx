@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
+import Image from "next/image";
 import { 
   Search, 
   Filter, 
@@ -149,9 +150,9 @@ export default function SchoolsManagement() {
                   >
                     <td className="px-6 py-6 font-arabic">
                       <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center p-0.5 overflow-hidden ring-1 ring-slate-100 dark:ring-slate-800 group-hover:scale-110 transition-transform duration-500">
+                        <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center p-0.5 overflow-hidden ring-1 ring-slate-100 dark:ring-slate-800 group-hover:scale-110 transition-transform duration-500 relative">
                           {school.logo ? (
-                            <img src={school.logo} alt={school.name} className="w-full h-full object-cover rounded-xl" />
+                            <Image src={school.logo} alt={school.name} fill className="object-cover rounded-xl" />
                           ) : (
                             <div className="w-full h-full bg-indigo-500/10 flex items-center justify-center text-indigo-500 font-black text-lg">
                               {school.name[0]}

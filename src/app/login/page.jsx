@@ -54,6 +54,25 @@ function LoginContent() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [failedAttempts, setFailedAttempts] = useState(0);
+  const [lockoutTimer, setLockoutTimer] = useState(0);
+
+  // Countdown timer for Rate Limit lockout
+  useEffect(() => {
+    let timer;
+    if (lockoutTimer > 0) {
+      timer = setInterval(() => {
+        setLockoutTimer((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [lockoutTimer]);
+
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+  };
 
   useEffect(() => {
     if (searchParams.get('registered') === 'true') {
@@ -106,8 +125,21 @@ function LoginContent() {
         }, 1500);
       })
       .catch((err) => {
-        toast.error(err.message || 'فشل تسجيل الدخول');
         setIsLoading(false);
+        
+        // Handle Rate Limit (429)
+        if (err.status === 429) {
+          const retryAfter = parseInt(err.retryAfter) || 900;
+          setLockoutTimer(retryAfter);
+          setError(''); // Clear normal error to show the timer message
+          return;
+        }
+
+        toast.error(err.message || 'فشل تسجيل الدخول');
+        // Increment failed attempts if it's an authentication error
+        if (err.status === 401 || (err.response && err.response.status === 401)) {
+          setFailedAttempts(prev => prev + 1);
+        }
       });
   };
 
@@ -189,6 +221,26 @@ function LoginContent() {
               {error}
             </div>
           )}
+          
+          {/* Rate Limit Lockout Message */}
+          {lockoutTimer > 0 && (
+            <div className="mb-6 p-4 bg-rose-50 border border-rose-200 rounded-2xl text-rose-700 text-sm flex items-center gap-2 animate-pulse">
+              <div className="w-2 h-2 bg-rose-500 rounded-full flex-shrink-0" />
+              <span>
+                لقد تجاوزت حد المحاولات. يرجى المحاولة مرة أخرى بعد {formatTime(lockoutTimer)} دقيقة.
+              </span>
+            </div>
+          )}
+          
+          {/* Failed Attempts Warning */}
+          {failedAttempts >= 3 && failedAttempts < 5 && lockoutTimer === 0 && (
+            <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-2xl text-amber-700 text-sm flex items-center gap-2 animate-pulse">
+              <div className="w-2 h-2 bg-amber-500 rounded-full flex-shrink-0" />
+              <span>
+                تبقت لك {5 - failedAttempts} محاولات فقط قبل أن يتم حظر الدخول مؤقتاً لمدة 15 دقيقة.
+              </span>
+            </div>
+          )}
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
@@ -218,7 +270,7 @@ function LoginContent() {
             />
 
             {/* Submit */}
-            <button type="submit" disabled={isLoading} className="auth-btn w-full">
+            <button type="submit" disabled={isLoading || lockoutTimer > 0} className="auth-btn w-full">
               {isLoading ? (
                 <span className="flex items-center justify-center gap-2">
                   <Loader2 className="w-5 h-5 animate-spin" />
