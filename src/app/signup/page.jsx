@@ -375,7 +375,7 @@ export default function SignupPage() {
                     className="text-right"
                     autoComplete="new-password"
                   />
-                  <p className="text-xs text-slate-400 mt-1">يجب أن تكون 6 أحرف على الأقل</p>
+                  <p className="text-xs text-slate-400 mt-1">يجب أن تكون 8 خانات على الأقل وتحتوي على حروف وأرقام</p>
                 </div>
 
                 <AuthInput

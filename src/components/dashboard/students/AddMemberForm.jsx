@@ -60,7 +60,13 @@ const AddMemberForm = memo(function AddMemberForm({
     if (!lastNameRef.current?.value.trim()) return setValidationError('اسم العائلة مطلوب');
     if (!emailRef.current?.value.trim()) return setValidationError('البريد الإلكتروني مطلوب');
     if (!initialData && !passwordRef.current?.value.trim()) return setValidationError('كلمة المرور مطلوبة');
-    if (passwordRef.current?.value && passwordRef.current.value.length < 6) return setValidationError('كلمة مرور ضعيفة (6 أحرف على الأقل)');
+    if (passwordRef.current?.value) {
+      const pass = passwordRef.current.value.trim();
+      if (pass.length < 8) return setValidationError('كلمة المرور يجب أن تكون 8 خانات على الأقل');
+      if (!/[a-zA-Z]/.test(pass) || !/[0-9]/.test(pass)) {
+        return setValidationError('كلمة المرور يجب أن تحتوي على حروف وأرقام');
+      }
+    }
     if (!birthDateRef.current?.value) return setValidationError('تاريخ الميلاد مطلوب');
     
     setValidationError('');
