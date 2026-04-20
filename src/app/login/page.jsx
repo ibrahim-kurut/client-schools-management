@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { GraduationCap, Mail, Lock, ArrowLeft, Loader2, CheckCircle2 } from 'lucide-react';
+import { GraduationCap, Mail, Lock, ArrowLeft, Loader2, CheckCircle2, ShieldAlert, Timer } from 'lucide-react';
 import AuthInput from '@/components/AuthInput';
 import { validateLogin } from '@/lib/validation/authSchemas';
 import { useDispatch, useSelector } from 'react-redux';
@@ -62,11 +62,18 @@ function LoginContent() {
     let timer;
     if (lockoutTimer > 0) {
       timer = setInterval(() => {
-        setLockoutTimer((prev) => prev - 1);
+        setLockoutTimer((prev) => {
+          if (prev <= 1) {
+            // When timer ends, clear the security error if it's currently showing
+            if (error === 'SECURITY_KICK') setError('');
+            return 0;
+          }
+          return prev - 1;
+        });
       }, 1000);
     }
     return () => clearInterval(timer);
-  }, [lockoutTimer]);
+  }, [lockoutTimer, error]);
 
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
@@ -78,7 +85,19 @@ function LoginContent() {
     if (searchParams.get('registered') === 'true') {
       setSuccess('تم إنشاء الحساب بنجاح! يمكنك الآن تسجيل الدخول.');
     }
-  }, [searchParams]);
+    
+    // Handle security kick from axios interceptor
+    const reason = searchParams.get('reason');
+    const retry = searchParams.get('retryAfter');
+    
+    if (reason === 'rate-limit') {
+      // Only set the timer if it's not already running
+      if (retry && lockoutTimer === 0) {
+        setLockoutTimer(parseInt(retry));
+        setError('SECURITY_KICK');
+      }
+    }
+  }, [searchParams, lockoutTimer]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -129,7 +148,7 @@ function LoginContent() {
         
         // Handle Rate Limit (429)
         if (err.status === 429) {
-          const retryAfter = parseInt(err.retryAfter) || 900;
+          const retryAfter = parseInt(err.retryAfter) || 300;
           setLockoutTimer(retryAfter);
           setError(''); // Clear normal error to show the timer message
           return;
@@ -215,15 +234,32 @@ function LoginContent() {
           )}
 
           {/* Error */}
-          {error && (
+          {error && error !== 'SECURITY_KICK' && (
             <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-2xl text-red-700 text-sm flex items-center gap-2 animate-shake">
               <div className="w-2 h-2 bg-red-500 rounded-full flex-shrink-0" />
               {error}
             </div>
           )}
           
-          {/* Rate Limit Lockout Message */}
-          {lockoutTimer > 0 && (
+          {/* Smart Security Alert (Kick Message) */}
+          {error === 'SECURITY_KICK' && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-2xl text-red-700 text-sm flex flex-col gap-3 animate-fadeIn">
+              <div className="flex items-center gap-2">
+                <ShieldAlert className="w-5 h-5 text-red-600 flex-shrink-0" />
+                <span className="font-bold text-red-800">تنبيه أمني: تم إنهاء الجلسة</span>
+              </div>
+              <p className="text-red-700/80 leading-relaxed">
+                تم تسجيل خروجك نتيجة كثرة الطلبات المتكررة. لحماية النظام، يرجى الانتظار والمحاولة مرة أخرى بعد:
+              </p>
+              <div className="flex items-center gap-2 font-black text-xl text-red-600 bg-white/50 w-fit px-3 py-1 rounded-xl border border-red-100">
+                <Timer className="w-5 h-5" />
+                <span dir="ltr">{formatTime(lockoutTimer)}</span>
+              </div>
+            </div>
+          )}
+          
+          {/* Rate Limit Lockout Message (only when NOT a security kick) */}
+          {lockoutTimer > 0 && error !== 'SECURITY_KICK' && (
             <div className="mb-6 p-4 bg-rose-50 border border-rose-200 rounded-2xl text-rose-700 text-sm flex items-center gap-2 animate-pulse">
               <div className="w-2 h-2 bg-rose-500 rounded-full flex-shrink-0" />
               <span>
@@ -237,7 +273,7 @@ function LoginContent() {
             <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-2xl text-amber-700 text-sm flex items-center gap-2 animate-pulse">
               <div className="w-2 h-2 bg-amber-500 rounded-full flex-shrink-0" />
               <span>
-                تبقت لك {5 - failedAttempts} محاولات فقط قبل أن يتم حظر الدخول مؤقتاً لمدة 15 دقيقة.
+                تبقت لك {5 - failedAttempts} محاولات فقط قبل أن يتم حظر الدخول مؤقتاً لمدة 5 دقائق.
               </span>
             </div>
           )}

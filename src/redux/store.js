@@ -17,6 +17,8 @@ import notificationsReducer from "./slices/notificationsSlice";
 import financeStatsReducer from "./slices/financeStatsSlice";
 import notesReducer from "./slices/notesSlice";
 import profileReducer from "./slices/profileSlice";
+import { injectStore } from '../lib/axios';
+
 export const store = configureStore({
     reducer: {
         auth: authReducer,
@@ -40,6 +42,4 @@ export const store = configureStore({
     },
 });
 
-
-
-
+injectStore(store);

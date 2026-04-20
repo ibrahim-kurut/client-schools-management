@@ -91,6 +91,16 @@ const authSlice = createSlice({
         setCredentials: (state, action) => {
             state.user = action.payload.user;
             state.isLoggedIn = !!action.payload.user;
+        },
+        forceLogout: (state) => {
+            state.status = 'idle';
+            state.user = null;
+            state.isLoggedIn = false;
+            state.error = null;
+            state.userInfo = null;
+            if (typeof window !== "undefined") {
+                localStorage.removeItem("user");
+            }
         }
     },
     extraReducers: (builder) => {
@@ -167,5 +177,5 @@ const authSlice = createSlice({
     }
 });
 
-export const { setCredentials } = authSlice.actions;
+export const { setCredentials, forceLogout } = authSlice.actions;
 export default authSlice.reducer;
