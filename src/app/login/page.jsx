@@ -269,11 +269,11 @@ function LoginContent() {
           )}
           
           {/* Failed Attempts Warning */}
-          {failedAttempts >= 3 && failedAttempts < 5 && lockoutTimer === 0 && (
+          {failedAttempts >= 7 && failedAttempts < 10 && lockoutTimer === 0 && (
             <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-2xl text-amber-700 text-sm flex items-center gap-2 animate-pulse">
               <div className="w-2 h-2 bg-amber-500 rounded-full flex-shrink-0" />
               <span>
-                تبقت لك {5 - failedAttempts} محاولات فقط قبل أن يتم حظر الدخول مؤقتاً لمدة 5 دقائق.
+                تبقت لك {10 - failedAttempts} محاولات فقط قبل أن يتم حظر الدخول مؤقتاً لمدة 5 دقائق.
               </span>
             </div>
           )}

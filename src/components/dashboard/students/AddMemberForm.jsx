@@ -14,7 +14,8 @@ const AddMemberForm = memo(function AddMemberForm({
   initialData = null, 
   loading = false, 
   error = null, 
-  classes = [] 
+  classes = [],
+  subjects = [] 
 }) {
   // --- Refs (For Lag-Free Input) ---
   const firstNameRef = useRef(null);
@@ -219,7 +220,10 @@ const AddMemberForm = memo(function AddMemberForm({
                     <label className=" font-black text-slate-500 mr-2">التخصص الدراسي الرئيسي</label>
                     <div className="relative">
                       <BookOpen className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                      <input ref={subjectRef} defaultValue={initialData?.subject} type="text" placeholder="مثال: الرياضيات المتقدمة" className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3.5 pr-11 pl-4 focus:border-blue-500 font-bold outline-none" />
+                      <select ref={subjectRef} defaultValue={initialData?.subject || ''} className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3.5 pr-11 pl-4 focus:border-blue-500 font-bold appearance-none cursor-pointer outline-none">
+                         <option value="">اختر التخصص الدراسي...</option>
+                         {subjects.map(s => <option key={s.id} value={s.name}>{s.name}</option>)}
+                      </select>
                     </div>
                   </div>
                )}

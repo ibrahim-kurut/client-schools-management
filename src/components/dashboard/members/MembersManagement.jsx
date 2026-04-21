@@ -9,6 +9,7 @@ import {
 import Image from 'next/image';
 import { fetchMembers, deleteMember, resetMembersStatus, createMember, updateMember } from '../../../redux/slices/membersSlice';
 import { fetchClasses } from '../../../redux/slices/classesSlice';
+import { fetchSubjects } from '../../../redux/slices/subjectsSlice';
 import MembersModal from './MembersModal';
 import RoleChangeModal from './RoleChangeModal';
 import Pagination from '../../ui/Pagination';
@@ -23,6 +24,7 @@ export default function MembersManagement({ slug }) {
   const userData = user?.userData || user;
   
   const { classes, status: classesStatus } = useSelector((state) => state.classes);
+  const { subjects, status: subjectsStatus } = useSelector((state) => state.subjects);
   const { members, pagination, status, error, createStatus, createError } = useSelector((state) => state.members);
   
   // -- Local State --
@@ -43,7 +45,10 @@ export default function MembersManagement({ slug }) {
     if (classesStatus === 'idle') {
       dispatch(fetchClasses());
     }
-  }, [classesStatus, dispatch]);
+    if (subjectsStatus === 'idle') {
+      dispatch(fetchSubjects());
+    }
+  }, [classesStatus, subjectsStatus, dispatch]);
 
   // -- Helpers --
   const getRoleLabel = (r) => {
@@ -354,9 +359,10 @@ export default function MembersManagement({ slug }) {
         <MembersModal 
           isOpen={isModalOpen} 
           onClose={() => setIsModalOpen(false)} 
-          onSave={handleSave}
+          onSave={handleSave} 
           initialData={selectedMember}
           classes={classes}
+          subjects={subjects}
           createStatus={createStatus}
           createError={createError}
           currentUserRole={userData?.role}
