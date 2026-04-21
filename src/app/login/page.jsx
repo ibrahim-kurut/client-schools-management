@@ -18,6 +18,7 @@ function LoginContent() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- نمط قياسي لتتبع حالة التركيب في Next.js
     setMounted(true);
   }, []);
 
@@ -83,6 +84,7 @@ function LoginContent() {
 
   useEffect(() => {
     if (searchParams.get('registered') === 'true') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- نمط قياسي لعرض رسالة النجاح من الرابط
       setSuccess('تم إنشاء الحساب بنجاح! يمكنك الآن تسجيل الدخول.');
     }
     

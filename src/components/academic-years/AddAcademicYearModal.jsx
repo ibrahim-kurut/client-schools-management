@@ -15,6 +15,7 @@ const AddAcademicYearModal = ({ isOpen, onClose, onSave, editingYear }) => {
   useEffect(() => {
     if (isOpen) {
       if (editingYear) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- ضروري لتعبئة بيانات السنة عند فتح المودال للتعديل
         setFormData({
           name: editingYear.name || '',
           startDate: editingYear.startDate ? format(new Date(editingYear.startDate), 'yyyy-MM-dd') : '',

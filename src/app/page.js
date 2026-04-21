@@ -17,11 +17,13 @@ export default function Home() {
   const [isRedirecting, setIsRedirecting] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- نمط قياسي لتتبع حالة التركيب في Next.js
     setMounted(true);
   }, []);
 
   useEffect(() => {
     if (mounted && isLoggedIn) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- ضروري لتجنب وميض الصفحة
       setIsRedirecting(true);
       // Determine redirection path based on user data
       // Check if user object has the nested userData or is direct

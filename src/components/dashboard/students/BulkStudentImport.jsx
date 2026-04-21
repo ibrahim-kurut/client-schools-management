@@ -97,6 +97,7 @@ export default function BulkStudentImport({ isOpen, onClose }) {
     e.preventDefault();
     setIsDragging(false);
     handleFileSelect(e.dataTransfer.files?.[0]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // تحميل النموذج الفارغ

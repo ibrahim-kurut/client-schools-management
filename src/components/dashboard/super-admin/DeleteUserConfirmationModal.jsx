@@ -38,7 +38,7 @@ export default function DeleteUserConfirmationModal({ isOpen, onClose, onConfirm
         </h3>
         
         <p className="text-sm font-bold text-slate-500 dark:text-slate-400 mb-8 leading-relaxed">
-          هل أنت متأكد من رغبتك في حذف المستخدم <span className="text-red-600 dark:text-red-400">"{userName}"</span>؟ هذا الإجراء سيقوم بتعطيل الحساب ومنعه من الدخول للنظام.
+          هل أنت متأكد من رغبتك في حذف المستخدم <span className="text-red-600 dark:text-red-400">&quot;{userName}&quot;</span>؟ هذا الإجراء سيقوم بتعطيل الحساب ومنعه من الدخول للنظام.
         </p>
 
         <div className="flex items-center gap-4">

@@ -30,6 +30,7 @@ export default function MyClassesPage() {
   // Set first class as expanded by default once loaded
   useEffect(() => {
     if (classes.length > 0 && expandedClass === null) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- ضروري لتوسيع أول فصل تلقائياً عند تحميل البيانات
       setExpandedClass(classes[0].id);
       dispatch(fetchClassGrades({ classId: classes[0].id }));
     }

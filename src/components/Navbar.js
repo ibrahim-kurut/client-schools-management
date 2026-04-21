@@ -15,6 +15,7 @@ export default function Navbar() {
   const router = useRouter();
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- نمط قياسي لتتبع حالة التركيب في Next.js
     setMounted(true);
   }, []);
 

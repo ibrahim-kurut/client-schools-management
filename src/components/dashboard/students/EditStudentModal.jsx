@@ -42,7 +42,7 @@ const EditStudentModal = memo(function EditStudentModal({ isOpen, onClose, stude
     });
 
     dispatch(updateStudent({ id: student.id, formData: data }));
-  }, [student?.id, dispatch]);
+  }, [student, dispatch]);
 
   // Stable initialData object to prevent unnecessary re-renders of the form
   const memoizedInitialData = useMemo(() => {

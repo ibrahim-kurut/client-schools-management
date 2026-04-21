@@ -155,6 +155,7 @@ export default function CreatePlanModal({ isOpen, onClose, editPlan }) {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- ضروري لتتبع حالة التركيب (mount) للبوابة (Portal)
     setMounted(true);
     return () => setMounted(false);
   }, []);
@@ -162,6 +163,7 @@ export default function CreatePlanModal({ isOpen, onClose, editPlan }) {
   useEffect(() => {
     if (isOpen) {
       if (editPlan) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- ضروري لتعبئة بيانات الباقة عند فتح المودال للتعديل
         setFormData({
             name: editPlan.name || "",
             price: editPlan.price || "",
@@ -383,7 +385,7 @@ export default function CreatePlanModal({ isOpen, onClose, editPlan }) {
                   <div>
                     <h4 className="text-[12px] font-black text-amber-900 dark:text-amber-200 mb-1">نظام الديون المرن</h4>
                     <p className="text-[11px] text-amber-700/70 dark:text-amber-400/70 font-medium leading-relaxed">
-                      عند تجاوز المدرسة سعة الطلاب الأساسية، يدخل في "منطقة الهدية" مجاناً. وإذا تجاوز الهدية، يُسمح بالإضافة وتُسجل كديون يتم احتسابها تلقائياً.
+                      عند تجاوز المدرسة سعة الطلاب الأساسية، يدخل في &quot;منطقة الهدية&quot; مجاناً. وإذا تجاوز الهدية، يُسمح بالإضافة وتُسجل كديون يتم احتسابها تلقائياً.
                     </p>
                   </div>
                 </div>

@@ -72,7 +72,7 @@ export default function RequestCard({ request, onApprove, onReject }) {
          </div>
          {adminNotes && (
             <div className="p-3 bg-slate-100 dark:bg-slate-800/80 rounded-xl text-[11px] font-medium text-slate-600 dark:text-slate-400 italic">
-               "ملاحظات الإدارة: {adminNotes}"
+               &quot;ملاحظات الإدارة: {adminNotes}&quot;
             </div>
          )}
       </div>

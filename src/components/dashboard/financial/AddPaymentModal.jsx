@@ -60,10 +60,10 @@ const AddPaymentModal = memo(function AddPaymentModal({ isOpen, onClose }) {
     return paymentStatusLabels[normalizedStatus] || status || 'غير محدد';
   }, []);
 
-  
   // Focus modal after successful creation
   useEffect(() => {
     if (createStatus === 'succeeded' && createdRecord) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- ضروري لعرض بيانات الوصل بعد نجاح عملية الدفع
       setReceiptData({
         ...createdRecord,
         studentName: selectedStudent?.name,
@@ -80,6 +80,7 @@ const AddPaymentModal = memo(function AddPaymentModal({ isOpen, onClose }) {
   // Close modal reset state
   useEffect(() => {
     if (!isOpen) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- ضروري لإعادة تعيين حالة المودال عند الإغلاق
       setSearchQuery('');
       setSelectedStudent(null);
       setIsDropdownOpen(false);

@@ -15,7 +15,8 @@ import {
   Calendar,
   ChevronRight,
   Sparkles,
-  ZapOff
+  ZapOff,
+  Clock
 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { useDispatch, useSelector } from "react-redux";

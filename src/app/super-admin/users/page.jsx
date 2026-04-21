@@ -65,6 +65,7 @@ export default function UsersManagement() {
     }, 500);
 
     return () => clearTimeout(delayDebounceFn);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchTerm, roleFilter]);
 
   const handleDeleteUser = async () => {

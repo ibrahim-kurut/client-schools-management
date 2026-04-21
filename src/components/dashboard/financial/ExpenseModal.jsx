@@ -89,6 +89,7 @@ export default function ExpenseModal({ isOpen, onClose, expense = null, mode = '
   // Initialize form
   useEffect(() => {
     if (isOpen && expense) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- ضروري لتعبئة بيانات المصروف عند فتح المودال للتعديل
       setFormData({
         title: expense.title || '',
         amount: expense.amount || '',

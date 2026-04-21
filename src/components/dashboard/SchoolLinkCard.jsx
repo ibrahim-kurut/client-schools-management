@@ -13,16 +13,18 @@ export default function SchoolLinkCard({ slug }) {
   const userData = user?.userData || user;
   const userRole = userData?.role;
 
-  // Only SCHOOL_ADMIN and ASSISTANT can see this card
-  if (userRole && !['SCHOOL_ADMIN', 'ASSISTANT'].includes(userRole)) {
-    return null;
-  }
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- نمط قياسي لتتبع حالة التركيب في Next.js
     setMounted(true);
     if (typeof window !== 'undefined') {
       setSchoolLoginUrl(`${window.location.origin}/school/${slug}/login`);
     }
   }, [slug]);
+
+  // Only SCHOOL_ADMIN and ASSISTANT can see this card
+  if (userRole && !['SCHOOL_ADMIN', 'ASSISTANT'].includes(userRole)) {
+    return null;
+  }
 
   const handleCopy = async () => {
     if (!schoolLoginUrl) return;

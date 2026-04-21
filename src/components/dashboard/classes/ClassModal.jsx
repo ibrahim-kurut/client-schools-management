@@ -8,6 +8,7 @@ export default function ClassModal({ isOpen, onClose, onSave, initialData }) {
 
   useEffect(() => {
     if (initialData) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- ضروري لتعبئة بيانات الصف عند فتح المودال للتعديل
       setName(initialData.name);
       setTuitionFee(initialData.tuitionFee);
     } else {

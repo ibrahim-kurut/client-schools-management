@@ -17,7 +17,7 @@ export default function SchoolGuard({ children }) {
 
     // Login page is PUBLIC — always accessible, skip all auth checks
     if (isLoginPage) {
-      setIsAuthorized(true);
+      setIsAuthorized(true); // eslint-disable-line react-hooks/set-state-in-effect -- ضروري لمنطق التحقق من الصلاحيات
       return;
     }
 

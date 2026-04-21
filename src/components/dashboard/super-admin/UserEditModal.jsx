@@ -15,6 +15,7 @@ export default function UserEditModal({ isOpen, onClose, onSave, user }) {
 
   useEffect(() => {
     if (user) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- ضروري لتحديث بيانات المودال عند تغير المستخدم المحدد
       setFormData({
         firstName: user.firstName || "",
         lastName: user.lastName || "",

@@ -43,7 +43,7 @@ export default function ArchiveConfirmationModal({ isOpen, onClose, onConfirm, s
           </h3>
           
           <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-6 leading-relaxed">
-            هل أنت متأكد من رغبتك في أرشفة مدرسة <span className="font-bold text-slate-900 dark:text-white">"{schoolName}"</span>؟ سيتم إخفاء المدرسة من اللوحة الرئيسية، ولكن يمكنك استعادتها لاحقاً من الأرشيف.
+            هل أنت متأكد من رغبتك في أرشفة مدرسة <span className="font-bold text-slate-900 dark:text-white">&quot;{schoolName}&quot;</span>؟ سيتم إخفاء المدرسة من اللوحة الرئيسية، ولكن يمكنك استعادتها لاحقاً من الأرشيف.
           </p>
 
           <div className="w-full bg-amber-50 dark:bg-amber-500/10 border border-amber-100 dark:border-amber-500/20 rounded-2xl p-4 mb-8 flex items-start gap-3 text-right">

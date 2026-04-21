@@ -32,6 +32,7 @@ const CreateSchoolPage = () => {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- نمط قياسي لتتبع حالة التركيب في Next.js
     setMounted(true);
   }, []);
   // Login check 
