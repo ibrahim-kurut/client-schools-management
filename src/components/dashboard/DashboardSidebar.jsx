@@ -19,22 +19,25 @@ import {
 } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '@/redux/slices/authSlice';
+import { closeSidebar } from '@/redux/slices/uiSlice';
 import { useRouter, usePathname } from 'next/navigation';
 import { toast } from 'react-toastify';
 import Swal from 'sweetalert2';
 import Link from 'next/link';
 import Image from 'next/image';
+import { X } from 'lucide-react';
 
-const SidebarItem = ({ icon: Icon, label, isActive = false, href = "/", iconColor = "text-blue-500" }) => (
+const SidebarItem = ({ icon: Icon, label, isActive = false, href = "/", iconColor = "text-blue-500", onClick }) => (
   <Link 
     href={href}
+    onClick={onClick}
     className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 ${
       isActive 
-        ? 'bg-blue-600 text-white shadow-lg' 
-        : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+        ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30 translate-x-1' 
+        : 'text-slate-400 hover:bg-white/5 hover:text-white'
     }`}
   >
-    <div className={`p-2 rounded-xl transition-colors ${isActive ? 'bg-white/20' : 'bg-slate-800/50 group-hover:bg-slate-700'}`}>
+    <div className={`p-2 rounded-xl transition-all duration-300 ${isActive ? 'bg-white/20' : 'bg-slate-800/50 group-hover:scale-110'}`}>
       <Icon className={`w-5 h-5 ${isActive ? 'text-white' : iconColor}`} />
     </div>
     <span className="font-bold text-sm tracking-wide">{label}</span>
@@ -46,6 +49,7 @@ export default function DashboardSidebar({ slug }) {
   const router = useRouter();
   const pathname = usePathname();
   const { user } = useSelector((state) => state.auth);
+  const { sidebarOpen } = useSelector((state) => state.ui);
   const [mounted, setMounted] = React.useState(false);
 
   React.useEffect(() => {
@@ -80,9 +84,14 @@ export default function DashboardSidebar({ slug }) {
         router.push('/login');
       } catch (error) {
         toast.error("فشل تسجيل الخروج");
-        // Even if it fails on server, we should probably clear local state
         router.push('/login');
       }
+    }
+  };
+
+  const handleLinkClick = () => {
+    if (window.innerWidth < 1024) {
+      dispatch(closeSidebar());
     }
   };
 
@@ -98,7 +107,6 @@ export default function DashboardSidebar({ slug }) {
     { icon: BookOpen, label: "إدارة المواد الدراسية", href: `/school/${normalizedSlug}/subjects`, roles: ['SCHOOL_ADMIN', 'ASSISTANT', 'SUPER_ADMIN'], color: 'text-amber-400' },
     { icon: CalendarDays, label: "جداول الحصص", href: `/school/${normalizedSlug}/schedules`, roles: ['SCHOOL_ADMIN', 'ASSISTANT', 'SUPER_ADMIN'], color: 'text-rose-400' },
     
-    // Financial Links
     ...(role === 'ACCOUNTANT' ? [
       { icon: PieChart, label: "لوحة التحكم المالية", href: `/school/${normalizedSlug}/financial/dashboard`, roles: ['ACCOUNTANT'], color: 'text-cyan-400' },
       { icon: Wallet, label: "رسوم الطلاب", href: `/school/${normalizedSlug}/financial/fees`, roles: ['ACCOUNTANT'], color: 'text-orange-400' },
@@ -123,7 +131,6 @@ export default function DashboardSidebar({ slug }) {
     SUPER_ADMIN: "مدير عام"
   };
 
-  // Use default mockup if not mounted to match server state and avoid hydration mismatch
   const displayUser = mounted ? {
     name: actualUser?.firstName ? `${actualUser.firstName} ${actualUser.lastName || ''}`.trim() : "المستخدم",
     email: actualUser?.email || "user@school.com",
@@ -137,46 +144,72 @@ export default function DashboardSidebar({ slug }) {
   };
 
   return (
-    <aside className="w-72 bg-[#1e293b] flex flex-col h-full lg:rounded-l-none overflow-hidden p-8 border-l border-slate-700 hidden lg:flex shadow-2xl z-20">
-      {/* Profile Section */}
-      <div className="flex flex-col items-center mb-10 text-center">
-        <div className="w-20 h-20 rounded-full bg-slate-700 p-1 mb-4 shadow-xl border-2 border-slate-600">
-          <div className="w-full h-full rounded-full bg-blue-100 flex items-center justify-center overflow-hidden">
-             {displayUser.schoolLogo ? (
-               <Image src={displayUser.schoolLogo} alt={displayUser.name} width={80} height={80} className="w-full h-full object-cover" />
-             ) : (
-               <User className="w-10 h-10 text-blue-600" />
-             )}
+    <>
+      {/* Overlay for mobile */}
+      <div 
+        className={`fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 transition-opacity duration-300 lg:hidden ${
+          sidebarOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        }`}
+        onClick={() => dispatch(closeSidebar())}
+      />
+
+      <aside 
+        className={`fixed lg:static top-0 right-0 h-full w-72 bg-[#0f172a] flex flex-col z-50 transition-all duration-300 ease-in-out border-l border-slate-800 shadow-2xl lg:shadow-none ${
+          sidebarOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'
+        }`}
+      >
+        {/* Header with Close Button for Mobile */}
+        <div className="p-8 flex items-center justify-between lg:justify-center">
+          <div className="flex flex-col items-center text-center flex-1">
+            <div className="w-20 h-20 rounded-full bg-slate-800 p-1 mb-4 shadow-xl border-2 border-slate-700 group hover:border-blue-500 transition-all duration-500">
+              <div className="w-full h-full rounded-full bg-slate-900 flex items-center justify-center overflow-hidden">
+                {displayUser.schoolLogo ? (
+                  <Image src={displayUser.schoolLogo} alt={displayUser.name} width={80} height={80} className="w-full h-full object-cover" />
+                ) : (
+                  <User className="w-10 h-10 text-slate-400 group-hover:text-blue-400 transition-colors" />
+                )}
+              </div>
+            </div>
+            <h3 className="text-white font-black text-lg leading-tight mb-1">{displayUser.name}</h3>
+            <p className="text-blue-400 font-bold text-[10px] uppercase tracking-widest bg-blue-500/10 px-3 py-1 rounded-full">{displayUser.roleLabel}</p>
           </div>
+          
+          <button 
+            onClick={() => dispatch(closeSidebar())}
+            className="lg:hidden p-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white"
+          >
+            <X className="w-6 h-6" />
+          </button>
         </div>
-        <h3 className="text-white font-black text-lg leading-tight mb-1">{displayUser.name}</h3>
-        <p className="text-blue-400 font-bold text-xs bg-blue-500/10 px-3 py-1 rounded-full">{displayUser.roleLabel}</p>
-      </div>
 
-      {/* Navigation Menu */}
-      <nav className="flex-1 space-y-2 overflow-y-auto pr-2 custom-scrollbar">
-        {filteredItems.map((item, index) => (
-          <SidebarItem 
-            key={index}
-            icon={item.icon} 
-            label={item.label} 
-            href={item.href} 
-            isActive={pathname === item.href || (item.href !== `/school/${slug}` && pathname.startsWith(item.href))} 
-            iconColor={item.color}
-          />
-        ))}
-      </nav>
+        {/* Navigation Menu */}
+        <nav className="flex-1 space-y-1.5 overflow-y-auto px-4 custom-scrollbar pb-6">
+          {filteredItems.map((item, index) => (
+            <SidebarItem 
+              key={index}
+              icon={item.icon} 
+              label={item.label} 
+              href={item.href} 
+              isActive={pathname === item.href || (item.href !== `/school/${slug}` && pathname.startsWith(item.href))} 
+              iconColor={item.color}
+              onClick={handleLinkClick}
+            />
+          ))}
+        </nav>
 
-      {/* Logout */}
-      <div className="mt-10">
-        <button 
-          onClick={handleLogout}
-          className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 hover:bg-red-500/10 hover:text-red-500 transition-all duration-300 font-bold text-sm"
-        >
-          <LogOut className="w-5 h-5" />
-          <span>تسجيل الخروج</span>
-        </button>
-      </div>
-    </aside>
+        {/* Footer / Logout */}
+        <div className="p-6 border-t border-slate-800">
+          <button 
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 hover:bg-red-500/10 hover:text-red-500 transition-all duration-300 font-bold text-sm group"
+          >
+            <div className="p-2 rounded-xl bg-slate-800/50 group-hover:bg-red-500/20 transition-colors">
+              <LogOut className="w-5 h-5" />
+            </div>
+            <span>تسجيل الخروج</span>
+          </button>
+        </div>
+      </aside>
+    </>
   );
 }

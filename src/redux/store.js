@@ -17,6 +17,7 @@ import notificationsReducer from "./slices/notificationsSlice";
 import financeStatsReducer from "./slices/financeStatsSlice";
 import notesReducer from "./slices/notesSlice";
 import profileReducer from "./slices/profileSlice";
+import uiReducer from "./slices/uiSlice";
 import { injectStore } from '../lib/axios';
 
 export const store = configureStore({
@@ -39,6 +40,7 @@ export const store = configureStore({
         financeStats: financeStatsReducer,
         notes: notesReducer,
         profile: profileReducer,
+        ui: uiReducer,
     },
 });
 
