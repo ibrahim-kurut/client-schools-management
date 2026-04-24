@@ -1,6 +1,9 @@
 "use client";
 import React, { useState, useRef, useCallback, memo } from 'react';
-import { User, Phone, Mail, Calendar, Loader2, Camera, XCircle, ShieldCheck, BookOpen, Layers } from 'lucide-react';
+import { User, Phone, Mail, Calendar, Loader2, XCircle, ShieldCheck, Layers } from 'lucide-react';
+import Select from '../../ui/Select';
+import Button from '../../ui/Button';
+import Input from '../../ui/Input';
 
 /**
  * @description Ultra-Performance Form for Adding School Staff (Teachers, Assistants, Accountants)
@@ -26,15 +29,11 @@ const AddMemberForm = memo(function AddMemberForm({
   const phoneRef = useRef(null);
   const subjectRef = useRef(null);
   const classNameRef = useRef(null);
-  const fileInputRef = useRef(null);
-
 
   // --- UI State ---
   const [step, setStep] = useState(1);
   const [role, setRole] = useState(initialData?.role || initialRole);
   const [gender, setGender] = useState(initialData?.gender || 'MALE');
-  const [imagePreview, setImagePreview] = useState(initialData?.image || null);
-  const [selectedImage, setSelectedImage] = useState(null);
   const [validationError, setValidationError] = useState('');
 
   // Role labeling
@@ -46,15 +45,6 @@ const AddMemberForm = memo(function AddMemberForm({
       default: return 'عضو';
     }
   }, []);
-
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setSelectedImage(file);
-      setImagePreview(URL.createObjectURL(file));
-      setValidationError('');
-    }
-  };
 
   const handleNext = useCallback(() => {
     if (!firstNameRef.current?.value.trim()) return setValidationError('الاسم الأول مطلوب');
@@ -92,12 +82,11 @@ const AddMemberForm = memo(function AddMemberForm({
       role,
       phone: phoneRef.current.value,
       className: classNameRef.current?.value || '',
-      subject: subjectRef.current?.value || '',
-      image: selectedImage
+      subject: subjectRef.current?.value || ''
     };
 
     onSubmit(finalData);
-  }, [gender, role, selectedImage, onSubmit]);
+  }, [gender, role, onSubmit]);
 
   const translateError = (errorMsg) => {
     if (!errorMsg) return '';
@@ -110,87 +99,94 @@ const AddMemberForm = memo(function AddMemberForm({
   };
 
   return (
-    <div className="relative">
+    <div className="relative flex flex-col flex-1 min-h-0 max-h-[85vh]">
       {/* Stepper */}
-      <div className="flex p-6 border-b border-slate-100 bg-slate-50/30">
+      <div className="flex p-4 md:p-6 border-b border-slate-100 bg-slate-50/30 shrink-0 px-4 sm:px-8">
         {[1, 2].map((s) => (
           <div key={s} className="flex-1 flex flex-col items-center gap-2 relative">
-             <div className={`w-9 h-9 rounded-full flex items-center justify-center font-black transition-all duration-500 z-10 ${step >= s ? 'bg-blue-600 text-white shadow-xl scale-110' : 'bg-slate-200 text-slate-500'}`}>
+             <div className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center font-black transition-all duration-500 z-10 ${step >= s ? 'bg-blue-600 text-white shadow-xl scale-110' : 'bg-slate-200 text-slate-500'}`}>
                 {s}
              </div>
-             <span className={` font-black ${step >= s ? 'text-blue-600' : 'text-slate-400'}`}>
+             <span className={`text-[10px] md:text-xs font-black ${step >= s ? 'text-blue-600' : 'text-slate-400'}`}>
                 {s === 1 ? 'البيانات الشخصية' : 'بيانات الوظيفة'}
              </span>
              {s < 2 && (
-               <div className="absolute top-4.5 right-1/2 w-full h-[2px] bg-slate-200 -z-0">
-                  <div className={`h-full bg-blue-600 transition-property-[width] duration-700 ${step > s ? 'w-full' : 'w-0'}`}></div>
+               <div className="absolute top-4 md:top-5 right-1/2 w-full h-[2px] bg-slate-200 -z-0">
+                  <div className={`h-full bg-blue-600 transition-all duration-700 ${step > s ? 'w-full' : 'w-0'}`}></div>
                </div>
              )}
           </div>
         ))}
       </div>
 
-      <form onSubmit={handleSubmitInternal} className="p-8 max-h-[55vh] overflow-y-auto no-scrollbar scroll-smooth">
+      <form onSubmit={handleSubmitInternal} className="flex-1 overflow-y-auto custom-scrollbar p-6 md:p-8 space-y-6 px-6 sm:px-10">
         
         {/* --- STEP 1 --- */}
         <div className={`space-y-6 animate-in fade-in zoom-in-95 duration-400 ${step === 1 ? 'block' : 'hidden'}`}>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1.5 focus-within:scale-[1.01] transition-transform duration-200">
-                <label className=" font-black text-slate-500 mr-2 uppercase tracking-tighter">الاسم الأول</label>
-                <div className="relative">
-                   <User className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                   <input ref={firstNameRef} defaultValue={initialData?.firstName} type="text" placeholder="مثال: يوسف" className="w-full bg-slate-50/50 border border-slate-200 rounded-2xl py-3.5 pr-11 pl-4 focus:bg-white focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500 font-bold transition-colors outline-none" />
-                </div>
-              </div>
-              <div className="space-y-1.5 focus-within:scale-[1.01] transition-transform duration-200">
-                <label className=" font-black text-slate-500 mr-2 uppercase tracking-tighter">اسم العائلة</label>
-                <div className="relative">
-                   <User className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                   <input ref={lastNameRef} defaultValue={initialData?.lastName} type="text" placeholder="اللقب" className="w-full bg-slate-50/50 border border-slate-200 rounded-2xl py-3.5 pr-11 pl-4 focus:bg-white focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500 font-bold transition-colors outline-none" />
-                </div>
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <Input 
+                ref={firstNameRef} 
+                defaultValue={initialData?.firstName} 
+                label="الاسم الأول" 
+                placeholder="مثال: يوسف" 
+                icon={User} 
+              />
+              <Input 
+                ref={lastNameRef} 
+                defaultValue={initialData?.lastName} 
+                label="اسم العائلة" 
+                placeholder="اللقب" 
+                icon={User} 
+              />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-               <div className="space-y-1.5 col-span-2 md:col-span-1">
-                 <label className=" font-black text-slate-500 mr-2">البريد الإلكتروني</label>
-                 <div className="relative">
-                   <Mail className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                   <input ref={emailRef} defaultValue={initialData?.email} type="email" dir="ltr" placeholder="staff@school.com" className="w-full bg-slate-50/50 border border-slate-200 rounded-2xl py-3.5 pr-11 pl-4 focus:bg-white focus:border-blue-500 font-bold transition-colors outline-none" />
-                 </div>
-               </div>
-               <div className="space-y-1.5 col-span-2 md:col-span-1">
-                 <label className=" font-black text-slate-500 mr-2">كلمة المرور</label>
-                 <input ref={passwordRef} type="password" dir="ltr" placeholder="••••••••" className="w-full bg-slate-50/50 border border-slate-200 rounded-2xl py-3.5 px-5 focus:bg-white focus:border-blue-500 font-bold transition-colors outline-none" />
-               </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+               <Input 
+                 ref={emailRef} 
+                 defaultValue={initialData?.email} 
+                 type="email" 
+                 label="البريد الإلكتروني" 
+                 placeholder="staff@school.com" 
+                 dir="ltr" 
+                 icon={Mail} 
+               />
+               <Input 
+                 ref={passwordRef} 
+                 type="password" 
+                 label="كلمة المرور" 
+                 placeholder="••••••••" 
+                 dir="ltr" 
+               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-               <div className="space-y-1.5">
-                  <label className=" font-black text-slate-500 mr-2">تاريخ الميلاد</label>
-                  <div className="relative">
-                    <Calendar className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                    <input ref={birthDateRef} defaultValue={initialData?.birthDate ? new Date(initialData.birthDate).toISOString().split('T')[0] : ''} type="date" className="w-full bg-slate-50/50 border border-slate-200 rounded-2xl py-3.5 pr-11 pl-4 focus:border-blue-500 font-bold outline-none" />
-                  </div>
-               </div>
-               <div className="space-y-1.5">
-                  <label className=" font-black text-slate-500 mr-2">الجنس</label>
-                  <select value={gender} onChange={(e) => setGender(e.target.value)} className="w-full bg-slate-50/50 border border-slate-200 rounded-2xl py-3.5 px-5 focus:border-blue-500 font-bold appearance-none cursor-pointer outline-none">
-                     <option value="MALE">ذكر</option>
-                     <option value="FEMALE">أنثى</option>
-                  </select>
-               </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+               <Input 
+                 ref={birthDateRef} 
+                 defaultValue={initialData?.birthDate ? new Date(initialData.birthDate).toISOString().split('T')[0] : ''} 
+                 type="date" 
+                 label="تاريخ الميلاد" 
+                 icon={Calendar} 
+               />
+               <Select 
+                 label="الجنس" 
+                 value={gender} 
+                 onChange={setGender} 
+                 options={[
+                   { value: 'MALE', label: 'ذكر' },
+                   { value: 'FEMALE', label: 'أنثى' }
+                 ]} 
+               />
             </div>
         </div>
 
         {/* --- STEP 2 --- */}
-        <div className={`space-y-8 animate-in fade-in slide-in-from-left-6 duration-500 ${step === 2 ? 'block' : 'hidden'}`}>
-            <div className="p-6 bg-blue-50/40 rounded-3xl border border-blue-100/50">
-              <h3 className=" font-black text-blue-800 flex items-center gap-2 mb-4">
+        <div className={`space-y-6 animate-in fade-in slide-in-from-left-6 duration-500 ${step === 2 ? 'block' : 'hidden'}`}>
+            <div className="p-5 md:p-6 bg-blue-50/40 rounded-3xl border border-blue-100/50">
+              <h3 className="text-sm font-black text-blue-800 flex items-center gap-2 mb-4">
                   <ShieldCheck className="w-4 h-4" />
                   تحديد الدور الوظيفي
               </h3>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   {['TEACHER', 'ASSISTANT', 'ACCOUNTANT']
                     .filter(r => currentUserRole !== 'ASSISTANT' || (r === 'TEACHER' || r === 'ACCOUNTANT'))
                     .map((r) => (
@@ -198,7 +194,7 @@ const AddMemberForm = memo(function AddMemberForm({
                       key={r}
                       type="button"
                       onClick={() => setRole(r)}
-                      className={`py-3 rounded-2xl font-black transition-all duration-300 ${role === r ? 'bg-blue-600 text-white shadow-xl shadow-blue-600/20' : 'bg-white border border-slate-200 text-slate-400 hover:border-blue-300'}`}
+                      className={`py-3.5 rounded-2xl font-black text-sm transition-all duration-300 ${role === r ? 'bg-blue-600 text-white shadow-xl shadow-blue-600/20' : 'bg-white border border-slate-200 text-slate-400 hover:border-blue-300'}`}
                     >
                       {getRoleLabel(r)}
                     </button>
@@ -206,77 +202,96 @@ const AddMemberForm = memo(function AddMemberForm({
               </div>
             </div>
 
-            <div className="space-y-5">
-               <div className="space-y-1.5">
-                  <label className=" font-black text-slate-500 mr-2">رقم الهاتف المحلي</label>
-                  <div className="relative">
-                    <Phone className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                    <input ref={phoneRef} defaultValue={initialData?.phone} type="tel" dir="ltr" placeholder="07XXXXXXXX" className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3.5 pr-11 pl-4 focus:border-blue-500 font-bold outline-none shadow-sm" />
-                  </div>
-               </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+               <Input 
+                 ref={phoneRef} 
+                 defaultValue={initialData?.phone} 
+                 type="tel" 
+                 label="رقم الهاتف المحلي" 
+                 placeholder="07XXXXXXXX" 
+                 dir="ltr" 
+                 icon={Phone} 
+               />
 
                {role === 'TEACHER' && (
-                  <div className="space-y-1.5 animate-in slide-in-from-top-4 duration-300">
-                    <label className=" font-black text-slate-500 mr-2">التخصص الدراسي الرئيسي</label>
-                    <div className="relative">
-                      <BookOpen className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                      <select ref={subjectRef} defaultValue={initialData?.subject || ''} className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3.5 pr-11 pl-4 focus:border-blue-500 font-bold appearance-none cursor-pointer outline-none">
-                         <option value="">اختر التخصص الدراسي...</option>
-                         {subjects.map(s => <option key={s.id} value={s.name}>{s.name}</option>)}
-                      </select>
-                    </div>
-                  </div>
+                  <Select 
+                    label="التخصص الدراسي الرئيسي" 
+                    value={initialData?.subject || ''} 
+                    onChange={(val) => {
+                      if (subjectRef.current) subjectRef.current.value = val;
+                    }} 
+                    placeholder="اختر التخصص الدراسي..."
+                    options={subjects.map(s => ({ value: s.name, label: s.name }))} 
+                  />
                )}
+               {/* Hidden ref for subject */}
+               <input type="hidden" ref={subjectRef} defaultValue={initialData?.subject || ''} />
 
                {role === 'TEACHER' && (
-                  <div className="space-y-1.5 animate-in slide-in-from-top-4 duration-300">
-                    <label className=" font-black text-slate-500 mr-2">
-                       الصف الدراسي المرتبط (اختياري)
-                    </label>
-                    <div className="relative">
-                      <Layers className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                      <select ref={classNameRef} defaultValue={initialData?.className || ''} className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3.5 pr-11 pl-4 focus:border-blue-500 font-bold appearance-none cursor-pointer outline-none">
-                         <option value="">غير مرتبط بصف محدد</option>
-                         {classes.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
-                      </select>
-                    </div>
-                  </div>
+                  <Select 
+                    label="الصف الدراسي المرتبط (اختياري)" 
+                    value={initialData?.className || ''} 
+                    onChange={(val) => {
+                      if (classNameRef.current) classNameRef.current.value = val;
+                    }} 
+                    placeholder="غير مرتبط بصف محدد"
+                    options={[
+                      { value: '', label: 'غير مرتبط بصف محدد' },
+                      ...classes.map(c => ({ value: c.name, label: c.name }))
+                    ]} 
+                  />
                )}
+               {/* Hidden ref for className */}
+               <input type="hidden" ref={classNameRef} defaultValue={initialData?.className || ''} />
             </div>
         </div>
       </form>
 
       {/* Actions & Feedback */}
-      <div className="p-8 pt-0 space-y-4">
+      <div className="p-8 px-6 sm:px-10 pb-10 pt-6 border-t border-slate-50 bg-slate-50/30 shrink-0 space-y-4">
         {(validationError || error) && (
-          <div className="p-4 bg-red-50 text-red-600 rounded-2xl font-black flex items-center gap-3 border border-red-100 animate-shake">
+          <div className="p-3.5 bg-rose-50 text-rose-600 rounded-2xl text-xs font-black flex items-center gap-3 border border-rose-100 animate-shake">
             <XCircle className="w-4 h-4 flex-shrink-0" />
             <span>{validationError || translateError(error)}</span>
           </div>
         )}
 
-        <div className="flex items-center gap-3">
-          <button type="button" onClick={() => step > 1 ? setStep(step - 1) : onCancel()} className="flex-1 py-4 bg-slate-100 text-slate-500 rounded-2xl font-black transition-colors hover:bg-slate-200">
+        <div className="flex flex-col sm:flex-row items-center gap-3">
+          <Button 
+            variant="secondary" 
+            className="w-full sm:w-1/3" 
+            onClick={() => step > 1 ? setStep(step - 1) : onCancel()}
+          >
             {step > 1 ? 'العودة للخلف' : 'إلغاء العملية'}
-          </button>
-          <button 
-            type="button"
+          </Button>
+          <Button 
+            variant="primary" 
+            className="w-full sm:w-2/3" 
+            loading={loading}
             onClick={() => {
               if (step === 1) handleNext();
               else handleSubmitInternal();
-            }} 
-            disabled={loading} 
-            className="flex-[2] py-4 bg-blue-600 text-white rounded-2xl font-black shadow-xl shadow-blue-600/30 hover:bg-blue-700 hover:shadow-blue-600/50 transition-all flex items-center justify-center gap-2 cursor-pointer"
+            }}
           >
-            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 
-             (step === 1 ? 'الخطوة التالية' : (initialData ? 'تحديث البيانات' : 'حفظ العضو الجديد'))}
-          </button>
+            {step === 1 ? 'الخطوة التالية' : (initialData ? 'تحديث البيانات' : 'حفظ العضو الجديد')}
+          </Button>
         </div>
       </div>
 
       <style jsx>{`
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: #f8fafc;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: #e2e8f0;
+          border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: #cbd5e1;
+        }
         @keyframes shake {
           0%, 100% { transform: translateX(0); }
           25% { transform: translateX(-4px); }

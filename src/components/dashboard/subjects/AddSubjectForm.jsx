@@ -1,14 +1,9 @@
 "use client";
 import React, { useRef, useState, useEffect } from 'react';
-import { 
-  BookOpen, 
-  Layers, 
-  User, 
-  CheckCircle2, 
-  XCircle, 
-  Loader2,
-  AlertCircle
-} from 'lucide-react';
+import { BookOpen, AlertCircle, XCircle } from 'lucide-react';
+import Select from '../../ui/Select';
+import Button from '../../ui/Button';
+import Input from '../../ui/Input';
 
 export default function AddSubjectForm({ onSubmit, onCancel, initialData, loading, error, classes, teachers }) {
   // Refs for high performance (Lag-free input)
@@ -20,14 +15,14 @@ export default function AddSubjectForm({ onSubmit, onCancel, initialData, loadin
   const [validationError, setValidationError] = useState(null);
 
   const handleSubmit = (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     setValidationError(null);
 
     const name = nameRef.current.value.trim();
 
     // Basic Validation
-    if (!name || name.length < 3) {
-      setValidationError("اسم المادة يجب أن يكون 3 أحرف على الأقل");
+    if (!name || name.length < 2) {
+      setValidationError("اسم المادة يجب أن يكون حرفين على الأقل");
       return;
     }
     if (!classId) {
@@ -45,112 +40,120 @@ export default function AddSubjectForm({ onSubmit, onCancel, initialData, loadin
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col h-full bg-white">
+    <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0 bg-white">
       {/* Form Content */}
       <div className="flex-1 overflow-y-auto p-8 space-y-8 custom-scrollbar">
         
         {/* Subject Detail Section */}
         <div className="space-y-6">
-          <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
-            <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
-              <BookOpen className="w-5 h-5" />
+          <div className="flex items-center gap-4 border-b border-slate-50 pb-6">
+            <div className="w-12 h-12 rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-xl shadow-blue-600/20">
+              <BookOpen className="w-6 h-6" />
             </div>
-            <h3 className="text-lg font-black text-slate-800">تفاصيل المادة الدراسية</h3>
+            <div>
+              <h3 className="text-xl font-black text-slate-800">بيانات المادة الدراسية</h3>
+              <p className="text-slate-400 text-xs font-bold">يرجى ملء تفاصيل المادة وربطها بالمعلم والصف</p>
+            </div>
           </div>
 
-          <div className="space-y-5">
+          <div className="space-y-6">
             {/* Subject Name */}
-            <div className="space-y-1.5 focus-within:scale-[1.01] transition-transform">
-              <label className="font-black text-slate-500 mr-2 uppercase tracking-tighter text-xs">اسم المادة</label>
-              <div className="relative">
-                <BookOpen className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                <input 
-                  ref={nameRef} 
-                  defaultValue={initialData?.name} 
-                  type="text" 
-                  placeholder="مثال: الرياضيات المتقدمة" 
-                  className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 pr-11 pl-4 focus:bg-white focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500 font-bold transition-all outline-none" 
-                />
-              </div>
-            </div>
+            <Input 
+              ref={nameRef} 
+              defaultValue={initialData?.name} 
+              label="اسم المادة الدراسية" 
+              placeholder="مثال: الرياضيات، اللغة العربية..." 
+              icon={BookOpen} 
+            />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Class Selection */}
-              <div className="space-y-1.5">
-                <label className="font-black text-slate-500 mr-2 uppercase tracking-tighter text-xs">الصف الدراسي</label>
-                <div className="relative">
-                  <Layers className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                  <select 
-                    value={classId} 
-                    onChange={(e) => setClassId(e.target.value)} 
-                    className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 pr-11 pl-4 focus:bg-white focus:border-blue-500 font-bold transition-all outline-none appearance-none cursor-pointer"
-                  >
-                    <option value="">اختر الصف...</option>
-                    {classes.map(c => (
-                      <option key={c.id} value={c.id}>{c.name}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
+              <Select 
+                label="الصف الدراسي الموجه إليه" 
+                value={classId} 
+                onChange={setClassId} 
+                placeholder="اختر الصف..."
+                options={classes.map(c => ({ value: c.id, label: c.name }))} 
+              />
 
               {/* Teacher Selection */}
-              <div className="space-y-1.5">
-                <label className="font-black text-slate-500 mr-2 uppercase tracking-tighter text-xs">المعلم المسؤول (اختياري)</label>
-                <div className="relative">
-                  <User className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                  <select 
-                    value={teacherId} 
-                    onChange={(e) => setTeacherId(e.target.value)} 
-                    className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 pr-11 pl-4 focus:bg-white focus:border-blue-500 font-bold transition-all outline-none appearance-none cursor-pointer"
-                  >
-                    <option value="">بدون معلم حالياً</option>
-                    {teachers.filter(t => t.role === 'TEACHER').map(t => (
-                      <option key={t.id} value={t.id}>{t.firstName} {t.lastName}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
+              <Select 
+                label="المعلم المسؤول (اختياري)" 
+                value={teacherId} 
+                onChange={setTeacherId} 
+                placeholder="بدون معلم حالياً"
+                options={[
+                  { value: '', label: 'بدون معلم حالياً' },
+                  ...teachers.filter(t => t.role === 'TEACHER').map(t => ({ 
+                    value: t.id, 
+                    label: `${t.firstName} ${t.lastName}` 
+                  }))
+                ]} 
+              />
             </div>
           </div>
         </div>
 
         {/* Info Card */}
         {!initialData && (
-          <div className="p-6 bg-amber-50 rounded-3xl border border-amber-100 flex gap-4">
-            <AlertCircle className="w-6 h-6 text-amber-500 flex-shrink-0" />
-            <p className="text-amber-800 text-sm font-medium leading-relaxed">
-              تنبيه: ربط المادة بصف دراسي سيجعلها تظهر تلقائياً في جداول الطلاب والتقارير الأكاديمية لهذا الصف.
-            </p>
+          <div className="p-6 bg-blue-50/50 rounded-3xl border border-blue-100/50 flex gap-4 animate-in fade-in slide-in-from-top-4">
+            <AlertCircle className="w-6 h-6 text-blue-500 flex-shrink-0 mt-0.5" />
+            <div className="space-y-1">
+              <p className="text-blue-900 text-sm font-black">ملاحظة هامة:</p>
+              <p className="text-blue-700/80 text-xs font-bold leading-relaxed">
+                ربط المادة بصف دراسي سيجعلها تظهر تلقائياً في جداول الطلاب والتقارير الأكاديمية لهذا الصف بشكل فوري.
+              </p>
+            </div>
           </div>
         )}
       </div>
 
       {/* Actions & Feedback */}
-      <div className="p-8 pt-0 space-y-4">
+      <div className="p-8 px-6 sm:px-10 pb-10 pt-6 border-t border-slate-50 bg-slate-50/30 shrink-0 space-y-4 ">
         {(validationError || error) && (
-          <div className="p-4 bg-red-50 text-red-600 rounded-2xl font-black flex items-center gap-3 border border-red-100 animate-in slide-in-from-top-2">
+          <div className="p-4 bg-rose-50 text-rose-600 rounded-2xl text-xs font-black flex items-center gap-3 border border-rose-100 animate-shake">
             <XCircle className="w-5 h-5 flex-shrink-0" />
-            <span className="text-sm">{validationError || error}</span>
+            <span>{validationError || error}</span>
           </div>
         )}
 
-        <div className="flex items-center gap-3">
-          <button 
-            type="button" 
-            onClick={onCancel} 
-            className="flex-1 py-4 bg-slate-100 text-slate-500 rounded-2xl font-black transition-all hover:bg-slate-200"
+        <div className="flex flex-col sm:flex-row items-center gap-3">
+          <Button 
+            variant="secondary" 
+            className="w-full sm:w-1/3"
+            onClick={onCancel}
           >
-            إلغاء
-          </button>
-          <button 
-            type="submit" 
-            disabled={loading} 
-            className="flex-[2] py-4 bg-blue-600 text-white rounded-2xl font-black shadow-xl shadow-blue-600/30 hover:bg-blue-700 hover:shadow-blue-600/50 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            إلغاء العملية
+          </Button>
+          <Button 
+            variant="primary" 
+            className="w-full sm:w-2/3"
+            loading={loading}
+            type="submit"
           >
-            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (initialData ? 'حفظ التعديلات' : 'إضافة المادة')}
-          </button>
+            {initialData ? 'حفظ التعديلات' : 'إضافة المادة الجديدة'}
+          </Button>
         </div>
       </div>
+
+      <style jsx>{`
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: #e2e8f0;
+          border-radius: 10px;
+        }
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          25% { transform: translateX(-4px); }
+          75% { transform: translateX(4px); }
+        }
+        .animate-shake { animation: shake 0.2s cubic-bezier(.36,.07,.19,.97) both; }
+      `}</style>
     </form>
   );
 }

@@ -5,6 +5,10 @@ import { useDispatch } from 'react-redux';
 import { checkStudentCode } from '../../../redux/slices/studentsSlice';
 import { toast } from 'react-toastify';
 
+import Select from '../../ui/Select';
+import Button from '../../ui/Button';
+import Input from '../../ui/Input';
+
 /**
  * @description Dedicated Form for Adding/Editing Students
  * @notice Aligned with backend: firstName, lastName, email, password, phone, gender, birthDate,
@@ -25,7 +29,6 @@ const AddStudentForm = memo(function AddStudentForm({
   const lastNameRef = useRef(null);
   const birthDateRef = useRef(null);
   const phoneRef = useRef(null);
-  const classNameRef = useRef(null);
   const customTuitionFeeRef = useRef(null);
   const discountAmountRef = useRef(null);
   const discountNotesRef = useRef(null);
@@ -38,20 +41,20 @@ const AddStudentForm = memo(function AddStudentForm({
   const [isVerifying, setIsVerifying] = useState(false);
   const [gender, setGender] = useState(initialData?.gender || 'MALE');
   const [validationError, setValidationError] = useState('');
-  const [displayClassFee, setDisplayClassFee] = useState(null);
+  
+  // Custom Class Select State
+  const [isClassSelectOpen, setIsClassSelectOpen] = useState(false);
+  const [classSearch, setClassSearch] = useState('');
+  const [selectedClass, setSelectedClass] = useState(
+    initialData?.className ? classes.find(c => c.name === initialData.className) : null
+  );
 
-  // Get selected class tuition fee logic
-  const getSelectedClassFee = useCallback(() => {
-    const selectedName = classNameRef.current?.value;
-    if (!selectedName) return null;
-    const cls = classes.find(c => c.name === selectedName);
-    return cls?.tuitionFee || null;
-  }, [classes]);
-
-  const handleClassChange = useCallback(() => {
-    const fee = getSelectedClassFee();
-    setDisplayClassFee(fee);
-  }, [getSelectedClassFee]);
+  const handleClassChange = useCallback((cls) => {
+    // This is now called with the class object from the custom select
+    if (cls) {
+      // Any additional logic when class changes
+    }
+  }, []);
 
   // --- Step 1 Validation ---
   const handleNext = useCallback(async () => {
@@ -90,12 +93,12 @@ const AddStudentForm = memo(function AddStudentForm({
     if (!phoneVal) return setValidationError('رقم هاتف ولي الأمر مطلوب');
     if (!/^\d{10,11}$/.test(phoneVal)) return setValidationError('يجب أن يكون رقم الهاتف 10 أو 11 رقماً');
     
-    if (!classNameRef.current?.value) return setValidationError('الصف الدراسي مطلوب للطالب');
+    if (!selectedClass) return setValidationError('الصف الدراسي مطلوب للطالب');
     if (!motherNameRef.current?.value.trim()) return setValidationError('اسم الأم مطلوب');
     
     setValidationError('');
     setStep(3);
-  }, []);
+  }, [selectedClass]);
 
   // --- Final Submit ---
   const handleSubmitInternal = useCallback((e) => {
@@ -109,7 +112,7 @@ const AddStudentForm = memo(function AddStudentForm({
       gender,
       role: 'STUDENT',
       phone: phoneRef.current.value,
-      className: classNameRef.current.value,
+      className: selectedClass?.name || '',
       motherName: motherNameRef.current.value,
       guardianMaritalStatus: guardianMaritalStatusRef.current.value,
       customTuitionFee: customTuitionFeeRef.current?.value || '',
@@ -118,7 +121,7 @@ const AddStudentForm = memo(function AddStudentForm({
     };
 
     onSubmit(finalData);
-  }, [gender, onSubmit]);
+  }, [gender, selectedClass, onSubmit]);
 
   const translateError = (errorMsg) => {
     if (!errorMsg) return '';
@@ -141,208 +144,258 @@ const AddStudentForm = memo(function AddStudentForm({
   const totalSteps = 3;
 
   return (
-    <div className="relative">
+    <div className="relative flex flex-col flex-1 min-h-0 max-h-[85vh]">
       {/* Stepper */}
-      <div className="flex p-6 border-b border-slate-100 bg-slate-50/30">
+      <div className="flex p-4 md:p-6 border-b border-slate-100 bg-slate-50/30 shrink-0 px-4 sm:px-8">
         {[1, 2, 3].map((s) => (
           <div key={s} className="flex-1 flex flex-col items-center gap-2 relative">
-             <div className={`w-9 h-9 rounded-full flex items-center justify-center font-black transition-all duration-500 z-10 ${step >= s ? 'bg-emerald-600 text-white shadow-xl scale-110' : 'bg-slate-200 text-slate-500'}`}>
+             <div className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center font-black transition-all duration-500 z-10 ${step >= s ? 'bg-emerald-600 text-white shadow-xl scale-110' : 'bg-slate-200 text-slate-500'}`}>
                 {s}
              </div>
-             <span className={`text-[11px] font-black ${step >= s ? 'text-emerald-600' : 'text-slate-400'}`}>
+             <span className={`text-[9px] md:text-xs font-black ${step >= s ? 'text-emerald-600' : 'text-slate-400'}`}>
                 {s === 1 ? 'البيانات الشخصية' : s === 2 ? 'بيانات الدراسة' : 'البيانات المالية'}
              </span>
              {s < totalSteps && (
-               <div className="absolute top-4.5 right-1/2 w-full h-[2px] bg-slate-200 -z-0">
-                  <div className={`h-full bg-emerald-600 transition-property-[width] duration-700 ${step > s ? 'w-full' : 'w-0'}`}></div>
+               <div className="absolute top-4 md:top-5 right-1/2 w-full h-[2px] bg-slate-200 -z-0">
+                  <div className={`h-full bg-emerald-600 transition-all duration-700 ${step > s ? 'w-full' : 'w-0'}`}></div>
                </div>
              )}
           </div>
         ))}
       </div>
 
-      <form onSubmit={handleSubmitInternal} className="p-8 max-h-[55vh] overflow-y-auto no-scrollbar">
+      <form onSubmit={handleSubmitInternal} className="flex-1 overflow-y-auto custom-scrollbar p-5 sm:p-8 space-y-6 px-6 sm:px-10">
         
         {/* ═══════════════ STEP 1 ═══════════════ */}
         <div className={`space-y-6 animate-in fade-in zoom-in-95 duration-400 ${step === 1 ? 'block' : 'hidden'}`}>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1.5 transition-colors duration-200">
-                <label className="text-xs font-black text-slate-500 mr-2">الاسم الأول</label>
-                <div className="relative">
-                   <User className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                   <input ref={firstNameRef} defaultValue={initialData?.firstName} type="text" placeholder="مثال: يوسف" className="w-full bg-slate-50/50 border border-slate-200 rounded-2xl py-3.5 pr-11 pl-4 focus:bg-white focus:ring-4 focus:ring-emerald-500/5 focus:border-emerald-500 font-bold transition-colors outline-none" />
-                </div>
-              </div>
-              <div className="space-y-1.5 transition-colors duration-200">
-                <label className="text-xs font-black text-slate-500 mr-2">اسم العائلة</label>
-                <div className="relative">
-                   <User className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                   <input ref={lastNameRef} defaultValue={initialData?.lastName} type="text" placeholder="اللقب" className="w-full bg-slate-50/50 border border-slate-200 rounded-2xl py-3.5 pr-11 pl-4 focus:bg-white focus:ring-4 focus:ring-emerald-500/5 focus:border-emerald-500 font-bold transition-colors outline-none" />
-                </div>
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <Input 
+                ref={firstNameRef} 
+                defaultValue={initialData?.firstName} 
+                label="الاسم الأول" 
+                placeholder="مثال: يوسف" 
+                icon={User} 
+              />
+              <Input 
+                ref={lastNameRef} 
+                defaultValue={initialData?.lastName} 
+                label="اسم العائلة" 
+                placeholder="اللقب" 
+                icon={User} 
+              />
             </div>
 
-            <div className="space-y-1.5 transition-colors duration-200">
-               <label className="text-xs font-black text-slate-500 mr-2">كود الطالب <span className="text-slate-400 text-[10px]">(المعرف الأساسي للدخول)</span></label>
-               <div className="relative">
-                  <Layers className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                  <input ref={studentCodeRef} defaultValue={initialData?.studentCode} type="text" placeholder="مثال: 100" className="w-full bg-slate-50/50 border border-slate-200 rounded-2xl py-3.5 pr-11 pl-4 focus:bg-white focus:ring-4 focus:ring-emerald-500/5 focus:border-emerald-500 font-bold transition-colors outline-none" />
-               </div>
-            </div>
+            <Input 
+              ref={studentCodeRef} 
+              defaultValue={initialData?.studentCode} 
+              label="كود الطالب" 
+              placeholder="مثال: 100" 
+              icon={Layers} 
+            />
 
-            <div className="grid grid-cols-2 gap-4">
-               <div className="space-y-1.5 ">
-                 <label className="text-xs font-black text-slate-500 mr-2">تاريخ الميلاد</label>
-                 <div className="relative">
-                   <Calendar className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                   <input ref={birthDateRef} defaultValue={initialData?.birthDate ? new Date(initialData.birthDate).toISOString().split('T')[0] : ''} type="date" className="w-full bg-slate-50/50 border border-slate-200 rounded-2xl py-3.5 pr-11 pl-4 focus:border-emerald-500 font-bold outline-none" />
-                 </div>
-               </div>
-               <div className="space-y-1.5">
-                  <label className="text-xs font-black text-slate-500 mr-2">الجنس</label>
-                  <select value={gender} onChange={(e) => setGender(e.target.value)} className="w-full bg-slate-50/50 border border-slate-200 rounded-2xl py-3.5 px-5 focus:border-emerald-500 font-bold appearance-none cursor-pointer outline-none">
-                     <option value="MALE">ذكر</option>
-                     <option value="FEMALE">أنثى</option>
-                  </select>
-               </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+               <Input 
+                 ref={birthDateRef} 
+                 defaultValue={initialData?.birthDate ? new Date(initialData.birthDate).toISOString().split('T')[0] : ''} 
+                 type="date" 
+                 label="تاريخ الميلاد" 
+                 icon={Calendar} 
+               />
+               <Select 
+                 label="الجنس" 
+                 value={gender} 
+                 onChange={setGender} 
+                 options={[
+                   { value: 'MALE', label: 'ذكر' },
+                   { value: 'FEMALE', label: 'أنثى' }
+                 ]} 
+               />
             </div>
         </div>
 
         {/* ═══════════════ STEP 2 ═══════════════ */}
         <div className={`space-y-6 animate-in fade-in slide-in-from-left-6 duration-500 ${step === 2 ? 'block' : 'hidden'}`}>
-            <div className="p-6 bg-emerald-50/40 rounded-3xl border border-emerald-100/50">
+            <div className="p-5 sm:p-6 bg-emerald-50/40 rounded-3xl border border-emerald-100/50">
               <h3 className="text-sm font-black text-emerald-800 flex items-center gap-2 mb-4">
                   <GraduationCap className="w-4 h-4" />
                   تسجيل الصف الدراسي
               </h3>
 
               <div className="space-y-4">
-                <div className="space-y-1.5">
+                <div className="space-y-1.5 relative">
                    <label className="text-xs font-black text-slate-500 mr-2">الصف الدراسي <span className="text-red-400">(إجباري)</span></label>
-                   <div className="relative">
-                     <Layers className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                     <select 
-                       ref={classNameRef} 
-                       defaultValue={initialData?.class?.name || ''} 
-                       onChange={handleClassChange}
-                       className="w-full bg-white border border-slate-200 rounded-2xl py-3.5 pr-11 pl-4 focus:border-emerald-500 font-bold appearance-none cursor-pointer outline-none"
-                     >
-                        <option value="">اختر الصف الدراسي...</option>
-                        {classes.map(c => (
-                          <option key={c.id} value={c.name}>
-                            {c.name} {c.tuitionFee ? `— القسط: ${formatNumber(c.tuitionFee)} IQD` : ''}
-                          </option>
-                        ))}
-                     </select>
+                   
+                   {/* Custom Professional Select */}
+                   <div className="relative group">
+                      <div 
+                        onClick={() => setIsClassSelectOpen(!isClassSelectOpen)}
+                        className={`w-full bg-white border-2 cursor-pointer rounded-2xl py-3.5 pr-11 pl-4 flex items-center justify-between transition-all ${isClassSelectOpen ? 'border-emerald-500 ring-4 ring-emerald-500/5 shadow-lg' : 'border-slate-100 hover:border-emerald-200 shadow-sm'}`}
+                      >
+                         <Layers className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-500" />
+                         <span className={`font-bold text-sm ${selectedClass ? 'text-slate-800' : 'text-slate-400'}`}>
+                           {selectedClass ? selectedClass.name : 'اختر الصف الدراسي...'}
+                         </span>
+                         <div className={`transition-transform duration-300 ${isClassSelectOpen ? 'rotate-180' : ''}`}>
+                            <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" />
+                            </svg>
+                         </div>
+                      </div>
+
+                      {/* Dropdown Menu */}
+                      {isClassSelectOpen && (
+                        <div className="absolute top-[calc(100%+8px)] left-0 w-full bg-white border border-slate-100 rounded-2xl shadow-2xl z-[100] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                           <div className="p-3 border-b border-slate-50 bg-slate-50/30">
+                              <input 
+                                type="text"
+                                placeholder="ابحث عن صف..."
+                                value={classSearch}
+                                onChange={(e) => setClassSearch(e.target.value)}
+                                className="w-full bg-white border border-slate-200 rounded-xl py-2 px-4 text-xs font-bold outline-none focus:border-emerald-500 transition-colors"
+                                onClick={(e) => e.stopPropagation()}
+                              />
+                           </div>
+                           <div className="max-h-60 overflow-y-auto custom-scrollbar">
+                              {classes.filter(c => c.name.toLowerCase().includes(classSearch.toLowerCase())).length > 0 ? (
+                                classes.filter(c => c.name.toLowerCase().includes(classSearch.toLowerCase())).map((c) => (
+                                  <div 
+                                    key={c.id}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setSelectedClass(c);
+                                      setIsClassSelectOpen(false);
+                                      setClassSearch('');
+                                      handleClassChange(c);
+                                    }}
+                                    className={`p-4 cursor-pointer transition-colors flex items-center justify-between group/item ${selectedClass?.id === c.id ? 'bg-emerald-50' : 'hover:bg-slate-50'}`}
+                                  >
+                                    <div className="flex items-center gap-3">
+                                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${selectedClass?.id === c.id ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-400 group-hover/item:bg-emerald-100 group-hover/item:text-emerald-600'}`}>
+                                        <Layers className="w-4 h-4" />
+                                      </div>
+                                      <div>
+                                        <p className={`font-black text-sm ${selectedClass?.id === c.id ? 'text-emerald-700' : 'text-slate-700'}`}>{c.name}</p>
+                                        <p className="text-[10px] text-slate-400 font-bold">المرحلة الدراسية</p>
+                                      </div>
+                                    </div>
+                                    {c.tuitionFee && (
+                                      <div className="text-left">
+                                        <p className="text-[10px] text-slate-400 font-black">القسط</p>
+                                        <p className="text-xs font-black text-emerald-600">{formatNumber(c.tuitionFee)} IQD</p>
+                                      </div>
+                                    )}
+                                  </div>
+                                ))
+                              ) : (
+                                <div className="p-8 text-center text-slate-400 font-bold text-xs">لا توجد نتائج مطابقة</div>
+                              )}
+                           </div>
+                        </div>
+                      )}
                    </div>
                 </div>
 
-                {displayClassFee !== null && (
-                  <div className="flex items-center gap-3 p-3 bg-white rounded-2xl border border-emerald-100 animate-in fade-in slide-in-from-top-2 duration-300">
-                    <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
-                      <DollarSign className="w-5 h-5 text-emerald-600" />
+                {selectedClass && selectedClass.tuitionFee && (
+                  <div className="flex items-center gap-3 p-4 bg-emerald-600 rounded-2xl border border-emerald-500 shadow-lg shadow-emerald-600/20 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center backdrop-blur-md ring-1 ring-white/30">
+                      <DollarSign className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                      <p className="text-[10px] font-bold text-slate-400">قسط الصف الدراسي الافتراضي</p>
-                      <p className="text-lg font-black text-emerald-700">{formatNumber(displayClassFee)} <span className="text-xs text-slate-400">IQD</span></p>
+                      <p className="text-[10px] font-bold text-emerald-100">قسط الصف الدراسي المعتمد</p>
+                      <p className="text-lg font-black text-white">{formatNumber(selectedClass.tuitionFee)} <span className="text-xs opacity-70">IQD</span></p>
+                    </div>
+                    <div className="mr-auto">
+                       <CheckCircle2 className="w-6 h-6 text-white/40" />
                     </div>
                   </div>
                 )}
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <label className="text-xs font-black text-slate-500 mr-2">اسم الأم <span className="text-red-400">(إجباري)</span></label>
-                <div className="relative">
-                  <User className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                  <input ref={motherNameRef} defaultValue={initialData?.studentProfile?.motherName} type="text" placeholder="اسم الأم الكامل" className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3.5 pr-11 pl-4 focus:border-emerald-500 font-bold outline-none shadow-sm" />
-                </div>
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-xs font-black text-slate-500 mr-2">رقم هاتف ولي الأمر</label>
-                <div className="relative">
-                  <Phone className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                  <input ref={phoneRef} defaultValue={initialData?.phone} type="tel" dir="ltr" placeholder="07XXXXXXXX" className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3.5 pr-11 pl-4 focus:border-emerald-500 font-bold outline-none shadow-sm" />
-                </div>
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <Input 
+                ref={motherNameRef} 
+                defaultValue={initialData?.studentProfile?.motherName} 
+                label="اسم الأم (إجباري)" 
+                placeholder="اسم الأم الكامل" 
+                icon={User} 
+              />
+              <Input 
+                ref={phoneRef} 
+                defaultValue={initialData?.phone} 
+                label="رقم هاتف ولي الأمر" 
+                placeholder="07XXXXXXXX" 
+                icon={Phone} 
+              />
             </div>
 
-            <div className="space-y-1.5">
-              <label className="text-xs font-black text-slate-500 mr-2">الحالة الاجتماعية لولي الأمر</label>
-              <select ref={guardianMaritalStatusRef} defaultValue={initialData?.studentProfile?.guardianMaritalStatus || ''} className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3.5 px-5 focus:border-emerald-500 font-bold appearance-none cursor-pointer outline-none shadow-sm">
-                 <option value="">اختر الحالة الاجتماعية...</option>
-                 <option value="متزوج">متزوج</option>
-                 <option value="أعزب">أعزب</option>
-                 <option value="مطلق">مطلق</option>
-                 <option value="أرمل">أرمل</option>
-                 <option value="منفصل">منفصل</option>
-              </select>
-            </div>
+            <Select 
+              label="الحالة الاجتماعية لولي الأمر" 
+              value={initialData?.studentProfile?.guardianMaritalStatus || ''} 
+              onChange={(val) => {
+                if (guardianMaritalStatusRef.current) guardianMaritalStatusRef.current.value = val;
+              }} 
+              placeholder="اختر الحالة الاجتماعية..."
+              options={[
+                { value: 'متزوج', label: 'متزوج' },
+                { value: 'أعزب', label: 'أعزب' },
+                { value: 'مطلق', label: 'مطلق' },
+                { value: 'أرمل', label: 'أرمل' },
+                { value: 'منفصل', label: 'منفصل' }
+              ]} 
+            />
+            {/* Hidden ref for guardianMaritalStatus */}
+            <input type="hidden" ref={guardianMaritalStatusRef} defaultValue={initialData?.studentProfile?.guardianMaritalStatus || ''} />
         </div>
 
         {/* ═══════════════ STEP 3 ═══════════════ */}
         <div className={`space-y-6 animate-in fade-in slide-in-from-left-6 duration-500 ${step === 3 ? 'block' : 'hidden'}`}>
-            <div className="p-6 bg-amber-50/40 rounded-3xl border border-amber-100/50">
-              <h3 className="text-sm font-black text-amber-800 flex items-center gap-2 mb-2">
+            <div className="p-5 sm:p-6 bg-amber-50/40 rounded-3xl border border-amber-100/50">
+              <h3 className="text-sm font-black text-amber-800 flex items-center gap-2 mb-1">
                   <DollarSign className="w-4 h-4" />
                   البيانات المالية للطالب
               </h3>
-              <p className="text-amber-600 text-[11px] mb-5 font-bold">هذه البيانات اختيارية</p>
+              <p className="text-amber-600 text-[10px] mb-5 font-bold">هذه البيانات اختيارية</p>
               
-              <div className="space-y-5">
-                 <div className="space-y-1.5">
-                    <label className="text-xs font-black text-slate-500 mr-2">قسط الطالب السنوي المخصص</label>
-                    <div className="relative">
-                      <span className="absolute right-4 top-1/2 -translate-y-1/2 font-black text-slate-400 text-xs">IQD</span>
-                      <input 
-                        ref={customTuitionFeeRef} 
-                        defaultValue={initialData?.studentProfile?.customTuitionFee || ''} 
-                        type="number" 
-                        min="0"
-                        placeholder="مثال: 900000" 
-                        className="w-full bg-white border border-slate-200 rounded-2xl py-3.5 pr-14 pl-4 focus:border-amber-500 focus:ring-4 focus:ring-amber-500/5 font-bold outline-none shadow-sm transition-colors" 
-                      />
-                    </div>
-                 </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                 <Input 
+                   ref={customTuitionFeeRef} 
+                   defaultValue={initialData?.studentProfile?.customTuitionFee || ''} 
+                   type="number" 
+                   label="قسط الطالب السنوي المخصص" 
+                   placeholder="مثال: 900000" 
+                   dir="ltr"
+                 />
+                 <Input 
+                   ref={discountAmountRef} 
+                   defaultValue={initialData?.studentProfile?.discountAmount || ''} 
+                   type="number" 
+                   label="مبلغ الخصم" 
+                   placeholder="مثال: 100000" 
+                   dir="ltr"
+                 />
+              </div>
 
-                 <div className="space-y-1.5">
-                    <label className="text-xs font-black text-slate-500 mr-2">مبلغ الخصم</label>
-                    <div className="relative">
-                      <span className="absolute right-4 top-1/2 -translate-y-1/2 font-black text-slate-400 text-xs">IQD</span>
-                      <input 
-                        ref={discountAmountRef} 
-                        defaultValue={initialData?.studentProfile?.discountAmount || ''} 
-                        type="number" 
-                        min="0"
-                        placeholder="مثال: 100000" 
-                        className="w-full bg-white border border-slate-200 rounded-2xl py-3.5 pr-14 pl-4 focus:border-amber-500 focus:ring-4 focus:ring-amber-500/5 font-bold outline-none shadow-sm transition-colors" 
-                      />
-                    </div>
-                 </div>
-
-                 <div className="space-y-1.5">
-                    <label className="text-xs font-black text-slate-500 mr-2">سبب الخصم</label>
-                    <div className="relative">
-                      <FileText className="absolute right-4 top-4 w-4 h-4 text-slate-400" />
-                      <textarea 
-                        ref={discountNotesRef} 
-                        defaultValue={initialData?.studentProfile?.discountNotes || ''} 
-                        placeholder="..." 
-                        className="w-full bg-white border border-slate-200 rounded-2xl py-3.5 pr-11 pl-4 focus:border-amber-500 focus:ring-4 focus:ring-amber-500/5 font-bold outline-none shadow-sm min-h-[90px] resize-none transition-colors"
-                      />
-                    </div>
-                 </div>
+              <div className="mt-5 space-y-1.5">
+                <label className="text-xs font-black text-slate-500 mr-2">سبب الخصم</label>
+                <div className="relative">
+                  <FileText className="absolute right-4 top-4 w-4 h-4 text-slate-400" />
+                  <textarea 
+                    ref={discountNotesRef} 
+                    defaultValue={initialData?.studentProfile?.discountNotes || ''} 
+                    placeholder="..." 
+                    className="w-full bg-white border border-slate-200 rounded-2xl py-3.5 pr-11 pl-4 focus:border-amber-500 focus:ring-4 focus:ring-amber-500/5 font-bold outline-none shadow-sm min-h-[90px] resize-none transition-colors"
+                  />
+                </div>
               </div>
             </div>
 
-            {/* Financial Summary Preview - Optimized: No ref access in render body */}
-            {displayClassFee !== null && (
+            {selectedClass && selectedClass.tuitionFee && (
               <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 space-y-2">
-                <h4 className="text-xs font-black text-slate-500">ملخص مالي</h4>
-                <div className="flex items-center justify-between text-sm">
+                <h4 className="text-[11px] font-black text-slate-500">ملخص مالي</h4>
+                <div className="flex items-center justify-between text-xs sm:text-sm">
                   <span className="text-slate-400 font-bold">قسط الصف</span>
-                  <span className="font-black text-slate-600">{`${formatNumber(displayClassFee)} IQD`}</span>
+                  <span className="font-black text-slate-600">{`${formatNumber(selectedClass.tuitionFee)} IQD`}</span>
                 </div>
               </div>
             )}
@@ -350,41 +403,53 @@ const AddStudentForm = memo(function AddStudentForm({
       </form>
 
       {/* Actions & Feedback */}
-      <div className="p-8 pt-0 space-y-4">
+      <div className="p-8 sm:p-10 pb-10 pt-6 border-t border-slate-50 bg-slate-50/30 shrink-0 space-y-4">
         {(validationError || error) && (
-          <div className="p-4 bg-red-50 text-red-600 rounded-2xl font-black flex items-center gap-3 border border-red-100 animate-shake">
+          <div className="p-3.5 bg-rose-50 text-rose-600 rounded-2xl text-xs font-black flex items-center gap-3 border border-rose-100 animate-shake">
             <XCircle className="w-4 h-4 flex-shrink-0" />
             <span>{validationError || translateError(error)}</span>
           </div>
         )}
 
-        <div className="flex items-center gap-3">
-          <button 
-            type="button" 
-            onClick={() => step > 1 ? setStep(step - 1) : onCancel()} 
-            className="flex-1 py-4 bg-slate-100 text-slate-500 rounded-2xl font-black transition-colors hover:bg-slate-200"
+        <div className="flex flex-col sm:flex-row items-center gap-3">
+          <Button 
+            variant="secondary" 
+            className="w-full sm:w-1/3"
+            onClick={() => step > 1 ? setStep(step - 1) : onCancel()}
           >
             {step > 1 ? 'العودة للخلف' : 'إلغاء العملية'}
-          </button>
-          <button 
-            type="button"
+          </Button>
+          <Button 
+            variant="emerald" 
+            loading={loading || isVerifying}
             onClick={() => {
               if (step === 1) handleNext();
               else if (step === 2) handleNextToFinancial();
               else handleSubmitInternal();
             }} 
             disabled={loading || isVerifying} 
-            className="flex-[2] py-4 bg-emerald-600 text-white rounded-2xl font-black shadow-xl shadow-emerald-600/30 hover:bg-emerald-700 hover:shadow-emerald-600/50 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full sm:w-2/3 py-3.5 bg-emerald-600 text-white rounded-2xl font-black text-sm shadow-xl shadow-emerald-600/20 hover:bg-emerald-700 hover:shadow-emerald-600/50 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {(loading || isVerifying) ? <Loader2 className="w-4 h-4 animate-spin" /> : 
              (step < totalSteps ? 'الخطوة التالية' : (initialData ? 'تحديث بيانات الطالب' : 'تسجيل الطالب الجديد'))}
-          </button>
+          </Button>
         </div>
       </div>
 
       <style jsx>{`
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: #f8fafc;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: #e2e8f0;
+          border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: #cbd5e1;
+        }
         @keyframes shake {
           0%, 100% { transform: translateX(0); }
           25% { transform: translateX(-4px); }

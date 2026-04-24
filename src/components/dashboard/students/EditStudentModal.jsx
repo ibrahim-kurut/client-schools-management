@@ -56,7 +56,7 @@ const EditStudentModal = memo(function EditStudentModal({ isOpen, onClose, stude
   if (!isOpen || !student) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-6 sm:p-10">
       {/* Backdrop - Optimized: Removed backdrop-blur for performance */}
       <div 
         className="absolute inset-0 bg-slate-900/50 backdrop-blur-none transition-opacity duration-300"
@@ -65,7 +65,7 @@ const EditStudentModal = memo(function EditStudentModal({ isOpen, onClose, stude
       
       {/* Modal Content */}
       <div 
-        className="relative bg-white rounded-[2.5rem] w-full max-w-2xl overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200" 
+        className="relative bg-white rounded-[2.5rem] w-full max-w-2xl overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200 flex flex-col max-h-[85vh]" 
         dir="rtl"
       >
         {/* Header */}
@@ -90,14 +90,16 @@ const EditStudentModal = memo(function EditStudentModal({ isOpen, onClose, stude
         </div>
 
         {/* Dedicated Student Form with stabilized initial data */}
-        <AddStudentForm 
-          initialData={memoizedInitialData}
-          onSubmit={handleSubmit}
-          onCancel={onClose}
-          loading={createStatus === 'loading'}
-          error={createError}
-          classes={classes}
-        />
+        <div className="flex-1 overflow-hidden min-h-0 flex flex-col">
+          <AddStudentForm 
+            initialData={memoizedInitialData}
+            onSubmit={handleSubmit}
+            onCancel={onClose}
+            loading={createStatus === 'loading'}
+            error={createError}
+            classes={classes}
+          />
+        </div>
       </div>
     </div>
   );

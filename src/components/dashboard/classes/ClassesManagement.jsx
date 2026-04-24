@@ -5,6 +5,7 @@ import { Plus, Edit2, Trash2, Users, Loader2 } from 'lucide-react';
 import ClassModal from './ClassModal';
 import Swal from 'sweetalert2';
 import { fetchClasses, createClass, updateClass, deleteClass } from '@/redux/slices/classesSlice';
+import Button from '@/components/ui/Button';
 
 export default function ClassesManagement({ slug }) {
   const dispatch = useDispatch();
@@ -131,18 +132,18 @@ export default function ClassesManagement({ slug }) {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center bg-white p-6 rounded-[32px] shadow-sm border border-slate-100">
-        <div>
-          <h1 className="text-2xl font-black text-slate-800">إدارة الصفوف والمراحل</h1>
-          <p className="text-slate-500 font-semibold mt-1">عرض وإدارة المراحل الدراسية والرسوم</p>
+      <div className="flex flex-col sm:flex-row justify-between items-center bg-white p-6 sm:p-8 rounded-[32px] shadow-sm border border-slate-100 gap-6">
+        <div className="text-center sm:text-right">
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-800">إدارة الصفوف والمراحل</h1>
+          <p className="text-slate-500 font-bold mt-1 text-sm sm:text-base">عرض وإدارة المراحل الدراسية والرسوم</p>
         </div>
-        <button 
+        <Button 
           onClick={handleAddClick}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-2xl font-bold flex items-center gap-2 transition-colors shadow-lg shadow-blue-600/20"
+          icon={Plus}
+          className="w-full sm:w-auto"
         >
-          <Plus className="w-5 h-5" />
-          <span>إضافة صف جديد</span>
-        </button>
+          إضافة صف جديد
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

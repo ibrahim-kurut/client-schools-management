@@ -46,35 +46,37 @@ const AddStudentModal = memo(function AddStudentModal({ isOpen, onClose }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Backdrop - Optimized: Removed backdrop-blur for performance */}
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-6 sm:p-10">
+      {/* Backdrop */}
       <div 
-        className="absolute inset-0 bg-slate-900/40 backdrop-blur-none transition-opacity duration-300"
+        className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity duration-300"
         onClick={onClose}
       />
       
       {/* Modal Content */}
       <div 
-        className="relative bg-white rounded-[2.5rem] w-full max-w-2xl overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200" 
+        className="relative bg-white rounded-[2rem] sm:rounded-[2.5rem] w-full max-w-2xl overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300 flex flex-col max-h-[85vh]" 
         dir="rtl"
       >
         {/* Header */}
-        <div className="bg-gradient-to-r from-emerald-600 to-teal-700 p-7 text-white flex items-center justify-between relative overflow-hidden">
-          <div className="flex items-center gap-4 relative z-10">
-            <div className="w-14 h-14 rounded-2xl bg-white/15 flex items-center justify-center ring-1 ring-white/25">
-              <GraduationCap className="w-7 h-7" />
+        <div className="bg-gradient-to-r from-emerald-600 to-teal-700 p-5 sm:p-7 text-white relative overflow-hidden shrink-0">
+          <div className="relative z-20 flex items-center justify-between">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-white/15 flex items-center justify-center ring-1 ring-white/25">
+                <GraduationCap className="w-5 h-5 sm:w-7 sm:h-7" />
+              </div>
+              <div>
+                <h2 className="text-lg sm:text-xl font-black mb-0.5">تسجيل طالب جديد</h2>
+                <p className="text-emerald-100/80 text-[10px] font-bold">أدخل بيانات الطالب الشخصية والأكاديمية والمالية</p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-xl font-black mb-1">تسجيل طالب جديد</h2>
-              <p className="text-emerald-100/80 text-[10px] font-bold">أدخل بيانات الطالب الشخصية والأكاديمية والمالية</p>
-            </div>
+            <button 
+              onClick={onClose}
+              className="w-10 h-10 sm:w-11 sm:h-11 bg-white/10 hover:bg-white/20 rounded-xl sm:rounded-2xl flex items-center justify-center transition-all relative z-20"
+            >
+              <X className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+            </button>
           </div>
-          <button 
-            onClick={onClose}
-            className="w-11 h-11 bg-white/10 hover:bg-white/20 rounded-2xl flex items-center justify-center transition-all relative z-10"
-          >
-            <X className="w-5 h-5 text-white" />
-          </button>
           
           {/* Decorative shapes */}
           <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 blur-2xl"></div>
@@ -82,13 +84,15 @@ const AddStudentModal = memo(function AddStudentModal({ isOpen, onClose }) {
         </div>
 
         {/* Dedicated Student Form */}
-        <AddStudentForm 
-          onSubmit={handleSubmit}
-          onCancel={onClose}
-          loading={createStatus === 'loading'}
-          error={createError}
-          classes={classes}
-        />
+        <div className="flex-1 overflow-hidden min-h-0 flex flex-col">
+          <AddStudentForm 
+            onSubmit={handleSubmit}
+            onCancel={onClose}
+            loading={createStatus === 'loading'}
+            error={createError}
+            classes={classes}
+          />
+        </div>
       </div>
     </div>
   );
