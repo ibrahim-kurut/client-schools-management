@@ -85,7 +85,7 @@ const AddStudentForm = memo(function AddStudentForm({
     }
 
     setStep(2);
-  }, [setStep]);
+  }, [initialData, dispatch, setStep]);
 
   // --- Step 2 Validation ---
   const handleNextToFinancial = useCallback(() => {
@@ -98,7 +98,7 @@ const AddStudentForm = memo(function AddStudentForm({
     
     setValidationError('');
     setStep(3);
-  }, [setStep]);
+  }, [selectedClass, setStep]);
 
   // --- Final Submit ---
   const handleSubmitInternal = useCallback((e) => {

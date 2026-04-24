@@ -62,7 +62,7 @@ const AddMemberForm = memo(function AddMemberForm({
     
     setValidationError('');
     setStep(2);
-  }, [setStep]);
+  }, [initialData, setStep]);
 
   const handleSubmitInternal = useCallback((e) => {
     if (e && e.preventDefault) e.preventDefault();
