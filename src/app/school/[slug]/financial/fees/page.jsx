@@ -23,17 +23,17 @@ export default function StudentFeesPage() {
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-3">
-            <button className="flex items-center gap-2 bg-white text-slate-700 px-6 py-3 rounded-2xl font-bold transition-all shadow-sm border border-slate-100 hover:bg-slate-50 cursor-pointer">
-                <Download className="w-5 h-5 text-blue-600" />
-                تحميل كشف الرسوم
+        <div className="grid grid-cols-2 md:flex md:flex-wrap gap-2 md:gap-3 w-full md:w-auto mt-4 md:mt-0">
+            <button className="flex items-center justify-center gap-1.5 bg-white text-slate-700 px-2 md:px-6 py-3 rounded-2xl font-bold text-[14px] sm:text-[15px] md:text-base transition-all shadow-sm border border-slate-100 hover:bg-slate-50 cursor-pointer">
+                <Download className="w-4 h-4 md:w-5 md:h-5 text-blue-600 shrink-0" />
+                <span className="truncate">تحميل كشف الرسوم</span>
             </button>
             <button 
                 onClick={() => setIsPaymentModalOpen(true)}
-                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-2xl font-bold transition-all shadow-lg shadow-blue-600/30 hover:-translate-y-0.5 cursor-pointer"
+                className="flex items-center justify-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white px-2 md:px-6 py-3 rounded-2xl font-bold text-[14px] sm:text-[15px] md:text-base transition-all shadow-lg shadow-blue-600/30 hover:-translate-y-0.5 cursor-pointer"
             >
-                <Plus className="w-5 h-5" />
-                تسجيل دفعة جديدة
+                <Plus className="w-4 h-4 md:w-5 md:h-5 shrink-0" />
+                <span className="truncate">تسجيل دفعة جديدة</span>
             </button>
         </div>
       </div>

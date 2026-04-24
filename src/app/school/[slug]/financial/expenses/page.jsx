@@ -71,17 +71,17 @@ export default function ExpensesPage() {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-wrap items-center gap-4 w-full md:w-auto">
-            <button className="flex-1 md:flex-none flex items-center justify-center gap-3 bg-white text-slate-700 px-8 py-4 rounded-[1.5rem] font-black transition-all shadow-sm border border-slate-100 hover:bg-slate-50 hover:shadow-md active:scale-95">
-                <Download className="w-5 h-5 text-emerald-600" />
-                تصدير السجل
+        <div className="grid grid-cols-2 md:flex md:flex-wrap items-center gap-2 md:gap-4 w-full md:w-auto mt-4 md:mt-0">
+            <button className="flex items-center justify-center gap-1.5 md:gap-3 bg-white text-slate-700 px-2 md:px-8 py-3.5 md:py-4 rounded-[1.5rem] font-black text-[16px] sm:text-xs md:text-base transition-all shadow-sm border border-slate-100 hover:bg-slate-50 hover:shadow-md active:scale-95">
+                <Download className="w-4 h-4 md:w-5 md:h-5 text-emerald-600 shrink-0" />
+                <span>تصدير السجل</span>
             </button>
             <button 
               onClick={handleOpenAddModal}
-              className="flex-1 md:flex-none flex items-center justify-center gap-3 bg-emerald-600 hover:bg-emerald-700 text-white px-10 py-4 rounded-[1.5rem] font-black transition-all shadow-xl shadow-emerald-600/30 hover:-translate-y-1 active:scale-95"
+              className="flex items-center justify-center gap-1.5 md:gap-3 bg-emerald-600 hover:bg-emerald-700 text-white px-2 md:px-10 py-3.5 md:py-4 rounded-[1.5rem] font-black text-[16px] sm:text-xs md:text-base transition-all shadow-xl shadow-emerald-600/30 hover:-translate-y-1 active:scale-95"
             >
-                <Plus className="w-6 h-6" />
-                إضافة مصروف جديد
+                <Plus className="w-4 h-4 md:w-6 md:h-6 shrink-0" />
+                <span>إضافة مصروف جديد</span>
             </button>
         </div>
       </div>

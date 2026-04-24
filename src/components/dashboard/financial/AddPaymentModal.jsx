@@ -3,6 +3,7 @@ import React, { useState, useCallback, useEffect, memo, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { X, CreditCard, CheckCircle2, User, Calendar, FileText, ChevronDown, BookOpen, Bus, Shirt, Search, Loader2, Printer, CheckCircle } from 'lucide-react';
 import { fetchStudentsSummary, createPayment, resetCreateStatus } from '../../../redux/slices/feesSlice';
+import Select from '../../ui/Select';
 
 // Map payment type to arabic label
 const paymentTypeLabels = {
@@ -506,16 +507,14 @@ const AddPaymentModal = memo(function AddPaymentModal({ isOpen, onClose }) {
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-700">حالة الدفعة</label>
                   <div className="relative">
-                    <select 
-                      name="status"
+                    <Select 
                       value={formData.status}
-                      onChange={handleChange}
-                      className="w-full bg-white border border-slate-200 rounded-2xl py-3 pr-4 pl-10 text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm appearance-none"
-                    >
-                      <option value="COMPLETED">مكتملة (تم استلام المبلغ)</option>
-                      <option value="PENDING">معلقة (قيد المعالجة / شيك)</option>
-                    </select>
-                    <ChevronDown className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                      onChange={(val) => setFormData(prev => ({ ...prev, status: val }))}
+                      options={[
+                        { value: 'COMPLETED', label: 'مكتملة (تم استلام المبلغ)' },
+                        { value: 'PENDING', label: 'معلقة (قيد المعالجة / شيك)' }
+                      ]}
+                    />
                   </div>
                 </div>
 

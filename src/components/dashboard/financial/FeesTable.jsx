@@ -6,6 +6,7 @@ import { fetchStudentsSummary } from '../../../redux/slices/feesSlice';
 import { fetchClasses } from '../../../redux/slices/classesSlice';
 import Pagination from '../../ui/Pagination';
 import SearchInput from '../../ui/SearchInput';
+import Select from '../../ui/Select';
 
 export default function FeesTable() {
   const dispatch = useDispatch();
@@ -78,21 +79,20 @@ export default function FeesTable() {
         />
 
         {/* Filters */}
-        <div className="w-full md:w-auto flex flex-wrap items-center gap-3">
-          <div className="relative">
-            <Filter className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <select 
+          <div className="w-full md:w-48">
+            <Select 
               value={classFilter}
-              onChange={handleFilterChange}
-              className="appearance-none bg-slate-50 border border-slate-200 text-slate-700 rounded-2xl py-3 pr-10 pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500/20 font-medium cursor-pointer transition-all hover:bg-slate-100"
-            >
-              <option value="ALL">جميع الصفوف</option>
-              {classes.map(c => (
-                <option key={c.id} value={c.name}>{c.name}</option>
-              ))}
-            </select>
+              onChange={(val) => {
+                setClassFilter(val);
+                setCurrentPage(1);
+              }}
+              options={[
+                { value: 'ALL', label: 'جميع الصفوف' },
+                ...classes.map(c => ({ value: c.name, label: c.name }))
+              ]}
+              placeholder="اختر الصف..."
+            />
           </div>
-        </div>
       </div>
 
       {/* ─── Data Table ─── */}
