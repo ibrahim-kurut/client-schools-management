@@ -8,7 +8,7 @@ export default function SubjectsModal({ isOpen, onClose, onSave, initialData, cl
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-6 sm:p-10">
       {/* Backdrop */}
       <div 
         className="absolute inset-0 bg-slate-900/80 transition-opacity duration-300"
@@ -17,7 +17,7 @@ export default function SubjectsModal({ isOpen, onClose, onSave, initialData, cl
       
       {/* Modal Content */}
       <div 
-        className="relative bg-white rounded-[2.5rem] w-full max-w-2xl overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300 flex flex-col max-h-[90vh]" 
+        className="relative bg-white rounded-[2.5rem] w-full max-w-2xl overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300 flex flex-col max-h-[85vh]" 
         dir="rtl"
       >
         {/* Header */}
@@ -47,7 +47,7 @@ export default function SubjectsModal({ isOpen, onClose, onSave, initialData, cl
         </div>
 
         {/* Reusable Form Component */}
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 overflow-hidden min-h-0 flex flex-col">
           <AddSubjectForm 
             onSubmit={onSave}
             onCancel={onClose}

@@ -3,11 +3,13 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   Upload, FileSpreadsheet, Download, X, CheckCircle2,
-  AlertCircle, Loader2, Users, ChevronDown, Info
+  AlertCircle, Loader2, Users, Info
 } from 'lucide-react';
 import { bulkImportStudents, resetImportStatus, fetchStudents } from '../../../redux/slices/studentsSlice';
 import { fetchClasses } from '../../../redux/slices/classesSlice';
 import Swal from 'sweetalert2';
+import Select from '../../ui/Select';
+import Button from '../../ui/Button';
 
 export default function BulkStudentImport({ isOpen, onClose }) {
   const dispatch = useDispatch();
@@ -57,7 +59,7 @@ export default function BulkStudentImport({ isOpen, onClose }) {
         text: 'يرجى رفع ملف بصيغة Excel (.xlsx) أو CSV (.csv) فقط.',
         icon: 'error',
         confirmButtonText: 'حسناً',
-        confirmButtonColor: '#2563eb',
+        confirmButtonColor: '#059669',
         customClass: { popup: 'rounded-[2rem] font-sans' }
       });
       return;
@@ -69,7 +71,7 @@ export default function BulkStudentImport({ isOpen, onClose }) {
         text: 'الحد الأقصى لحجم الملف هو 5 ميجابايت.',
         icon: 'error',
         confirmButtonText: 'حسناً',
-        confirmButtonColor: '#2563eb',
+        confirmButtonColor: '#059669',
         customClass: { popup: 'rounded-[2rem] font-sans' }
       });
       return;
@@ -85,7 +87,7 @@ export default function BulkStudentImport({ isOpen, onClose }) {
   // --- Drag & Drop ---
   const handleDragOver = useCallback((e) => {
     e.preventDefault();
-    if (!isDragging) setIsDragging(true); // Optimize to stop continuous state updates
+    if (!isDragging) setIsDragging(true);
   }, [isDragging]);
 
   const handleDragLeave = useCallback((e) => {
@@ -121,7 +123,7 @@ export default function BulkStudentImport({ isOpen, onClose }) {
         text: 'تعذر تحميل النموذج. حاول مرة أخرى.',
         icon: 'error',
         confirmButtonText: 'حسناً',
-        confirmButtonColor: '#2563eb',
+        confirmButtonColor: '#059669',
         customClass: { popup: 'rounded-[2rem] font-sans' }
       });
     }
@@ -135,7 +137,7 @@ export default function BulkStudentImport({ isOpen, onClose }) {
         text: 'يرجى اختيار الصف الدراسي أولاً قبل رفع الملف.',
         icon: 'warning',
         confirmButtonText: 'حسناً',
-        confirmButtonColor: '#2563eb',
+        confirmButtonColor: '#059669',
         customClass: { popup: 'rounded-[2rem] font-sans' }
       });
       return;
@@ -146,7 +148,7 @@ export default function BulkStudentImport({ isOpen, onClose }) {
         text: 'يرجى اختيار ملف Excel أو CSV لرفعه.',
         icon: 'warning',
         confirmButtonText: 'حسناً',
-        confirmButtonColor: '#2563eb',
+        confirmButtonColor: '#059669',
         customClass: { popup: 'rounded-[2rem] font-sans' }
       });
       return;
@@ -178,37 +180,36 @@ export default function BulkStudentImport({ isOpen, onClose }) {
 
   if (!isOpen) return null;
 
-  const selectedClassName = classes.find(c => c.id === selectedClassId)?.name || '';
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Backdrop - Removed backdrop-blur-sm as it causes massive rendering lag on some machines */}
-      <div className="absolute inset-0 bg-slate-900/60" onClick={onClose} />
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={onClose} />
 
       {/* Modal */}
-      <div className="relative bg-white rounded-[2rem] w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+      <div className="relative bg-white rounded-[2rem] w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl animate-in fade-in zoom-in-95 duration-300">
 
         {/* Header */}
         <div className="bg-gradient-to-br from-emerald-600 to-teal-700 rounded-t-[2rem] p-8 text-white relative overflow-hidden">
-          {/* Reduced blur intensity from 2xl/xl to md/lg to prevent graphics rendering lag */}
           <div className="absolute -right-6 -top-6 w-32 h-32 bg-white/10 rounded-full blur-md"></div>
           <div className="absolute -left-6 -bottom-6 w-24 h-24 bg-white/10 rounded-full blur-md"></div>
           <div className="relative z-10 flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center">
+              <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-md">
                 <FileSpreadsheet className="w-7 h-7" />
               </div>
               <div>
-                <h2 className="text-2xl font-black">استيراد الطلاب من ملف إكسل</h2>
-                <p className="text-emerald-100 font-medium mt-1">رفع جماعي سريع لبيانات الطلاب</p>
+                <h2 className="text-2xl font-black">استيراد جماعي للطلاب</h2>
+                <p className="text-emerald-100 font-medium mt-1">رفع بيانات الطلاب من ملف إكسل</p>
               </div>
             </div>
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={onClose}
-              className="w-10 h-10 bg-white/20 hover:bg-white/30 rounded-xl flex items-center justify-center transition-colors cursor-pointer"
+              className="text-white hover:bg-white/20 w-10 h-10 p-0"
             >
               <X className="w-5 h-5" />
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -218,30 +219,23 @@ export default function BulkStudentImport({ isOpen, onClose }) {
           {/* الخطوة 1: اختيار الصف */}
           <div>
             <label className="flex items-center gap-2 text-slate-700 font-bold text-lg mb-3">
-              <span className="w-8 h-8 bg-emerald-100 text-emerald-700 rounded-xl flex items-center justify-center text-sm font-black">1</span>
-              اختر الصف الدراسي
+              <span className="w-8 h-8 bg-emerald-600 text-white rounded-xl flex items-center justify-center text-sm font-black shadow-lg shadow-emerald-600/20">1</span>
+              اختر الصف الدراسي الموجه إليه
             </label>
-            <div className="relative">
-              <select
-                value={selectedClassId}
-                onChange={(e) => setSelectedClassId(e.target.value)}
-                className="w-full appearance-none bg-slate-50 border-2 border-slate-200 text-slate-700 rounded-2xl py-4 px-5 pr-12 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 font-bold cursor-pointer transition-all hover:bg-slate-100 text-base"
-                disabled={importStatus === 'loading'}
-              >
-                <option value="">— اختر الصف —</option>
-                {classes.map((c) => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
-                ))}
-              </select>
-              <ChevronDown className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none" />
-            </div>
+            <Select
+              value={selectedClassId}
+              onChange={setSelectedClassId}
+              placeholder="اختر الصف الدراسي..."
+              disabled={importStatus === 'loading'}
+              options={classes.map(c => ({ value: c.id, label: c.name }))}
+            />
           </div>
 
           {/* الخطوة 2: رفع الملف */}
           <div>
             <label className="flex items-center gap-2 text-slate-700 font-bold text-lg mb-3">
-              <span className="w-8 h-8 bg-emerald-100 text-emerald-700 rounded-xl flex items-center justify-center text-sm font-black">2</span>
-              ارفع ملف الإكسل
+              <span className="w-8 h-8 bg-emerald-600 text-white rounded-xl flex items-center justify-center text-sm font-black shadow-lg shadow-emerald-600/20">2</span>
+              ارفع ملف الإكسل (XLSX, CSV)
             </label>
 
             {!selectedFile ? (
@@ -251,10 +245,10 @@ export default function BulkStudentImport({ isOpen, onClose }) {
                 onDrop={handleDrop}
                 onClick={() => fileInputRef.current?.click()}
                 className={`
-                  border-2 border-dashed rounded-2xl p-10 text-center cursor-pointer transition-all duration-200
+                  border-2 border-dashed rounded-3xl p-12 text-center cursor-pointer transition-all duration-300 group
                   ${isDragging
-                    ? 'border-emerald-500 bg-emerald-50 scale-[1.02]'
-                    : 'border-slate-300 bg-slate-50 hover:border-emerald-400 hover:bg-emerald-50/50'
+                    ? 'border-emerald-500 bg-emerald-50/50 scale-[1.01]'
+                    : 'border-slate-200 bg-slate-50/50 hover:border-emerald-400 hover:bg-emerald-50/30'
                   }
                 `}
               >
@@ -265,130 +259,133 @@ export default function BulkStudentImport({ isOpen, onClose }) {
                   onChange={handleInputChange}
                   className="hidden"
                 />
-                <div className={`w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center transition-colors ${isDragging ? 'bg-emerald-200 text-emerald-700' : 'bg-slate-200 text-slate-500'}`}>
-                  <Upload className="w-8 h-8" />
+                <div className={`w-20 h-20 mx-auto mb-6 rounded-2xl flex items-center justify-center transition-all duration-500 ${isDragging ? 'bg-emerald-600 text-white shadow-2xl shadow-emerald-600/40' : 'bg-slate-200 text-slate-400 group-hover:bg-emerald-100 group-hover:text-emerald-600'}`}>
+                  <Upload className={`w-10 h-10 ${isDragging ? 'animate-bounce' : ''}`} />
                 </div>
-                <p className="text-slate-600 font-bold text-lg mb-1">
-                  {isDragging ? 'أفلت الملف هنا' : 'اسحب الملف هنا أو اضغط للاختيار'}
+                <p className="text-slate-700 font-black text-xl mb-2">
+                  {isDragging ? 'أفلت الملف هنا الآن' : 'اسحب الملف هنا أو اضغط للاختيار'}
                 </p>
-                <p className="text-slate-400 text-sm font-medium">
-                  الصيغ المدعومة: XLSX, CSV • الحد الأقصى: 5MB • حتى 100 طالب
+                <p className="text-slate-400 text-sm font-bold max-w-xs mx-auto">
+                  تأكد من مطابقة الملف للنموذج المعتمد لضمان الاستيراد الصحيح
                 </p>
               </div>
             ) : (
-              <div className="bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-5 flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-emerald-200 text-emerald-700 rounded-xl flex items-center justify-center">
-                    <FileSpreadsheet className="w-6 h-6" />
+              <div className="bg-emerald-50/50 border-2 border-emerald-100 rounded-3xl p-6 flex items-center justify-between group animate-in slide-in-from-top-2">
+                <div className="flex items-center gap-5">
+                  <div className="w-16 h-16 bg-emerald-600 text-white rounded-2xl flex items-center justify-center shadow-xl shadow-emerald-600/20">
+                    <FileSpreadsheet className="w-8 h-8" />
                   </div>
                   <div>
-                    <p className="font-bold text-slate-800">{selectedFile.name}</p>
-                    <p className="text-slate-500 text-sm font-medium">
-                      {(selectedFile.size / 1024).toFixed(1)} KB
+                    <p className="font-black text-slate-800 text-lg">{selectedFile.name}</p>
+                    <p className="text-emerald-600 text-xs font-black uppercase tracking-wider">
+                      {(selectedFile.size / 1024).toFixed(1)} KB • جاهز للرفع
                     </p>
                   </div>
                 </div>
-                <button
+                <Button
+                  variant="danger"
+                  size="sm"
                   onClick={handleRemoveFile}
-                  className="w-10 h-10 bg-red-100 text-red-600 hover:bg-red-200 rounded-xl flex items-center justify-center transition-colors cursor-pointer"
                   disabled={importStatus === 'loading'}
+                  className="w-12 h-12 p-0 rounded-2xl"
                 >
                   <X className="w-5 h-5" />
-                </button>
+                </Button>
               </div>
             )}
           </div>
 
           {/* معلومات مساعدة */}
-          <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4 flex gap-3">
-            <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-            <div className="text-sm text-blue-700 font-medium">
-              <p className="font-bold mb-1">تلميحات مهمة:</p>
-              <ul className="space-y-1 list-disc list-inside text-blue-600">
-                <li>الأعمدة الإجبارية: <span className="font-mono font-bold">firstName</span>, <span className="font-mono font-bold">lastName</span>, <span className="font-mono font-bold">parentPhone</span>, <span className="font-mono font-bold">birthDate</span>, <span className="font-mono font-bold">gender</span></li>
-                <li>الأعمدة الاختيارية: <span className="font-mono font-bold">studentCode</span>, <span className="font-mono font-bold">motherName</span>, <span className="font-mono font-bold">guardianMaritalStatus</span></li>
-                <li>رقم الهاتف يجب أن يتكون من 10 أو 11 رقماً (مثال: 0770936701)</li>
-                <li>الجنس: اكتب <span className="font-mono font-bold">ذكر</span> أو <span className="font-mono font-bold">أنثى</span> (أو MALE / FEMALE)</li>
-                <li>تاريخ الميلاد بصيغة: <span className="font-mono font-bold">YYYY-MM-DD</span> (مثال: 2012-05-15)</li>
-                <li>كلمة مرور الطالب ستكون رقم هاتف ولي الأمر</li>
+          <div className="bg-slate-50 border-2 border-slate-100 rounded-3xl p-6 flex gap-4">
+            <Info className="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" />
+            <div className="text-sm text-slate-600 font-bold leading-relaxed">
+              <p className="text-slate-900 font-black mb-2 flex items-center gap-2">
+                 تلميحات هامة لضمان نجاح الاستيراد:
+              </p>
+              <ul className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1 list-none">
+                <li className="flex items-center gap-2 text-[11px]"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> الأعمدة الإجبارية: firstName, lastName</li>
+                <li className="flex items-center gap-2 text-[11px]"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> رقم الهاتف: 10 أو 11 رقماً</li>
+                <li className="flex items-center gap-2 text-[11px]"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> التاريخ: YYYY-MM-DD</li>
+                <li className="flex items-center gap-2 text-[11px]"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> الجنس: ذكر / أنثى</li>
               </ul>
             </div>
           </div>
 
           {/* رسائل الأخطاء */}
           {importStatus === 'failed' && (
-            <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-5 space-y-3">
-              <div className="flex items-center gap-2 text-red-700 font-bold">
-                <AlertCircle className="w-5 h-5" />
-                {importError}
+            <div className="bg-red-50 border-2 border-red-100 rounded-3xl p-6 space-y-4 animate-in shake duration-500">
+              <div className="flex items-center gap-3 text-red-700 font-black">
+                <AlertCircle className="w-6 h-6" />
+                <span>عذراً، حدثت أخطاء أثناء الاستيراد</span>
               </div>
+              <p className="text-red-600 text-xs font-bold px-9">{importError}</p>
               {importErrors.length > 0 && (
-                <ul className="space-y-1 text-red-600 text-sm font-medium max-h-40 overflow-y-auto pr-2">
-                  {importErrors.map((err, i) => (
-                    <li key={i} className="flex items-start gap-2">
-                      <span className="text-red-400 mt-0.5">•</span>
-                      {err}
-                    </li>
+                <div className="bg-white/50 rounded-2xl p-4 max-h-40 overflow-y-auto custom-scrollbar border border-red-100">
+                   {importErrors.map((err, i) => (
+                    <div key={i} className="text-[11px] text-red-500 font-bold flex items-start gap-2 mb-1.5 last:mb-0">
+                       <span className="w-1 h-1 rounded-full bg-red-400 mt-1.5 shrink-0"></span>
+                       {err}
+                    </div>
                   ))}
-                </ul>
+                </div>
               )}
-            </div>
-          )}
-
-          {/* رسالة النجاح */}
-          {importStatus === 'succeeded' && (
-            <div className="bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-5 flex items-center gap-3 text-emerald-700 font-bold">
-              <CheckCircle2 className="w-6 h-6" />
-              تم استيراد الطلاب بنجاح!
             </div>
           )}
         </div>
 
         {/* Footer */}
-        <div className="border-t border-slate-100 p-6 flex flex-col sm:flex-row items-center gap-3 justify-between bg-slate-50/50 rounded-b-[2rem]">
-          <button
+        <div className="border-t border-slate-50 p-8 flex flex-col sm:flex-row items-center gap-4 justify-between bg-slate-50/30 rounded-b-[2rem]">
+          <Button
+            variant="outline"
             onClick={handleDownloadTemplate}
-            className="flex items-center gap-2 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-5 py-3 rounded-2xl font-bold transition-all cursor-pointer border border-emerald-200"
             disabled={importStatus === 'loading'}
+            icon={Download}
           >
-            <Download className="w-5 h-5" />
-            تحميل النموذج الفارغ
-          </button>
+            تحميل النموذج
+          </Button>
 
-          <div className="flex items-center gap-3">
-            <button
+          <div className="flex items-center gap-3 w-full sm:w-auto">
+            <Button
+              variant="ghost"
               onClick={onClose}
-              className="px-6 py-3 rounded-2xl font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all cursor-pointer"
               disabled={importStatus === 'loading'}
+              fullWidth
             >
               إلغاء
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="emerald"
               onClick={handleImport}
-              disabled={!selectedClassId || !selectedFile || importStatus === 'loading'}
-              className={`
-                flex items-center gap-2 px-8 py-3 rounded-2xl font-bold transition-all cursor-pointer
-                ${(!selectedClassId || !selectedFile || importStatus === 'loading')
-                  ? 'bg-slate-200 text-slate-400 cursor-not-allowed'
-                  : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-600/30 hover:shadow-emerald-600/50 hover:-translate-y-0.5'
-                }
-              `}
+              loading={importStatus === 'loading'}
+              disabled={!selectedClassId || !selectedFile}
+              icon={Users}
+              fullWidth
+              className="sm:px-12"
             >
-              {importStatus === 'loading' ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  جاري الاستيراد...
-                </>
-              ) : (
-                <>
-                  <Users className="w-5 h-5" />
-                  بدء الاستيراد
-                </>
-              )}
-            </button>
+              بدء الاستيراد
+            </Button>
           </div>
         </div>
       </div>
+
+      <style jsx>{`
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: #fee2e2;
+          border-radius: 10px;
+        }
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          25% { transform: translateX(-4px); }
+          75% { transform: translateX(4px); }
+        }
+        .animate-shake { animation: shake 0.2s cubic-bezier(.36,.07,.19,.97) both; }
+      `}</style>
     </div>
   );
 }
