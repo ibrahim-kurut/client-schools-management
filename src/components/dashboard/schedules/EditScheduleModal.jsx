@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Clock, X, Save, Loader2 } from 'lucide-react';
 import axios from '@/lib/axios';
 import { toast } from 'react-toastify';
+import Select from '@/components/ui/Select';
 
 const DAYS_AR = {
   SUNDAY: 'الأحد',
@@ -80,48 +81,34 @@ const EditScheduleModal = ({ show, onClose, onSave, item, subjects, classes }) =
         <form onSubmit={handleSubmit} className="p-8 space-y-6">
           <div className="space-y-5">
             
-            {/* Class Selection (Read Only or Informative) */}
-            <div className="space-y-2">
-              <label className="block text-xs font-black text-slate-500 mr-2 uppercase">الصف الدراسي</label>
-              <select 
-                value={formData.classId}
-                onChange={(e) => setFormData({...formData, classId: e.target.value, subjectId: '', teacherId: ''})}
-                className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black outline-none focus:border-blue-500 focus:bg-white transition-all"
-              >
-                {classes.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-              </select>
-            </div>
+            <Select 
+              label="الصف الدراسي"
+              value={formData.classId}
+              onChange={(val) => setFormData({...formData, classId: val, subjectId: '', teacherId: ''})}
+              options={classes.map(c => ({ value: c.id, label: c.name }))}
+            />
 
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="block text-xs font-black text-slate-500 mr-2 uppercase">اليوم</label>
-                <select 
-                  value={formData.day}
-                  onChange={(e) => setFormData({...formData, day: e.target.value})}
-                  className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black outline-none focus:border-blue-500"
-                >
-                  {DAY_ORDER.map(d => <option key={d} value={d}>{DAYS_AR[d]}</option>)}
-                </select>
-              </div>
+              <Select 
+                label="اليوم"
+                value={formData.day}
+                onChange={(val) => setFormData({...formData, day: val})}
+                options={DAY_ORDER.map(d => ({ value: d, label: DAYS_AR[d] }))}
+              />
               
-              <div className="space-y-2">
-                <label className="block text-xs font-black text-slate-500 mr-2 uppercase">المادة والمعلم</label>
-                <select 
-                  value={formData.subjectId}
-                  onChange={(e) => {
-                    const sub = subjects.find(s => s.id === e.target.value);
-                    setFormData({...formData, subjectId: e.target.value, teacherId: sub?.teacherId || ''});
-                  }}
-                  className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black outline-none focus:border-blue-500"
-                >
-                  <option value="" disabled>اختر مادة...</option>
-                  {classSubjects.map(s => (
-                      <option key={s.id} value={s.id}>
-                          {s.name} — {s.teacher?.firstName ? `${s.teacher.firstName} ${s.teacher.lastName}` : 'بدون معلم'}
-                      </option>
-                  ))}
-                </select>
-              </div>
+              <Select 
+                label="المادة والمعلم"
+                value={formData.subjectId}
+                onChange={(val) => {
+                  const sub = subjects.find(s => s.id === val);
+                  setFormData({...formData, subjectId: val, teacherId: sub?.teacherId || ''});
+                }}
+                placeholder="اختر مادة..."
+                options={classSubjects.map(s => ({
+                  value: s.id,
+                  label: `${s.name} — ${s.teacher?.firstName ? `${s.teacher.firstName} ${s.teacher.lastName}` : 'بدون معلم'}`
+                }))}
+              />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
