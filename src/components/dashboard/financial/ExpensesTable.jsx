@@ -5,6 +5,7 @@ import { Search, Filter, Trash2, Edit, TrendingDown, User, Calendar, Loader2, Pr
 import { fetchExpenses, deleteExpense } from '../../../redux/slices/expensesSlice';
 import Pagination from '../../ui/Pagination';
 import SearchInput from '../../ui/SearchInput';
+import Select from '../../ui/Select';
 import Swal from 'sweetalert2';
 
 const expenseTypeLabels = {
@@ -108,21 +109,19 @@ export default function ExpensesTable({ onEdit, onPrint }) {
 
         {/* Filters */}
         <div className="w-full md:w-auto flex flex-wrap items-center gap-3">
-          <div className="relative">
-            <Filter className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <select 
+          <div className="w-full md:w-48">
+            <Select
               value={typeFilter}
-              onChange={(e) => {
-                setTypeFilter(e.target.value);
+              onChange={(val) => {
+                setTypeFilter(val);
                 setCurrentPage(1);
               }}
-              className="appearance-none bg-slate-50 border border-slate-200 text-slate-700 rounded-2xl py-3 pr-10 pl-10 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 font-bold cursor-pointer transition-all hover:bg-slate-100"
-            >
-              <option value="">جميع التصنيفات</option>
-              {Object.entries(expenseTypeLabels).map(([val, label]) => (
-                <option key={val} value={val}>{label}</option>
-              ))}
-            </select>
+              options={[
+                { value: '', label: 'جميع التصنيفات' },
+                ...Object.entries(expenseTypeLabels).map(([val, label]) => ({ value: val, label }))
+              ]}
+              placeholder="اختر التصنيف..."
+            />
           </div>
         </div>
       </div>

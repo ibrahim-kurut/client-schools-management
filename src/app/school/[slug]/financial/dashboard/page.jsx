@@ -236,28 +236,28 @@ export default function FinancialDashboard() {
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-3 items-center">
+        <div className="grid grid-cols-2 md:flex md:flex-wrap gap-2 md:gap-3 items-center w-full md:w-auto mt-4 md:mt-0">
             <input
               type="month"
               value={selectedMonth}
               onChange={(e) => setSelectedMonth(e.target.value)}
-              className="bg-white text-slate-700 px-4 py-3 rounded-2xl font-bold border border-slate-100 shadow-sm"
+              className="col-span-2 md:col-span-1 bg-white text-slate-700 px-4 py-3 rounded-2xl font-bold border border-slate-100 shadow-sm w-full md:w-auto"
             />
             <button
                 onClick={handleDownloadMonthlyReport}
                 disabled={reportLoading}
-                className="flex items-center gap-2 bg-white text-slate-700 px-6 py-3 rounded-2xl font-bold transition-all shadow-sm border border-slate-100 hover:bg-slate-50 disabled:opacity-60"
+                className="flex items-center justify-center gap-1.5 bg-white text-slate-700 px-2 md:px-6 py-3 rounded-2xl font-bold text-[14px] sm:text-[15px] md:text-base transition-all shadow-sm border border-slate-100 hover:bg-slate-50 disabled:opacity-60"
             >
-                {reportLoading ? <Loader2 className="w-5 h-5 animate-spin text-purple-600" /> : <Printer className="w-5 h-5 text-purple-600" />}
-                تحميل تقرير شهري
+                {reportLoading ? <Loader2 className="w-4 h-4 md:w-5 md:h-5 animate-spin text-purple-600 shrink-0" /> : <Printer className="w-4 h-4 md:w-5 md:h-5 text-purple-600 shrink-0" />}
+                <span className="truncate">تحميل تقرير</span>
             </button>
             <button
                 onClick={handleExportMonthlyData}
                 disabled={exportLoading}
-                className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-2xl font-bold transition-all shadow-lg shadow-purple-600/30 hover:-translate-y-0.5 disabled:opacity-60"
+                className="flex items-center justify-center gap-1.5 bg-purple-600 hover:bg-purple-700 text-white px-2 md:px-6 py-3 rounded-2xl font-bold text-[14px] sm:text-[15px] md:text-base transition-all shadow-lg shadow-purple-600/30 hover:-translate-y-0.5 disabled:opacity-60"
             >
-                {exportLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Download className="w-5 h-5" />}
-                تصدير البيانات
+                {exportLoading ? <Loader2 className="w-4 h-4 md:w-5 md:h-5 animate-spin shrink-0" /> : <Download className="w-4 h-4 md:w-5 md:h-5 shrink-0" />}
+                <span className="truncate">تصدير البيانات</span>
             </button>
         </div>
       </div>

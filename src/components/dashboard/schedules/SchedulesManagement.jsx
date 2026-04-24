@@ -16,6 +16,7 @@ import Swal from 'sweetalert2';
 import { useParams, useRouter } from 'next/navigation';
 import ScheduleGrid from './ScheduleGrid';
 import EditScheduleModal from './EditScheduleModal';
+import Select from '@/components/ui/Select';
 
 const DAYS_AR = {
   SUNDAY: 'الأحد',
@@ -149,15 +150,13 @@ export default function SchedulesManagement() {
         </div>
 
         <div className="flex flex-wrap items-center gap-4">
-          <div className="relative group">
-            <Filter className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-hover:text-blue-600 transition-colors" />
-            <select 
+          <div className="w-full md:w-64">
+            <Select 
               value={selectedClassId}
-              onChange={(e) => setSelectedClassId(e.target.value)}
-              className="pr-12 pl-6 py-3 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-slate-700 focus:border-blue-500 focus:bg-white outline-none transition-all appearance-none cursor-pointer min-w-[200px]"
-            >
-              {classes.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-            </select>
+              onChange={setSelectedClassId}
+              options={classes.map(c => ({ value: c.id, label: c.name }))}
+              placeholder="اختر الصف الدراسي..."
+            />
           </div>
 
           <button 

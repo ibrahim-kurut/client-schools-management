@@ -15,6 +15,7 @@ import {
 import { toast } from 'react-toastify';
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
+import Select from '@/components/ui/Select';
 
 const DAYS_AR = {
   SUNDAY: 'الأحد',
@@ -209,31 +210,27 @@ export default function AddBulkSchedulePage() {
 
       {/* Selection Bar */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white p-8 rounded-[40px] shadow-sm border border-slate-100">
-        <div className="space-y-3">
-          <label className="text-sm font-black text-slate-500 mr-2 flex items-center gap-2">
-            <CalendarDays className="w-4 h-4" /> الصف الدراسي المستهدف
-          </label>
-          <select 
-            value={selectedClassId}
-            onChange={(e) => setSelectedClassId(e.target.value)}
-            className="w-full px-6 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-slate-700 focus:border-blue-500 focus:bg-white outline-none transition-all"
-          >
-            {classes.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-          </select>
-        </div>
+        <Select 
+          label={
+            <div className="flex items-center gap-2">
+              <CalendarDays className="w-4 h-4" /> الصف الدراسي المستهدف
+            </div>
+          }
+          value={selectedClassId}
+          onChange={setSelectedClassId}
+          options={classes.map(c => ({ value: c.id, label: c.name }))}
+        />
 
-        <div className="space-y-3">
-          <label className="text-sm font-black text-slate-500 mr-2 flex items-center gap-2">
-            <Clock className="w-4 h-4" /> اختيار اليوم
-          </label>
-          <select 
-            value={selectedDay}
-            onChange={(e) => setSelectedDay(e.target.value)}
-            className="w-full px-6 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-slate-700 focus:border-blue-500 focus:bg-white outline-none transition-all"
-          >
-            {DAY_ORDER.map(d => <option key={d} value={d}>{DAYS_AR[d]}</option>)}
-          </select>
-        </div>
+        <Select 
+          label={
+            <div className="flex items-center gap-2">
+              <Clock className="w-4 h-4" /> اختيار اليوم
+            </div>
+          }
+          value={selectedDay}
+          onChange={setSelectedDay}
+          options={DAY_ORDER.map(d => ({ value: d, label: DAYS_AR[d] }))}
+        />
       </div>
 
       {/* Bulk Lessons Form */}
@@ -256,25 +253,24 @@ export default function AddBulkSchedulePage() {
                 key={lesson.id} 
                 className="group flex flex-col md:flex-row items-end gap-6 p-6 bg-slate-50/50 hover:bg-white hover:shadow-xl hover:shadow-slate-200/50 rounded-[32px] border-2 border-transparent hover:border-blue-100 transition-all duration-300"
               >
-                <div className="flex-1 space-y-3 w-full">
-                  <label className="text-xs font-black text-slate-400 mr-2 flex items-center gap-2">
-                    <span className="w-6 h-6 bg-blue-600 text-white rounded-lg flex items-center justify-center text-[10px]">
-                      {index + 1}
-                    </span>
-                    المادة الدراسية والمعلم
-                  </label>
-                  <select 
+                <div className="flex-1 w-full">
+                  <Select 
+                    label={
+                      <div className="flex items-center gap-2">
+                        <span className="w-6 h-6 bg-blue-600 text-white rounded-lg flex items-center justify-center text-[10px]">
+                          {index + 1}
+                        </span>
+                        المادة الدراسية والمعلم
+                      </div>
+                    }
                     value={lesson.subjectId}
-                    onChange={(e) => updateLesson(lesson.id, 'subjectId', e.target.value)}
-                    className="w-full px-5 py-4 bg-white border-2 border-slate-100 rounded-2xl font-black text-slate-700 focus:border-blue-500 outline-none transition-all"
-                  >
-                    <option value="">اختر مادة الدراسية...</option>
-                    {classSubjects.map(s => (
-                      <option key={s.id} value={s.id}>
-                          {s.name} — {s.teacher?.firstName ? `${s.teacher.firstName} ${s.teacher.lastName}` : 'بدون معلم'}
-                      </option>
-                    ))}
-                  </select>
+                    onChange={(val) => updateLesson(lesson.id, 'subjectId', val)}
+                    placeholder="اختر مادة الدراسية..."
+                    options={classSubjects.map(s => ({
+                      value: s.id,
+                      label: `${s.name} — ${s.teacher?.firstName ? `${s.teacher.firstName} ${s.teacher.lastName}` : 'بدون معلم'}`
+                    }))}
+                  />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 flex-1 w-full">
