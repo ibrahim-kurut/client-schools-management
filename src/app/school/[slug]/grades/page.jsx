@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchClasses } from "@/redux/slices/classesSlice";
 import axiosInstance from "@/lib/axios";
 import { Layers, Printer, Search, Loader2, User2, Eye } from "lucide-react";
+import Select from "@/components/ui/Select";
 import StudentReportCard from "@/components/grades/StudentReportCard";
 import Swal from "sweetalert2";
 import { useParams } from "next/navigation";
@@ -62,8 +63,7 @@ export default function AdminGradesPage() {
     }
   };
 
-  const handleClassChange = (e) => {
-    const val = e.target.value;
+  const handleClassChange = (val) => {
     setSelectedClassId(val);
     if (val) {
       loadResults(val);
@@ -129,29 +129,14 @@ export default function AdminGradesPage() {
         {/* Filters */}
         <div className="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
-              <label className="flex items-center gap-2 text-sm font-black text-slate-700 mb-2">
-                <Layers className="w-4 h-4 text-indigo-500" />
-                تحديد الصف الدراسي
-              </label>
-              <div className="relative">
-                <select
-                  value={selectedClassId}
-                  onChange={handleClassChange}
-                  disabled={classesStatus === "loading"}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 appearance-none"
-                >
-                  <option value="">اختر الصف لفتح النتائج...</option>
-                  {classes.map((cls) => (
-                    <option key={cls.id} value={cls.id}>{cls.name}</option>
-                  ))}
-                </select>
-                {classesStatus === "loading" && (
-                  <div className="absolute left-3 top-1/2 -translate-y-1/2">
-                    <Loader2 className="w-4 h-4 animate-spin text-slate-400" />
-                  </div>
-                )}
-              </div>
+            <div className="relative">
+              <Select
+                label="تحديد الصف الدراسي"
+                placeholder={classesStatus === "loading" ? "جاري التحميل..." : "اختر الصف لفتح النتائج..."}
+                value={selectedClassId}
+                onChange={handleClassChange}
+                options={classes.map((cls) => ({ value: cls.id, label: cls.name }))}
+              />
             </div>
           </div>
         </div>

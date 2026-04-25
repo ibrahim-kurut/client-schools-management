@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { GraduationCap, Mail, Lock, ArrowLeft, Loader2, CheckCircle2, ShieldAlert, Timer } from 'lucide-react';
@@ -16,6 +16,7 @@ function LoginContent() {
   const dispatch = useDispatch();
   const { isLoggedIn, user } = useSelector((state) => state.auth);
   const [mounted, setMounted] = useState(false);
+  const rateLimitProcessed = useRef(false);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- نمط قياسي لتتبع حالة التركيب في Next.js
@@ -66,7 +67,7 @@ function LoginContent() {
         setLockoutTimer((prev) => {
           if (prev <= 1) {
             // When timer ends, clear the security error if it's currently showing
-            if (error === 'SECURITY_KICK') setError('');
+            setError((currentError) => currentError === 'SECURITY_KICK' ? '' : currentError);
             return 0;
           }
           return prev - 1;
@@ -74,7 +75,7 @@ function LoginContent() {
       }, 1000);
     }
     return () => clearInterval(timer);
-  }, [lockoutTimer, error]);
+  }, [lockoutTimer]);
 
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
@@ -88,18 +89,24 @@ function LoginContent() {
       setSuccess('تم إنشاء الحساب بنجاح! يمكنك الآن تسجيل الدخول.');
     }
     
-    // Handle security kick from axios interceptor
+    // Handle security kick from axios interceptor (process ONCE only)
     const reason = searchParams.get('reason');
     const retry = searchParams.get('retryAfter');
     
-    if (reason === 'rate-limit') {
-      // Only set the timer if it's not already running
-      if (retry && lockoutTimer === 0) {
-        setLockoutTimer(parseInt(retry));
-        setError('SECURITY_KICK');
+    if (reason === 'rate-limit' && retry && !rateLimitProcessed.current) {
+      rateLimitProcessed.current = true;
+      setLockoutTimer(parseInt(retry));
+      setError('SECURITY_KICK');
+
+      // Clean the URL to prevent re-triggering on future renders
+      if (typeof window !== 'undefined') {
+        const url = new URL(window.location.href);
+        url.searchParams.delete('reason');
+        url.searchParams.delete('retryAfter');
+        window.history.replaceState({}, '', url.pathname);
       }
     }
-  }, [searchParams, lockoutTimer]);
+  }, [searchParams]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

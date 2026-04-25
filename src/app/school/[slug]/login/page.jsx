@@ -1,11 +1,9 @@
 'use client';
 
-import { useState } from 'react';
-import Link from 'next/link';
+import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { GraduationCap, Mail, Lock, ArrowLeft, Loader2, School } from 'lucide-react';
+import { GraduationCap, Mail, Lock, Loader2, School } from 'lucide-react';
 import AuthInput from '@/components/AuthInput';
-import { validateLogin } from '@/lib/validation/authSchemas';
 import { useDispatch } from 'react-redux';
 import { loginWithSchoolSlug } from '@/redux/slices/authSlice';
 import { toast } from 'react-toastify';
@@ -59,7 +57,7 @@ export default function SchoolLoginPage() {
 
     const isEmail = identifier.includes('@');
     const loginPayload = {
-      slug,
+      slug: decodeURIComponent(slug),
       password,
       ...(isEmail ? { email: identifier } : { studentCode: identifier })
     };
