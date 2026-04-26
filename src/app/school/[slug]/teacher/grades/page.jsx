@@ -5,6 +5,7 @@ import { fetchTeacherStudents } from "@/redux/slices/teacherProfileSlice";
 import { fetchClassGrades, addGrade, updateGrade, deleteGrade } from "@/redux/slices/teacherGradesSlice";
 import { examTypes } from "@/data/teacherMockData";
 import { ClipboardList, PlusCircle, Save, Trash2, Edit2, AlertCircle, BookOpen, Layers, FileText, User2, Printer, CheckCircle2, Loader2 } from "lucide-react";
+import Select from "@/components/ui/Select";
 import Swal from "sweetalert2";
 import StudentResultModal from "@/components/students/StudentResultModal";
 import AllStudentsGradesModal from "@/components/students/AllStudentsGradesModal";
@@ -59,15 +60,13 @@ export default function GradesPage() {
     setDrafts({});
   }, [dispatch, classes]);
 
-  const handleClassChange = (e) => {
-    const val = e.target.value;
+  const handleClassChange = (val) => {
     setSelectedClassId(val);
     setSelectedSubjectId("");
     handleSelectionChange(val, "");
   };
 
-  const handleSubjectChange = (e) => {
-    const val = e.target.value;
+  const handleSubjectChange = (val) => {
     setSelectedSubjectId(val);
     handleSelectionChange(selectedClassId, val);
   };
@@ -203,38 +202,24 @@ export default function GradesPage() {
       <div className="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
-            <label className="flex items-center gap-2 text-sm font-black text-slate-700 mb-2">
-              <Layers className="w-4 h-4 text-indigo-500" />
-              الفصل الدراسي
-            </label>
-            <select
+            <Select
+              label="الفصل الدراسي"
+              placeholder="اختر الفصل..."
               value={selectedClassId}
               onChange={handleClassChange}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 cursor-pointer"
-            >
-              <option key="default-class" value="">اختر الفصل...</option>
-              {classes.map((cls, idx) => (
-                <option key={cls.id || `class-${idx}`} value={cls.id}>{cls.name}</option>
-              ))}
-            </select>
+              options={classes.map((cls) => ({ value: cls.id, label: cls.name }))}
+            />
           </div>
 
           <div>
-            <label className="flex items-center gap-2 text-sm font-black text-slate-700 mb-2">
-              <BookOpen className="w-4 h-4 text-violet-500" />
-              المادة الدراسية
-            </label>
-            <select
+            <Select
+              label="المادة الدراسية"
+              placeholder="اختر المادة..."
               value={selectedSubjectId}
               onChange={handleSubjectChange}
+              options={availableSubjects.map((sub) => ({ value: sub.id, label: sub.name }))}
               disabled={!selectedClassId}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <option key="default-subject" value="">اختر المادة...</option>
-              {availableSubjects.map((sub, idx) => (
-                <option key={sub.id || `sub-${idx}`} value={sub.id}>{sub.name}</option>
-              ))}
-            </select>
+            />
           </div>
 
           <div className="flex items-end">

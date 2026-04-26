@@ -3,6 +3,7 @@ import { useState } from "react";
 import { teacherClasses, attendanceStatusLabels } from "@/data/teacherMockData";
 import { CalendarCheck, Save, CheckCircle2, User2, Layers, Calendar, Timer, AlertCircle } from "lucide-react";
 import Swal from "sweetalert2";
+import Select from "@/components/ui/Select";
 
 export default function AttendancePage() {
   const [selectedClassId, setSelectedClassId] = useState("");
@@ -17,8 +18,7 @@ export default function AttendancePage() {
     return nameA.localeCompare(nameB, 'ar');
   });
 
-  const handleClassChange = (e) => {
-    const val = e.target.value;
+  const handleClassChange = (val) => {
     setSelectedClassId(val);
     setAttendance({});
     setSaved(false);
@@ -94,20 +94,13 @@ export default function AttendancePage() {
           <div className="bg-white rounded-2xl border border-slate-100 p-6 mt-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="flex items-center gap-2 text-sm font-black text-slate-700 mb-2">
-                  <Layers className="w-4 h-4 text-indigo-500" />
-                  الفصل الدراسي
-                </label>
-                <select
+                <Select
+                  label="الفصل الدراسي"
+                  placeholder="اختر الفصل..."
                   value={selectedClassId}
                   onChange={handleClassChange}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-sm font-bold text-slate-700 appearance-none"
-                >
-                  <option key="default-class" value="">اختر الفصل...</option>
-                  {teacherClasses.map((cls, idx) => (
-                    <option key={cls.id || `class-${idx}`} value={cls.id}>{cls.name}</option>
-                  ))}
-                </select>
+                  options={teacherClasses.map((cls) => ({ value: cls.id, label: cls.name }))}
+                />
               </div>
 
               <div>

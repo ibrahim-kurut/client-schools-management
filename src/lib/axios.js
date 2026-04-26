@@ -24,8 +24,10 @@ axiosInstance.interceptors.response.use(
             const retryAfter = error.response.data?.retryAfter || 60;
             const currentPath = typeof window !== "undefined" ? window.location.pathname : "";
             
-            // Smart Kick Logic:
-            if (currentPath !== "/login") {
+            // Check if we're on ANY login page (main /login or school /school/slug/login)
+            const isOnLoginPage = currentPath === "/login" || currentPath.includes("/login");
+            
+            if (!isOnLoginPage) {
                 // Not on login page -> Force logout and redirect
                 if (store) {
                     store.dispatch(forceLogout());

@@ -19,6 +19,7 @@ import { toast } from "react-toastify";
 import { formatDistanceToNow } from "date-fns";
 import { ar } from "date-fns/locale";
 import Swal from 'sweetalert2';
+import Select from "@/components/ui/Select";
 
 export default function TeacherNotesPage() {
   const dispatch = useDispatch();
@@ -136,22 +137,13 @@ export default function TeacherNotesPage() {
             <form onSubmit={handleSubmit} className="space-y-5">
               {/* Class Selection */}
               <div>
-                <label className="block text-sm font-black text-slate-700 mb-2">اختر الصف</label>
-                <div className="relative group">
-                  <Layers className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
-                  <select
-                    value={selectedClassId}
-                    onChange={(e) => setSelectedClassId(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 pr-10 pl-4 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-all font-bold appearance-none cursor-pointer"
-                  >
-                    <option value="">اختر صفاً من القائمة...</option>
-                    {classes.map((cls) => (
-                      <option key={cls.id} value={cls.id}>
-                        {cls.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                <Select
+                  label="اختر الصف"
+                  placeholder="اختر صفاً من القائمة..."
+                  value={selectedClassId}
+                  onChange={setSelectedClassId}
+                  options={classes.map((cls) => ({ value: cls.id, label: cls.name }))}
+                />
               </div>
 
               {/* Note Content */}

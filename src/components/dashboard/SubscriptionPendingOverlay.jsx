@@ -21,7 +21,7 @@ export default function SubscriptionPendingOverlay() {
   const userRole = userData?.role;
 
   // Check if current page is the login page
-  const isLoginPage = pathname?.endsWith('/login');
+  const isLoginPage = pathname?.includes('/login');
 
   // Only SCHOOL_ADMIN should see this overlay
   const shouldCheck = !isLoginPage && userRole === 'SCHOOL_ADMIN';

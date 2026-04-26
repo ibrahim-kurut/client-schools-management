@@ -1,10 +1,11 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchClassNotes } from "@/redux/slices/notesSlice";
 import { fetchProfile } from "@/redux/slices/profileSlice";
 import { formatDistanceToNow } from "date-fns";
 import { ar } from "date-fns/locale";
+import axiosInstance from "@/lib/axios";
 
 import {
   TrendingUp,
@@ -35,11 +36,32 @@ export default function StudentDashboardPage() {
   // Use classId from profileData
   const classId = profileData?.classId;
 
+  // Schedule state
+  const [schedules, setSchedules] = useState([]);
+  const [loadingSchedule, setLoadingSchedule] = useState(false);
+
   useEffect(() => {
     if (classId) {
       dispatch(fetchClassNotes(classId));
     }
   }, [dispatch, classId]);
+
+  useEffect(() => {
+    const fetchStudentSchedule = async () => {
+      if (!classId) return;
+      try {
+        setLoadingSchedule(true);
+        const res = await axiosInstance.get(`/schedules/class/${classId}`);
+        setSchedules(res.data.data || []);
+      } catch (error) {
+        console.error("فشل في تحميل الجدول الدراسي", error);
+      } finally {
+        setLoadingSchedule(false);
+      }
+    };
+
+    fetchStudentSchedule();
+  }, [classId]);
 
   // Financial summary from profile
   const financial = profileData?.financialSummary || {
@@ -52,17 +74,17 @@ export default function StudentDashboardPage() {
   const stats = [
     {
       label: "النسبة العامة",
-      value: "92%",
-      trend: "+2.5%",
+      value: "في التطوير",
+      trend: "",
       isPositive: true,
       icon: Award,
       color: "emerald"
     },
     {
       label: "نسبة الحضور",
-      value: "96%",
-      trend: "-1.0%",
-      isPositive: false,
+      value: "في التطوير",
+      trend: "",
+      isPositive: true,
       icon: Clock,
       color: "blue"
     },
@@ -76,20 +98,18 @@ export default function StudentDashboardPage() {
     }
   ];
 
-  const todaySchedule = [
-    { time: "08:00 ص", subject: "الرياضيات", teacher: "أ. أحمد محمد", type: "class", status: "مكتمل" },
-    { time: "09:00 ص", subject: "العلوم", teacher: "أ. محمود رجب", type: "class", status: "الآن" },
-    { time: "10:00 ص", subject: "استراحة", teacher: "", type: "break", status: "قادم" },
-    { time: "10:30 ص", subject: "اللغة العربية", teacher: "أ. خالد النجار", type: "class", status: "قادم" },
-    { time: "11:30 ص", subject: "التاريخ", teacher: "أ. سعد علي", type: "class", status: "قادم" }
-  ];
+  const todayName = new Date().toLocaleDateString('en-US', { weekday: 'long' }).toUpperCase();
+  const todaySchedules = schedules
+    .filter(s => s.day === todayName)
+    .sort((a, b) => a.startTime.localeCompare(b.startTime));
 
-  const attendanceData = {
-    present: 42,
-    absent: 2,
-    late: 1,
-    total: 45
-  };
+  const todayScheduleList = todaySchedules.map((s) => ({
+    time: s.startTime,
+    subject: s.subject?.name || "بدون مادة",
+    teacher: s.teacher ? `أ. ${s.teacher.firstName} ${s.teacher.lastName}` : "غير محدد",
+    type: "class",
+    status: "قادم"
+  }));
 
   return (
     <div className="space-y-6 pb-12 w-full max-w-[1400px] mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -109,7 +129,7 @@ export default function StudentDashboardPage() {
           <div className="bg-white/20 backdrop-blur-md border border-white/20 rounded-2xl p-4 shrink-0 flex items-center gap-4">
             <div className="text-right">
               <div className="text-emerald-50 text-xs font-bold mb-1">التقييم المستمر</div>
-              <div className="text-xl font-black tracking-tight">امتياز</div>
+              <div className="text-sm font-black tracking-tight mt-1">في مرحلة التطوير</div>
             </div>
             <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-inner">
               <TrendingUp className="w-6 h-6 text-emerald-600" />
@@ -173,34 +193,42 @@ export default function StudentDashboardPage() {
             </div>
             
             <div className="flex flex-col gap-4">
-              {todaySchedule.map((item, idx) => (
-                <div key={idx} className={`flex items-center gap-4 p-4 rounded-2xl border ${item.status === 'الآن' ? 'bg-emerald-50 border-emerald-200 shadow-[0_0_15px_-3px_rgba(16,185,129,0.1)]' : 'bg-slate-50 border-slate-100'}`}>
-                  <div className={`shrink-0 w-20 text-center text-sm font-black ${item.status === 'الآن' ? 'text-emerald-700' : 'text-slate-500'}`}>
-                    {item.time}
-                  </div>
-                  
-                  <div className={`w-1 h-12 rounded-full ${item.type === 'break' ? 'bg-amber-400' : (item.status === 'الآن' ? 'bg-emerald-500' : 'bg-slate-300')}`} />
-                  
-                  <div className="flex-1 min-w-0">
-                    <h3 className={`font-black truncate ${item.status === 'الآن' ? 'text-emerald-900' : 'text-slate-800'}`}>
-                      {item.subject}
-                    </h3>
-                    <p className={`text-xs font-semibold truncate ${item.status === 'الآن' ? 'text-emerald-600' : 'text-slate-500'}`}>
-                      {item.teacher || "استراحة قصيرة"}
-                    </p>
-                  </div>
-
-                  <div className="hidden sm:block shrink-0">
-                    <span className={`text-[11px] font-black px-3 py-1 rounded-full ${
-                      item.status === 'مكتمل' ? 'bg-slate-200 text-slate-600' :
-                      item.status === 'الآن' ? 'bg-emerald-500 text-white animate-pulse' :
-                      'bg-slate-100 text-slate-400'
-                    }`}>
-                      {item.status}
-                    </span>
-                  </div>
+              {loadingSchedule ? (
+                <div className="flex flex-col items-center justify-center py-10 gap-3">
+                  <Loader2 className="w-8 h-8 text-emerald-500 animate-spin" />
+                  <p className="text-xs font-bold text-slate-400">جاري تحميل الجدول...</p>
                 </div>
-              ))}
+              ) : todayScheduleList.length === 0 ? (
+                <div className="text-center py-10 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                  <Calendar className="w-8 h-8 text-slate-200 mx-auto mb-2" />
+                  <p className="text-xs font-bold text-slate-400">لا يوجد لديك حصص مجدولة لهذا اليوم</p>
+                </div>
+              ) : (
+                todayScheduleList.map((item, idx) => (
+                  <div key={idx} className={`flex items-center gap-4 p-4 rounded-2xl border bg-slate-50 border-slate-100`}>
+                    <div className={`shrink-0 w-20 text-center text-sm font-black text-slate-500`}>
+                      {item.time}
+                    </div>
+                    
+                    <div className={`w-1 h-12 rounded-full bg-slate-300`} />
+                    
+                    <div className="flex-1 min-w-0">
+                      <h3 className={`font-black truncate text-slate-800`}>
+                        {item.subject}
+                      </h3>
+                      <p className={`text-xs font-semibold truncate text-slate-500`}>
+                        {item.teacher}
+                      </p>
+                    </div>
+
+                    <div className="hidden sm:block shrink-0">
+                      <span className={`text-[11px] font-black px-3 py-1 rounded-full bg-slate-100 text-slate-400`}>
+                        {item.status}
+                      </span>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>

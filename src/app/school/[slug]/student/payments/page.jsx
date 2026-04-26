@@ -1,22 +1,49 @@
 "use client";
 
-import { CreditCard, Wallet, Banknote, History, CheckCheck, Clock } from "lucide-react";
+import { CreditCard, Wallet, Banknote, History, CheckCheck, Clock, Loader2 } from "lucide-react";
+import { useSelector, useDispatch } from "react-redux";
+import { useEffect } from "react";
+import { fetchProfile } from "@/redux/slices/profileSlice";
+import { format } from "date-fns";
+import { ar } from "date-fns/locale";
 
 export default function StudentPaymentsPage() {
-  const financialSummary = {
-    totalRequired: "2,500,000",
-    totalPaid: "1,500,000",
-    remaining: "1,000,000",
+  const dispatch = useDispatch();
+  const { profileData, loading } = useSelector((state) => state.profile);
+
+  useEffect(() => {
+    dispatch(fetchProfile());
+  }, [dispatch]);
+
+  const financialSummary = profileData?.financialSummary ? {
+    totalRequired: profileData.financialSummary.netRequired.toLocaleString(),
+    totalPaid: profileData.financialSummary.totalPaid.toLocaleString(),
+    remaining: profileData.financialSummary.remainingBalance.toLocaleString(),
+    currency: "د.ع"
+  } : {
+    totalRequired: "0",
+    totalPaid: "0",
+    remaining: "0",
     currency: "د.ع"
   };
 
-  const paymentsHistory = [
-    { id: "INV-2026-001", amount: "500,000", date: "15 سبتمبر 2025", type: "القسط الأول", status: "مكتمل", method: "كاش" },
-    { id: "INV-2026-002", amount: "500,000", date: "15 نوفمبر 2025", type: "القسط الثاني", status: "مكتمل", method: "تحويل بنكي" },
-    { id: "INV-2026-003", amount: "500,000", date: "15 يناير 2026", type: "القسط الثالث", status: "مكتمل", method: "زين كاش" },
-    { id: "INV-2026-004", amount: "500,000", date: "15 مارس 2026", type: "القسط الرابع", status: "بانتظار الدفع", method: "-" },
-    { id: "INV-2026-005", amount: "500,000", date: "15 مايو 2026", type: "القسط الخامس", status: "بانتظار الدفع", method: "-" },
-  ];
+  const paymentsHistory = profileData?.paymentsMade?.map(payment => ({
+    id: payment.invoiceNumber || payment.id.substring(0, 8).toUpperCase(),
+    amount: payment.amount.toLocaleString(),
+    date: format(new Date(payment.date), "dd MMMM yyyy", { locale: ar }),
+    type: payment.note || (payment.paymentType === "TUITION" ? "قسط دراسي" : "رسوم أخرى"),
+    status: payment.status === "COMPLETED" ? "مكتمل" : (payment.status === "PENDING" ? "بانتظار الدفع" : payment.status),
+    method: payment.status === "COMPLETED" ? "نقداً" : "-"
+  })) || [];
+
+  if (loading && !profileData) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 gap-4">
+        <Loader2 className="w-12 h-12 text-indigo-600 animate-spin" />
+        <p className="font-black text-slate-500">جاري تحميل السجل المالي...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-10">
@@ -102,7 +129,16 @@ export default function StudentPaymentsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100/50">
-                 {paymentsHistory.map((payment, idx) => {
+                 {paymentsHistory.length === 0 ? (
+                    <tr>
+                      <td colSpan="4" className="py-10 text-center">
+                        <div className="flex flex-col items-center justify-center">
+                          <Banknote className="w-12 h-12 text-slate-200 mb-3" />
+                          <p className="text-sm font-bold text-slate-400">لا توجد أقساط مسجلة حتى الآن</p>
+                        </div>
+                      </td>
+                    </tr>
+                 ) : paymentsHistory.map((payment, idx) => {
                     const isPaid = payment.status === "مكتمل";
 
                     return (

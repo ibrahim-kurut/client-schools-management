@@ -1,16 +1,55 @@
 "use client";
 
-import { FileText, Award, TrendingUp, Search, Calendar } from "lucide-react";
+import { FileText, Award, TrendingUp, Search, Calendar, Loader2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
+import axiosInstance from "@/lib/axios";
+
+const EXAM_TYPE_AR = {
+  OCTOBER: "الشهر الأول",
+  NOVEMBER: "الشهر الثاني",
+  DECEMBER: "الشهر الثالث",
+  MIDYEAR: "نصف السنة",
+  MARCH: "الشهر الرابع",
+  APRIL: "الشهر الخامس",
+  FINAL_EXAM: "الامتحان النهائي",
+  SECOND_ROUND_EXAM: "امتحان الدور الثاني",
+  FIRST_SEMESTER_AVG: "معدل الفصل الأول",
+  SECOND_SEMESTER_AVG: "معدل الفصل الثاني",
+  ANNUAL_EFFORT: "السعي السنوي",
+  FINAL_GRADE: "الدرجة النهائية",
+  LAST_GRADE: "الدرجة النهائية (بعد الدور الثاني)"
+};
 
 export default function StudentGradesPage() {
-  const grades = [
-    { subject: "الرياضيات", exam: "اختبار الشهر الأول", score: 95, total: 100, date: "15 أکتوبر 2025", type: "اختبار فصلي", isExcellent: true },
-    { subject: "اللغة العربية", exam: "اختبار الشهر الأول", score: 88, total: 100, date: "16 أکتوبر 2025", type: "اختبار فصلي", isExcellent: false },
-    { subject: "العلوم", exam: "امتحان نصف السنة", score: 45, total: 50, date: "10 يناير 2026", type: "امتحان نهائي", isExcellent: true },
-    { subject: "اللغة الإنجليزية", exam: "تعبير كتابي", score: 18, total: 20, date: "05 فبراير 2026", type: "نشاط", isExcellent: true },
-    { subject: "التاريخ", exam: "اختبار قصير", score: 12, total: 20, date: "20 مارس 2026", type: "اختبار قصير", isExcellent: false },
-    { subject: "الجغرافيا", exam: "مشروع بحثي", score: 48, total: 50, date: "01 أبريل 2026", type: "نشاط", isExcellent: true },
-  ];
+  const { user } = useSelector((state) => state.auth);
+  const [grades, setGrades] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchGrades = async () => {
+      if (!user?.id) return;
+      try {
+        setLoading(true);
+        const res = await axiosInstance.get(`/grades/student/${user.id}/current`);
+        const fetchedGrades = (res.data.grades || []).map(g => ({
+          subject: g.subject?.name || "مادة غير محددة",
+          exam: EXAM_TYPE_AR[g.examType] || g.examType,
+          score: g.score,
+          total: "في التطوير",
+          date: "في التطوير",
+          type: "في التطوير",
+          isExcellent: g.score >= 90
+        }));
+        setGrades(fetchedGrades);
+      } catch (error) {
+        console.error("Failed to fetch grades", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchGrades();
+  }, [user?.id]);
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -32,14 +71,14 @@ export default function StudentGradesPage() {
             <TrendingUp className="w-5 h-5 text-emerald-500" />
             <div>
               <div className="text-[10px] font-bold text-slate-400 mb-0.5">المعدل التراكمي</div>
-              <div className="text-lg font-black text-slate-800 tracking-tight">92%</div>
+              <div className="text-sm font-black text-slate-800 tracking-tight mt-1">في التطوير</div>
             </div>
           </div>
           <div className="bg-slate-50 px-4 py-3 rounded-2xl border border-slate-100 flex items-center gap-3">
             <FileText className="w-5 h-5 text-indigo-500" />
             <div>
               <div className="text-[10px] font-bold text-slate-400 mb-0.5">إجمالي التقييمات</div>
-              <div className="text-lg font-black text-slate-800 tracking-tight">15</div>
+              <div className="text-lg font-black text-slate-800 tracking-tight">{grades.length}</div>
             </div>
           </div>
         </div>
@@ -68,67 +107,79 @@ export default function StudentGradesPage() {
         </div>
 
         {/* Grades Table */}
-        <div className="overflow-x-auto custom-scrollbar pb-2">
-          <table className="w-full text-right border-collapse">
-            <thead>
-              <tr className="border-b border-slate-100/80">
-                <th className="py-4 px-4 text-slate-400 text-xs font-black uppercase tracking-wider">الـمـادة</th>
-                <th className="py-4 px-4 text-slate-400 text-xs font-black uppercase tracking-wider">تفاصيل التقييم</th>
-                <th className="py-4 px-4 text-slate-400 text-xs font-black uppercase tracking-wider">التصنيف</th>
-                <th className="py-4 px-4 text-slate-400 text-xs font-black uppercase tracking-wider">النتيجة</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100/50">
-              {grades.map((grade, idx) => {
-                const percentage = (grade.score / grade.total) * 100;
-                let colorClass = grade.isExcellent ? "text-emerald-600 bg-emerald-50 border-emerald-100" : (percentage > 70 ? "text-blue-600 bg-blue-50 border-blue-100" : "text-amber-600 bg-amber-50 border-amber-100");
-                let barClass = grade.isExcellent ? "bg-emerald-500" : (percentage > 70 ? "bg-blue-500" : "bg-amber-500");
+        <div className="overflow-x-auto custom-scrollbar pb-2 min-h-[300px]">
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-20 gap-3">
+              <Loader2 className="w-8 h-8 text-emerald-500 animate-spin" />
+              <p className="text-sm font-bold text-slate-400">جاري تحميل الدرجات...</p>
+            </div>
+          ) : grades.length === 0 ? (
+            <div className="text-center py-20 bg-slate-50 rounded-2xl border border-dashed border-slate-200 m-6">
+               <FileText className="w-10 h-10 text-slate-200 mx-auto mb-3" />
+               <p className="text-sm font-bold text-slate-400">لا توجد درجات مسجلة حتى الآن</p>
+            </div>
+          ) : (
+            <table className="w-full text-right border-collapse">
+              <thead>
+                <tr className="border-b border-slate-100/80">
+                  <th className="py-4 px-4 text-slate-400 text-xs font-black uppercase tracking-wider">الـمـادة</th>
+                  <th className="py-4 px-4 text-slate-400 text-xs font-black uppercase tracking-wider">تفاصيل التقييم</th>
+                  <th className="py-4 px-4 text-slate-400 text-xs font-black uppercase tracking-wider">التصنيف</th>
+                  <th className="py-4 px-4 text-slate-400 text-xs font-black uppercase tracking-wider">النتيجة</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100/50">
+                {grades.map((grade, idx) => {
+                  const percentage = grade.score !== null ? (grade.score / 100) * 100 : 0;
+                  let colorClass = grade.isExcellent ? "text-emerald-600 bg-emerald-50 border-emerald-100" : (percentage > 70 ? "text-blue-600 bg-blue-50 border-blue-100" : "text-amber-600 bg-amber-50 border-amber-100");
+                  let barClass = grade.isExcellent ? "bg-emerald-500" : (percentage > 70 ? "bg-blue-500" : "bg-amber-500");
 
-                return (
-                  <tr key={idx} className="hover:bg-slate-50/50 transition-colors group">
-                    {/* Subject */}
-                    <td className="py-4 px-4">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center border font-black text-sm ${colorClass}`}>
-                          {grade.subject.charAt(0)}
+                  return (
+                    <tr key={idx} className="hover:bg-slate-50/50 transition-colors group">
+                      {/* Subject */}
+                      <td className="py-4 px-4">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center border font-black text-sm ${colorClass}`}>
+                            {grade.subject.charAt(0)}
+                          </div>
+                          <span className="font-bold text-slate-800 text-sm">{grade.subject}</span>
                         </div>
-                        <span className="font-bold text-slate-800 text-sm">{grade.subject}</span>
-                      </div>
-                    </td>
+                      </td>
 
-                    {/* Details */}
-                    <td className="py-4 px-4">
-                      <div className="font-bold text-slate-700 text-sm mb-1">{grade.exam}</div>
-                      <div className="flex items-center gap-1.5 text-[10px] font-semibold text-slate-400">
-                        <Calendar className="w-3 h-3" />
-                        {grade.date}
-                      </div>
-                    </td>
-
-                    {/* Type */}
-                    <td className="py-4 px-4">
-                       <span className="text-[10px] font-bold px-2 py-1 rounded-md bg-slate-100 text-slate-500">
-                         {grade.type}
-                       </span>
-                    </td>
-
-                    {/* Score */}
-                    <td className="py-4 px-4">
-                      <div className="flex flex-col gap-1.5 max-w-[120px]">
-                        <div className="flex items-baseline justify-between">
-                          <span className="font-black text-slate-800">{grade.score}</span>
-                          <span className="text-[10px] font-bold text-slate-400">من {grade.total}</span>
+                      {/* Details */}
+                      <td className="py-4 px-4">
+                        <div className="font-bold text-slate-700 text-sm mb-1">{grade.exam}</div>
+                        <div className="flex items-center gap-1.5 text-[10px] font-semibold text-slate-400">
+                          <Calendar className="w-3 h-3" />
+                          {grade.date}
                         </div>
-                        <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
-                          <div className={`h-full rounded-full ${barClass}`} style={{ width: `${percentage}%` }} />
+                      </td>
+
+                      {/* Type */}
+                      <td className="py-4 px-4">
+                        <span className="text-[10px] font-bold px-2 py-1 rounded-md bg-slate-100 text-slate-500">
+                          {grade.type}
+                        </span>
+                      </td>
+
+                      {/* Score */}
+                      <td className="py-4 px-4">
+                        <div className="flex flex-col gap-1.5 max-w-[120px]">
+                          <div className="flex items-baseline justify-between">
+                            <span className="font-black text-slate-800">{grade.score ?? "لا يوجد"}</span>
+                            <span className="text-[10px] font-bold text-slate-400">{grade.total === "في التطوير" ? "في التطوير" : `من ${grade.total}`}</span>
+                          </div>
+                          <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                            <div className={`h-full rounded-full ${barClass}`} style={{ width: `${percentage}%` }} />
+                          </div>
                         </div>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
     </div>

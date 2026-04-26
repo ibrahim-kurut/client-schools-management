@@ -23,6 +23,20 @@ export default function StudentAttendancePage() {
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-10">
+      
+      {/* Development Overlay */}
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
+        <div className="bg-white rounded-[2rem] p-8 max-w-sm w-full text-center shadow-2xl border border-slate-100 animate-in zoom-in-95 duration-300">
+          <div className="w-20 h-20 bg-amber-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-amber-100 shadow-inner">
+            <AlertCircle className="w-10 h-10 text-amber-500" />
+          </div>
+          <h2 className="text-2xl font-black text-slate-800 mb-2">في مرحلة التطوير</h2>
+          <p className="text-sm font-bold text-slate-500 leading-relaxed">
+            هذه الصفحة قيد التطوير حالياً، يتم العمل على ربط بيانات الحضور الفعلية قريباً.
+          </p>
+        </div>
+      </div>
+
       {/* Header */}
       <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-4">

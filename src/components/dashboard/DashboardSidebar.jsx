@@ -31,6 +31,7 @@ const SidebarItem = ({ icon: Icon, label, isActive = false, href = "/", iconColo
   <Link 
     href={href}
     onClick={onClick}
+    prefetch={false}
     className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 ${
       isActive 
         ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30 translate-x-1' 
@@ -95,7 +96,9 @@ export default function DashboardSidebar({ slug }) {
     }
   };
 
-  const normalizedSlug = slug ? decodeURIComponent(slug.toString()).replace(/\s+/g, '-') : '';
+  const normalizePath = (p) => decodeURIComponent(p || '').replace(/\s+/g, '-');
+  const normalizedSlug = normalizePath(slug?.toString());
+  
   const actualUser = user?.userData || user;
   const role = actualUser?.role || 'TEACHER';
 
@@ -184,17 +187,28 @@ export default function DashboardSidebar({ slug }) {
 
         {/* Navigation Menu */}
         <nav className="flex-1 space-y-1.5 overflow-y-auto px-4 custom-scrollbar pb-6">
-          {filteredItems.map((item, index) => (
-            <SidebarItem 
-              key={index}
-              icon={item.icon} 
-              label={item.label} 
-              href={item.href} 
-              isActive={pathname === item.href || (item.href !== `/school/${slug}` && pathname.startsWith(item.href))} 
-              iconColor={item.color}
-              onClick={handleLinkClick}
-            />
-          ))}
+          {filteredItems.map((item, index) => {
+            const itemPath = normalizePath(item.href);
+            const currentPath = normalizePath(pathname);
+            const isDashboardRoot = item.href === `/school/${normalizedSlug}`;
+            
+            // Link is active if it's the exact dashboard root, or if it's a subpath and not the root itself
+            const isActive = isDashboardRoot 
+              ? currentPath === itemPath 
+              : currentPath.startsWith(itemPath);
+
+            return (
+              <SidebarItem 
+                key={index}
+                icon={item.icon} 
+                label={item.label} 
+                href={item.href} 
+                isActive={isActive} 
+                iconColor={item.color}
+                onClick={handleLinkClick}
+              />
+            );
+          })}
         </nav>
 
         {/* Footer / Logout */}

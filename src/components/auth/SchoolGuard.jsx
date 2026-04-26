@@ -13,7 +13,7 @@ export default function SchoolGuard({ children }) {
   const [isAuthorized, setIsAuthorized] = useState(false);
 
   useEffect(() => {
-    const isLoginPage = pathname?.endsWith('/login');
+    const isLoginPage = pathname?.includes('/login');
 
     // Login page is PUBLIC — always accessible, skip all auth checks
     if (isLoginPage) {
