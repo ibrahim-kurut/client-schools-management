@@ -31,6 +31,7 @@ const SidebarItem = ({ icon: Icon, label, isActive = false, href = "/", iconColo
   <Link 
     href={href}
     onClick={onClick}
+    prefetch={false}
     className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 ${
       isActive 
         ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30 translate-x-1' 

@@ -18,12 +18,15 @@ export default function StudentSidebar({ slug }) {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
 
+  const normalizePath = (p) => decodeURIComponent(p || '').replace(/\s+/g, '-');
+  const normalizedSlug = normalizePath(slug?.toString());
+
   const navItems = [
-    { name: "الرئيسية", icon: LayoutDashboard, path: `/school/${slug}/student` },
-    { name: "الدرجات الأكاديمية", icon: FileText, path: `/school/${slug}/student/grades` },
-    { name: "الجدول الدراسي", icon: Calendar, path: `/school/${slug}/student/schedule` },
-    { name: "سجل الحضور", icon: Clock, path: `/school/${slug}/student/attendance` },
-    { name: "السجل المالي", icon: CreditCard, path: `/school/${slug}/student/payments` },
+    { name: "الرئيسية", icon: LayoutDashboard, path: `/school/${normalizedSlug}/student` },
+    { name: "الدرجات الأكاديمية", icon: FileText, path: `/school/${normalizedSlug}/student/grades` },
+    { name: "الجدول الدراسي", icon: Calendar, path: `/school/${normalizedSlug}/student/schedule` },
+    { name: "سجل الحضور", icon: Clock, path: `/school/${normalizedSlug}/student/attendance` },
+    { name: "السجل المالي", icon: CreditCard, path: `/school/${normalizedSlug}/student/payments` },
   ];
 
   return (
@@ -82,6 +85,7 @@ export default function StudentSidebar({ slug }) {
                 key={item.path}
                 href={item.path}
                 onClick={() => setIsOpen(false)}
+                prefetch={false}
                 className={`
                   relative flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-300 group
                   ${

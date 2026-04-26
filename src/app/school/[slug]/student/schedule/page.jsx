@@ -1,21 +1,28 @@
 "use client";
 
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { useEffect, useState } from "react";
 import axios from "@/lib/axios";
 import { CalendarDays, Loader2 } from "lucide-react";
 import ScheduleGrid from "@/components/dashboard/schedules/ScheduleGrid";
 import { toast } from "react-toastify";
+import { fetchProfile } from "@/redux/slices/profileSlice";
 
 export default function StudentSchedulePage() {
+  const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
+  const { profileData } = useSelector((state) => state.profile);
   const [schedules, setSchedules] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    dispatch(fetchProfile());
+  }, [dispatch]);
+
+  useEffect(() => {
     const fetchStudentSchedule = async () => {
-      // Use classId from user object (Student role should have it)
-      const classId = user?.classId;
+      // Use classId from profileData for reliability
+      const classId = profileData?.classId || user?.classId;
       
       if (!classId) {
         setLoading(false);
@@ -34,7 +41,7 @@ export default function StudentSchedulePage() {
     };
 
     fetchStudentSchedule();
-  }, [user?.classId]);
+  }, [profileData?.classId, user?.classId]);
 
   if (loading) return (
     <div className="flex flex-col items-center justify-center py-20 gap-4">
@@ -43,7 +50,7 @@ export default function StudentSchedulePage() {
     </div>
   );
 
-  if (!user?.classId) return (
+  if (!profileData?.classId && !user?.classId) return (
     <div className="flex flex-col items-center justify-center py-20 text-center gap-4 bg-white rounded-3xl border border-dashed border-slate-200">
         <CalendarDays className="w-16 h-16 text-slate-200" />
         <h2 className="text-xl font-black text-slate-800">لم يتم تعيين صف لك بعد</h2>
