@@ -1,38 +1,15 @@
 "use client";
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import axiosInstance from '@/lib/axios';
 
-export default function SubscriptionStats() {
-  const [stats, setStats] = useState(null);
-  const [loading, setLoading] = useState(true);
+export default React.memo(function SubscriptionStats() {
+  const { data: stats, status: subscriptionStatus } = useSelector((state) => state.mySubscription);
+  const loading = subscriptionStatus === 'loading' || subscriptionStatus === 'idle';
   const { user } = useSelector((state) => state.auth);
 
   // Determine user role safely
   const userData = user?.userData || user;
   const userRole = userData?.role;
-
-  useEffect(() => {
-    // Only SCHOOL_ADMIN can access this endpoint
-    if (userRole !== 'SCHOOL_ADMIN') {
-      setLoading(false);
-      return;
-    }
-
-    const fetchStats = async () => {
-      try {
-        const response = await axiosInstance.get('/subscriptions/my-subscription');
-        if (response.data.success) {
-          setStats(response.data.data);
-        }
-      } catch (error) {
-        console.error("Error fetching stats:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchStats();
-  }, [userRole]);
 
   // Hide component for non-SCHOOL_ADMIN users
   if (userRole !== 'SCHOOL_ADMIN') return null;
@@ -102,4 +79,4 @@ export default function SubscriptionStats() {
       </div>
     </div>
   );
-}
+});

@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import axiosInstance from '@/lib/axios';
+
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
 import { 
@@ -26,28 +26,12 @@ import NewSubscriptionRequestModal from "@/components/dashboard/NewSubscriptionR
 export default function SubscriptionPage() {
   const { slug } = useParams();
   const dispatch = useDispatch();
-  const [loading, setLoading] = useState(true);
-  const [data, setData] = useState(null);
+  const { data, status: subscriptionStatus } = useSelector((state) => state.mySubscription);
+  const loading = subscriptionStatus === 'loading' || subscriptionStatus === 'idle';
   const [isModalOpen, setIsModalOpen] = useState(false);
-
   const { pendingRequest } = useSelector((state) => state.subscriptionRequests);
 
   useEffect(() => {
-    const fetchSubscription = async () => {
-      try {
-        const response = await axiosInstance.get('/subscriptions/my-subscription');
-        if (response.data.success) {
-          setData(response.data.data);
-        }
-      } catch (error) {
-        console.error("Error fetching subscription:", error);
-        toast.error("فشل في تحميل بيانات الاشتراك");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchSubscription();
     dispatch(fetchMyPendingRequest());
   }, [slug, dispatch]);
 

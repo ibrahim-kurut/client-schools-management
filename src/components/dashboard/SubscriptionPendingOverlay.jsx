@@ -5,16 +5,15 @@ import { Loader2, Zap, ShieldCheck, AlertCircle, LogOut } from "lucide-react";
 import axiosInstance from "@/lib/axios";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "@/redux/slices/authSlice";
+import { fetchMySubscription } from "@/redux/slices/mySubscriptionSlice";
 import { useRouter, usePathname } from "next/navigation";
 
 export default function SubscriptionPendingOverlay() {
-  const [status, setStatus] = useState(null); // 'ACTIVE', 'PENDING', etc.
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
   const dispatch = useDispatch();
   const router = useRouter();
   const pathname = usePathname();
   const { user } = useSelector((state) => state.auth);
+  const { data: stats, status: subscriptionStatus } = useSelector((state) => state.mySubscription);
 
   // Determine user role safely
   const userData = user?.userData || user;
@@ -27,42 +26,31 @@ export default function SubscriptionPendingOverlay() {
   const shouldCheck = !isLoginPage && userRole === 'SCHOOL_ADMIN';
 
   useEffect(() => {
-    if (!shouldCheck) {
-      setLoading(false);
-      return;
-    }
-
-    const checkSubscription = async () => {
-      try {
-        const response = await axiosInstance.get("/subscriptions/my-subscription");
-        if (response.data.success) {
-          setStatus(response.data.data.status);
-        }
-      } catch (err) {
-        console.error("Failed to fetch subscription status:", err);
-        setError(true);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    checkSubscription();
+    if (!shouldCheck) return;
     
+    // Initial check
+    dispatch(fetchMySubscription());
+
     // Polling every 30 seconds to check if approved
-    const interval = setInterval(checkSubscription, 30000);
+    const interval = setInterval(() => {
+        dispatch(fetchMySubscription());
+    }, 30000);
+    
     return () => clearInterval(interval);
-  }, [shouldCheck]);
+  }, [shouldCheck, dispatch]);
 
   const handleLogout = () => {
     dispatch(logout());
     router.push("/login");
   };
 
+  const status = stats?.status;
+
   // Don't show overlay if: login page, non-SCHOOL_ADMIN, loading, active status, or API error
   if (!shouldCheck) return null;
-  if (loading) return null; 
+  if (subscriptionStatus === 'loading' || subscriptionStatus === 'idle') return null; 
   if (status === "ACTIVE") return null;
-  if (error) return null; // Fail open: if API fails, don't block the user
+  if (subscriptionStatus === 'failed') return null; // Fail open: if API fails, don't block the user
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
@@ -115,7 +103,7 @@ export default function SubscriptionPendingOverlay() {
         {/* Actions */}
         <div className="mt-10 flex flex-col sm:flex-row gap-4">
           <button 
-            onClick={() => window.location.reload()}
+            onClick={() => dispatch(fetchMySubscription())}
             className="flex-1 py-4 bg-blue-600 text-white rounded-2xl font-black text-sm hover:bg-blue-500 transition-colors shadow-lg shadow-blue-600/20"
           >
             تحديث الحالة يدوياً
