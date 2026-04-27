@@ -1,25 +1,21 @@
-import { Geist, Geist_Mono } from "next/font/google";
+import { Cairo } from "next/font/google";
 import "./globals.css";
 import { ReduxProvider } from "@/redux/redux-provider";
 import { ToastContainer } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+const cairo = Cairo({
+  subsets: ["arabic", "latin"],
+  weight: ["200", "300", "400", "500", "600", "700", "800", "900"],
+  variable: "--font-cairo",
 });
 
 export const metadata = {
-  title: "EduFlow — نظام إدارة مدارس",
-  description: "منصة إدارية مدرسية متكاملة",
+  title: "نقطة - نظام لإدارة المدارس",
+  description: "نقطة بداية التمييز",
   icons: {
-    icon: "/icon.svg",
+    icon: "/logo.ico",
   },
 };
 
@@ -28,10 +24,10 @@ export default function RootLayout({ children }) {
     <html
       lang="ar"
       dir="rtl"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${cairo.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col" suppressHydrationWarning>
+      <body className={`${cairo.className} min-h-full flex flex-col`} suppressHydrationWarning>
         <ReduxProvider>
           <ToastContainer theme="colored" rtl={true} closeOnClick pauseOnHover />
           {children}

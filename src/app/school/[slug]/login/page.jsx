@@ -139,7 +139,7 @@ export default function SchoolLoginPage() {
           {/* Powered by Badge */}
           <div className="mt-16 flex items-center justify-center gap-2 text-emerald-200/60">
             <GraduationCap className="w-5 h-5" />
-            <span className="text-sm font-bold">Powered by EduFlow</span>
+            <span className="text-sm font-bold">Powered by نقطة</span>
           </div>
         </div>
       </div>

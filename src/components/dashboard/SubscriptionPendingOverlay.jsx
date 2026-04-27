@@ -120,7 +120,7 @@ export default function SubscriptionPendingOverlay() {
         {/* Footer info */}
         <div className="mt-8 flex items-center justify-center gap-2 text-slate-500">
            <AlertCircle className="w-4 h-4 text-blue-500" />
-           <span className="text-[10px] font-black uppercase tracking-widest">EduFlow Support System Area</span>
+           <span className="text-[10px] font-black uppercase tracking-widest">Nokta Support System Area</span>
         </div>
       </div>
     </div>

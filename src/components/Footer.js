@@ -15,11 +15,11 @@ export default function Footer() {
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-10 lg:items-start mb-14">
           <div className="lg:col-span-4 text-right">
             <Link href="/" className="inline-flex items-center gap-2.5 mb-5 group">
-              <div className="bg-blue-600 p-2 rounded-xl text-white shadow-md shadow-blue-600/25 transition-transform group-hover:scale-105">
-                <GraduationCap className="h-5 w-5 sm:h-6 sm:w-6" aria-hidden />
+              <div className="bg-white border-2 border-blue-600 p-1.5 rounded-xl text-white shadow-md shadow-blue-600/25 transition-transform group-hover:scale-105">
+                <img src="/logo.ico" alt="نقطة" className="h-6 w-6 object-contain" />
               </div>
               <span className="text-xl sm:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-indigo-700">
-                EduFlow
+                نقطة
               </span>
             </Link>
             <p className="text-slate-600 text-sm sm:text-base leading-relaxed max-w-md">
@@ -116,10 +116,10 @@ export default function Footer() {
                 <li className="flex items-start gap-2.5">
                   <Mail className="h-4 w-4 text-slate-400 shrink-0 mt-0.5" aria-hidden />
                   <a
-                    href="mailto:info@eduflow.iq"
+                    href="mailto:info@nokta.iq"
                     className="hover:text-blue-600 transition-colors break-all text-right"
                   >
-                    info@eduflow.iq
+                    info@nokta.iq
                   </a>
                 </li>
                 <li className="flex items-center gap-2.5">
@@ -139,7 +139,7 @@ export default function Footer() {
 
         <div className="flex flex-col-reverse gap-4 sm:flex-row sm:items-center sm:justify-between pt-8 border-t border-slate-200/90 text-slate-500 text-sm">
           <p className="text-center sm:text-right">
-            &copy; {new Date().getFullYear()} EduFlow. جميع الحقوق محفوظة.
+            &copy; {new Date().getFullYear()} نقطة لادارة المدارس. جميع الحقوق محفوظة.
           </p>
           <div className="flex flex-wrap items-center justify-center sm:justify-end gap-x-6 gap-y-2">
             <Link

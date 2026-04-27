@@ -170,7 +170,7 @@ export default function WelcomePage() {
         {/* Powered by */}
         <div className="mt-6 flex items-center justify-center gap-2 text-slate-400">
           <GraduationCap className="w-4 h-4" />
-          <span className="text-xs font-bold">Powered by EduFlow</span>
+          <span className="text-xs font-bold">Powered by نقطة</span>
         </div>
       </div>
     </div>

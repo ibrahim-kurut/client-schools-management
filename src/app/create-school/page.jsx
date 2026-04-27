@@ -120,7 +120,7 @@ const CreateSchoolPage = () => {
               أنشئ نظام مدرستك <span className="text-blue-600">الآن</span>
             </h1>
             <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-              أكمل البيانات التالية لبدء إدارة مدرستك باستخدام <span className="font-bold text-blue-700">EduFlow</span> بكل سهولة واحترافية.
+              أكمل البيانات التالية لبدء إدارة مدرستك باستخدام <span className="font-bold text-blue-700">نقطة</span> بكل سهولة واحترافية.
             </p>
           </div>
 

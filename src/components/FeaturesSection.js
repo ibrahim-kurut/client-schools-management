@@ -69,7 +69,7 @@ export default function FeaturesSection() {
     <section id="features" className="py-24 bg-white">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="text-3xl md:text-5xl font-bold text-slate-900 mb-6">لماذا تختار EduFlow؟</h2>
+          <h2 className="text-3xl md:text-5xl font-bold text-slate-900 mb-6">لماذا تختار منصة نقطة؟</h2>
           <p className="text-lg text-slate-600">نقدم لك مجموعة من الأدوات القوية المصممة خصيصاً لتلبية كافة احتياجات الإدارة المدرسية الحديثة.</p>
         </div>
 

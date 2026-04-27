@@ -39,7 +39,7 @@ export default function SuperAdminLayout({ children }) {
         <footer className="h-14 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 px-8 flex items-center justify-between text-[11px] font-medium text-slate-400 dark:text-slate-500 uppercase tracking-widest shrink-0">
           <div className="flex items-center gap-1.5 group">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)] animate-pulse" />
-            <span className="group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-colors">نظام EduFlow الإداري متاح الآن</span>
+            <span className="group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-colors">نظام نقطة الإداري متاح الآن</span>
           </div>
           <div className="flex items-center gap-6">
             <span className="hover:text-slate-600 dark:hover:text-slate-300 transition-colors cursor-default underline decoration-indigo-500/30 underline-offset-4">نسخة v1.0.4 - بريميوم</span>

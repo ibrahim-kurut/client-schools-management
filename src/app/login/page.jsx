@@ -186,12 +186,12 @@ function LoginContent() {
         <div className="absolute top-1/3 right-16 w-8 h-8 bg-white/10 rounded-lg rotate-45 animate-float" />
 
         <div className="relative z-10 text-center px-12 max-w-lg">
-          <div className="bg-white/15 backdrop-blur-sm p-4 rounded-2xl inline-flex mb-8">
-            <GraduationCap className="h-12 w-12 text-white" />
+          <div className="bg-white border-2 border-blue-600 p-4 rounded-2xl inline-flex mb-8">
+            <img src="/logo.ico" alt="نقطة" className="h-12 w-12 object-contain" />
           </div>
           <h2 className="text-4xl font-bold text-white mb-6 leading-snug">
             مرحباً بك مجدداً في
-            <span className="block text-blue-200 mt-2">EduFlow</span>
+            <span className="block text-blue-200 mt-2">نقطة</span>
           </h2>
           <p className="text-blue-100/80 text-lg leading-relaxed">
             نظام الإدارة المدرسية المتكامل الذي يمنحك التحكم الكامل بمؤسستك التعليمية بذكاء وكفاءة.
@@ -220,11 +220,11 @@ function LoginContent() {
         <div className="w-full max-w-md">
           {/* Mobile Logo */}
           <div className="lg:hidden flex items-center gap-2 mb-10 justify-center">
-            <div className="bg-blue-600 p-2 rounded-xl text-white">
-              <GraduationCap className="h-6 w-6" />
+            <div className="bg-white border-2 border-blue-600 p-1.5 rounded-xl text-white">
+              <img src="/logo.ico" alt="نقطة" className="h-6 w-6 object-contain" />
             </div>
             <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-indigo-700">
-              EduFlow
+              نقطة
             </span>
           </div>
 

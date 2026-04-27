@@ -38,11 +38,13 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <div className="flex items-center gap-2">
-            <div className="bg-blue-600 p-2 rounded-xl text-white">
-              <GraduationCap className="h-6 w-6" />
-            </div>
-            <Link href={"/"} className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-indigo-700">
-              EduFlow
+            <Link href={"/"} className="flex items-center gap-2 group">
+              <div className="bg-white border-2 border-blue-600 p-1.5 rounded-xl text-white shadow-lg shadow-blue-200 transition-transform group-hover:scale-105">
+                <img src="/logo.ico" alt="نقطة" className="h-7 w-7 object-contain" />
+              </div>
+              <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-indigo-700">
+                نقطة
+              </span>
             </Link>
           </div>
 

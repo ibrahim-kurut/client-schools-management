@@ -17,8 +17,12 @@ export default function HeroSection() {
           </div>
 
           <h1 className="text-5xl md:text-6xl lg:text-7xl font-black text-slate-900 leading-tight mb-8">
-            أدر مؤسستك التعليمية بذكاء مع <span className="text-transparent bg-clip-text bg-gradient-to-l from-blue-600 to-indigo-600">EduFlow</span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-l from-blue-600 to-indigo-600">نقطة</span> لادارة المدارس
           </h1>
+
+          <p className="text-xl md:text-3xl text-blue-600 font-bold mb-6 tracking-wide">
+            نقطة بداية التمييز
+          </p>
 
           <p className="text-xl md:text-2xl text-slate-600 leading-relaxed mb-10 max-w-3xl mx-auto font-light">
             نظام متكامل مصمم خصيصاً لأتمتة العمليات الأكاديمية والمالية بدقة وموثوقية، ليمنحك التحكم الكامل بنقرة واحدة.

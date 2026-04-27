@@ -20,7 +20,7 @@ const faqs = [
   },
   {
     question: "هل يمكنني استيراد بيانات الطلاب والمعلمين؟",
-    answer: "بالطبع، يدعم EduFlow استيراد البيانات من ملفات Excel و CSV بكل سهولة، مما يوفر عليك ساعات من العمل اليدوي في إدخال البيانات."
+    answer: "بالطبع، يدعم نقطة استيراد البيانات من ملفات Excel و CSV بكل سهولة، مما يوفر عليك ساعات من العمل اليدوي في إدخال البيانات."
   },
   {
     question: "هل بيانات مدرستي آمنة؟",
@@ -65,7 +65,7 @@ export default function DemoPage() {
           <div className="max-w-4xl mx-auto text-center mb-16">
             <h1 className="text-4xl md:text-5xl font-black text-slate-900 mb-6">احصل على عرض توضيحي مجاني</h1>
             <p className="text-xl text-slate-600 leading-relaxed max-w-2xl mx-auto">
-              اكتشف كيف يمكن لـ EduFlow أن يحول مدرستك إلى مؤسسة رقمية ذكية. املأ البيانات وسنقوم بالتواصل معك في أقرب وقت.
+              اكتشف كيف يمكن لنظام نقطة أن يحول مدرستك إلى مؤسسة رقمية ذكية. املأ البيانات وسنقوم بالتواصل معك في أقرب وقت.
             </p>
           </div>
 
@@ -78,7 +78,7 @@ export default function DemoPage() {
                   <div className="p-8 md:p-12">
                     <div className="flex items-center gap-3 mb-10">
                       <div className="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center">
-                        <Send className="w-6 h-6 text-blue-600 rotate-180" />
+                        <Send className="w-6 h-6 text-blue-600" />
                       </div>
                       <h2 className="text-2xl font-bold text-slate-800">بيانات المسؤول</h2>
                     </div>
@@ -224,9 +224,11 @@ export default function DemoPage() {
                 <div className="bg-slate-900 rounded-3xl p-8 text-white relative overflow-hidden group">
                   <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600/20 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl group-hover:bg-blue-600/30 transition-all"></div>
                   <h3 className="text-xl font-bold mb-4 relative z-10">تواصل مباشر؟</h3>
-                  <p className="text-slate-400 mb-6 relative z-10">يمكنك أيضاً التحدث مع فريق المبيعات مباشرة عبر الواتساب للإجابة السريعة.</p>
+                  <p className="text-slate-400 mb-6 relative z-10">يمكنك التحدث مع فريق المبيعات عبر الواتساب للإجابة السريعة على جميع استفساراتك.</p>
                   <a 
-                    href="https://wa.me/your-number" 
+                    href="https://wa.me/9647709367018" 
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="flex items-center justify-center gap-2 w-full py-3 bg-white text-slate-900 rounded-xl font-bold hover:bg-slate-100 transition-all relative z-10"
                   >
                     <MessageCircle className="w-5 h-5 text-green-500" />

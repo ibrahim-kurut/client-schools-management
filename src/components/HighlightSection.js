@@ -65,7 +65,7 @@ export default function HighlightSection() {
           <div className=" text-right lg:w-1/2">
             <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">جاهز للانتقال بمدرستك إلى المستقبل؟</h2>
             <p className="text-xl text-slate-300 mb-8 leading-relaxed">
-              انضم إلى عشرات المدارس التي تثق في EduFlow لإدارة عملياتها اليومية بسلاسة واحترافية. لا مزيد من الأعمال الورقية، ولا مزيد من الأخطاء المالية.
+              انضم إلى عشرات المدارس التي تثق في نقطة لإدارة عملياتها اليومية بسلاسة واحترافية. لا مزيد من الأعمال الورقية، ولا مزيد من الأخطاء المالية.
             </p>
             <ul className="flex flex-col items-end justify-end space-y-4 mb-10">
               <li className="flex items-center gap-3 text-slate-200 text-lg">
