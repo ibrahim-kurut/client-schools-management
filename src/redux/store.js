@@ -19,6 +19,7 @@ import notesReducer from "./slices/notesSlice";
 import profileReducer from "./slices/profileSlice";
 import uiReducer from "./slices/uiSlice";
 import mySubscriptionReducer from "./slices/mySubscriptionSlice";
+import dashboardReducer from "./slices/dashboardSlice";
 import { injectStore } from '../lib/axios';
 
 export const store = configureStore({
@@ -43,6 +44,7 @@ export const store = configureStore({
         profile: profileReducer,
         ui: uiReducer,
         mySubscription: mySubscriptionReducer,
+        dashboard: dashboardReducer,
     },
 });
 

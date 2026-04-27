@@ -1,8 +1,7 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { Check, Shield, Zap, Rocket, AlertCircle } from 'lucide-react';
-import axiosInstance from '@/lib/axios';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchPlans } from '@/redux/slices/planSlice';
 
 const iconMap = {
   0: Shield,
@@ -17,34 +16,14 @@ const colorMap = {
 };
 
 export default function PlanSelection({ selectedPlanId, onSelectPlan }) {
-  const [plans, setPlans] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const dispatch = useDispatch();
+  const { plans, status, error: reduxError } = useSelector((state) => state.plan);
+  const loading = status === 'loading';
+  const error = reduxError?.message || reduxError;
 
   useEffect(() => {
-    const fetchPlans = async () => {
-      try {
-        const response = await axiosInstance.get('/plans');
-        // The server returns the plans in the 'plans' field, not 'data'
-        const rawPlans = response.data.plans || [];
-        
-        if (rawPlans.length === 0) {
-          setError('لا توجد خطط اشتراك متاحة حالياً. يرجى مراجعة الإدارة.');
-          return;
-        }
-
-        const sortedPlans = [...rawPlans].sort((a, b) => a.price - b.price);
-        setPlans(sortedPlans);
-      } catch (err) {
-        console.error('Failed to fetch plans:', err);
-        setError('فشل في جلب خطط الاشتراك. يرجى المحاولة مرة أخرى.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchPlans();
-  }, []);
+    dispatch(fetchPlans());
+  }, [dispatch]);
 
   if (loading) {
     return (

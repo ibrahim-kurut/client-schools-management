@@ -18,6 +18,14 @@ export const fetchNotifications = createAsyncThunk(
         } catch (e) {
             return rejectWithValue(e.response?.data?.message || "Failed to fetch notifications");
         }
+    },
+    {
+        condition: (force, { getState }) => {
+            const { notifications } = getState();
+            if (!force && (notifications.status === 'loading' || notifications.status === 'succeeded')) {
+                return false;
+            }
+        }
     }
 );
 

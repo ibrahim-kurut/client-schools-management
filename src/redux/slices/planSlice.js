@@ -31,6 +31,13 @@ export const fetchPlans = createAsyncThunk('plan/fetchPlans', async (_, { reject
         const errorMessage = e.response?.data?.message || e.response?.data?.error || "Failed to fetch plans";
         return rejectWithValue({ message: errorMessage });
     }
+}, {
+    condition: (_, { getState }) => {
+        const { plan } = getState();
+        if (plan.status === 'loading' || plan.plans.length > 0) {
+            return false;
+        }
+    }
 });
 
 // 4- Update a plan

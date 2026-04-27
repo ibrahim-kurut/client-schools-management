@@ -12,6 +12,14 @@ export const fetchProfile = createAsyncThunk(
                 error.response?.data?.message || 'فشل في جلب بيانات الملف الشخصي'
             );
         }
+    },
+    {
+        condition: (_, { getState }) => {
+            const { profile } = getState();
+            if (profile.loading || profile.profileData) {
+                return false;
+            }
+        }
     }
 );
 

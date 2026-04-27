@@ -42,37 +42,24 @@ export default function FinancialDashboard() {
   });
   const [reportLoading, setReportLoading] = useState(false);
   const [exportLoading, setExportLoading] = useState(false);
-  const [dashboardLoading, setDashboardLoading] = useState(false);
-  const [chartData, setChartData] = useState([]);
-  const [recentOperations, setRecentOperations] = useState([]);
+  const { 
+    chartData, 
+    recentOperations, 
+    status: dashboardStatus 
+  } = useSelector((state) => state.financeStats);
+
+  const dashboardLoading = dashboardStatus === "loading";
 
   const actualUser = user?.userData || user;
   const schoolId = actualUser?.schoolId;
 
   useEffect(() => {
     if (schoolId) {
-      dispatch(fetchFinanceStats(schoolId));
+      dispatch(fetchFinanceStats({ schoolId, months: 6 }));
     }
   }, [dispatch, schoolId]);
 
-  useEffect(() => {
-    const fetchDashboardDetails = async () => {
-      if (!schoolId) return;
-      setDashboardLoading(true);
-      try {
-        const res = await axiosInstance.get(`/finance/dashboard/${schoolId}?months=6`);
-        setChartData(res.data?.data?.chartData || []);
-        setRecentOperations(res.data?.data?.recentOperations || []);
-      } catch (error) {
-        setChartData([]);
-        setRecentOperations([]);
-      } finally {
-        setDashboardLoading(false);
-      }
-    };
 
-    fetchDashboardDetails();
-  }, [schoolId]);
 
   const openPrintWindow = (reportData) => {
     const getArabicPaymentType = (type) => {

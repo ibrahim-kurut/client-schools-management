@@ -1,38 +1,28 @@
 "use client";
 import { Users, GraduationCap, Layers, Wallet } from 'lucide-react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useState, useEffect } from 'react';
-import axiosInstance from '@/lib/axios';
+import { fetchDashboardStats } from '@/redux/slices/dashboardSlice';
 
 export default function StatsGrid() {
+  const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
+  const { stats: dashboardStats, status } = useSelector((state) => state.dashboard);
+  
   const actualUser = user?.userData || user;
   const role = actualUser?.role || 'TEACHER';
 
-  const [backendStats, setBackendStats] = useState({
+  const loading = status === 'loading';
+  const backendStats = dashboardStats || {
     totalStudents: 0,
     totalStaff: 0,
     totalClasses: 0,
     totalRevenue: 0
-  });
-  const [loading, setLoading] = useState(true);
+  };
 
   useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const response = await axiosInstance.get('/schools/stats/overview');
-        if (response.data && response.data.stats) {
-          setBackendStats(response.data.stats);
-        }
-      } catch (error) {
-        console.error("Error fetching dashboard stats:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchStats();
-  }, []);
+    dispatch(fetchDashboardStats());
+  }, [dispatch]);
 
   const allStats = [
     { 
