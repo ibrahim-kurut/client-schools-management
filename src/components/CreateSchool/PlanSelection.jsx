@@ -1,6 +1,8 @@
 'use client';
 
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { Check, Shield, Zap, Rocket, AlertCircle } from 'lucide-react';
 import { fetchPlans } from '@/redux/slices/planSlice';
 
 const iconMap = {
